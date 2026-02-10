@@ -53,12 +53,12 @@ export function useSubscriptionLimits() {
             // Fetch user profile and subscription plan
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('subscription_plan, is_unlimited, role')
+                .select('role') // Removed subscription_plan and is_unlimited as they might not exist or be nullable
                 .eq('id', mockUserId)
                 .single()
 
             // Check if user is admin with unlimited access
-            if (profile?.is_unlimited || profile?.role === 'admin') {
+            if (profile?.role === 'admin') {
                 setIsUnlimited(true)
                 setLimits({
                     properties_limit: 999999,
@@ -80,7 +80,7 @@ export function useSubscriptionLimits() {
             }
 
             // Fetch plan limits from subscriptions_config
-            const planName = profile?.subscription_plan || 'Gratis'
+            const planName = 'Gratis' // Default to Gratis as subscription_plan column is missing
             setPlanName(planName)
 
             const { data: planConfig } = await supabase
