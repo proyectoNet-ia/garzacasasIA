@@ -4,6 +4,7 @@ import "./globals.css";
 import { InteractionsProvider } from "@/providers/InteractionsProvider";
 import { SearchProvider } from "@/providers/SearchProvider";
 import { ComparisonTray } from "@/components/marketing/ComparisonTray";
+import { DynamicFavicon } from "@/components/DynamicFavicon";
 import { Toaster } from "sonner";
 
 
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} font-montserrat antialiased bg-zinc-950 text-white transition-colors duration-300`}>
+        <DynamicFavicon />
         <InteractionsProvider>
           <SearchProvider>
             {children}

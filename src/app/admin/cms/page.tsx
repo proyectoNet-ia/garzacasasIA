@@ -351,16 +351,48 @@ export default function AdminCMS() {
                 </Card>
 
                 <Card className="border-zinc-200">
-                    <CardHeader><CardTitle>Icono del Sitio</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5" />
+                            Favicon (Icono del Sitio)
+                        </CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                            <p className="text-xs text-blue-800 font-medium mb-1">📌 Recomendaciones:</p>
+                            <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
+                                <li>Tamaño recomendado: <strong>512x512px</strong> o <strong>192x192px</strong></li>
+                                <li>Formato: <strong>PNG</strong> con fondo transparente</li>
+                                <li>El favicon aparecerá en la pestaña del navegador</li>
+                            </ul>
+                        </div>
                         <div className="flex gap-4 items-center">
-                            {siteIconUrl && <div className="h-24 w-24 rounded-lg overflow-hidden border border-zinc-200 bg-white"><img src={siteIconUrl} alt="Icon" className="w-full h-full object-contain p-2" /></div>}
-                            <div className="flex-1">
-                                <Button onClick={() => iconFileRef.current?.click()} variant="outline" disabled={uploadingIcon} className="w-full gap-2">
-                                    {uploadingIcon ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="h-4 w-4" /> Subir Icono</>}
+                            {siteIconUrl && (
+                                <div className="h-24 w-24 rounded-lg overflow-hidden border-2 border-zinc-200 bg-white shadow-sm">
+                                    <img src={siteIconUrl} alt="Favicon" className="w-full h-full object-contain p-2" />
+                                </div>
+                            )}
+                            <div className="flex-1 space-y-2">
+                                <Button
+                                    onClick={() => iconFileRef.current?.click()}
+                                    variant="outline"
+                                    disabled={uploadingIcon}
+                                    className="w-full gap-2"
+                                >
+                                    {uploadingIcon ? (
+                                        <><Loader2 className="h-4 w-4 animate-spin" /> Subiendo...</>
+                                    ) : (
+                                        <><Upload className="h-4 w-4" /> {siteIconUrl ? 'Cambiar Favicon' : 'Subir Favicon'}</>
+                                    )}
                                 </Button>
+                                {siteIconUrl && (
+                                    <p className="text-xs text-green-600 flex items-center gap-1">
+                                        <CheckCircle className="h-3 w-3" />
+                                        Favicon configurado correctamente
+                                    </p>
+                                )}
                             </div>
-                            <input ref={iconFileRef} type="file" accept="image/*" onChange={handleIconUpload} className="hidden" />
+                            <input ref={iconFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/x-icon" onChange={handleIconUpload} className="hidden" />
                         </div>
                     </CardContent>
                 </Card>
