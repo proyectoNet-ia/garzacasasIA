@@ -59,7 +59,7 @@ export default function LoginPage() {
             // Verificar el rol del usuario en la tabla profiles
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('role, full_name')
+                .select('role, full_name, is_unlimited')
                 .eq('id', authData.user.id)
                 .single()
 
