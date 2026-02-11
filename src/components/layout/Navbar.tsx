@@ -144,7 +144,7 @@ export function Navbar({ contactConfig }: NavbarProps) {
             <div className="lg:hidden absolute top-4 left-4 z-50">
                 <Sheet>
                     <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                        <Button variant="ghost" size="icon" className={`transition-colors ${isScrolled ? "text-zinc-900 hover:bg-zinc-100" : "text-white hover:bg-white/10"}`}>
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>

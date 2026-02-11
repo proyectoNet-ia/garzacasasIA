@@ -224,7 +224,6 @@ export default function AdminSettings() {
                             <textarea
                                 id="subtitle"
                                 rows={3}
-                                className="flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm ring-offset-background placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                 value={config.subtitle}
                                 onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
                                 placeholder="Descripción corta debajo del título..."
