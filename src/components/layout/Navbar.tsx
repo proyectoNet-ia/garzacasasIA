@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Building2, LayoutDashboard, Settings, LogIn, Phone, Mail, Instagram, Facebook, Heart, GitCompare, User } from "lucide-react"
+import { Building2, LayoutDashboard, Settings, LogIn, Phone, Mail, Instagram, Facebook, Heart, GitCompare, User, Menu } from "lucide-react"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 interface ContactConfig {
     phone: string;
@@ -139,6 +140,52 @@ export function Navbar({ contactConfig }: NavbarProps) {
                     </div>
                 </div>
             </div>
-        </header>
+            {/* Mobile Menu Sheet */}
+            <div className="lg:hidden absolute top-4 left-4 z-50">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                            <Menu className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="bg-zinc-950 border-zinc-800 text-white w-[300px]">
+                        <SheetHeader className="mb-8">
+                            <SheetTitle className="text-left text-white flex items-center gap-2">
+                                <div className="border border-white/10 px-3 py-1 rounded-xl bg-white/5">
+                                    <span className="text-xl font-black tracking-tighter">
+                                        Garza Casas <span className="text-blue-500">IA</span>
+                                    </span>
+                                </div>
+                            </SheetTitle>
+                        </SheetHeader>
+                        <div className="flex flex-col gap-4">
+                            {[
+                                { label: "Inicio", href: "/" },
+                                { label: "Propiedades", href: "/propiedades" },
+                                { label: "Agentes", href: "/agentes" },
+                                { label: "Planes", href: "/planes" },
+                                { label: "Servicios", href: "/servicios" },
+                                { label: "Contacto", href: "/contacto" },
+                            ].map((link) => (
+                                <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    className="text-lg font-medium text-zinc-400 hover:text-white hover:pl-2 transition-all p-2 rounded-lg hover:bg-white/5"
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                            <div className="h-px bg-zinc-800 my-4" />
+                            <Link href="/dashboard" className="w-full">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                                    <User className="mr-2 h-4 w-4" />
+                                    Entrar / Dashboard
+                                </Button>
+                            </Link>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
+        </header >
     )
 }

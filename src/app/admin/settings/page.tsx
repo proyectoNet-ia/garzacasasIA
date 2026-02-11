@@ -63,19 +63,32 @@ export default function AdminSettings() {
             const fileName = `hero-bg-${Math.random()}.${fileExt}`
             const filePath = `${fileName}`
 
-            const { error: uploadError } = await supabase.storage
-                .from('marketing')
+            // Try 'marketing' (lowercase) first
+            let bucketName = 'marketing'
+            let { error: uploadError } = await supabase.storage
+                .from(bucketName)
                 .upload(filePath, file)
+
+            // If bucket not found, try 'MARKETING' (uppercase)
+            if (uploadError && (uploadError.message.includes('Bucket not found') || (uploadError as any).error === 'Bucket not found')) {
+                console.log('Bucket "marketing" not found, trying "MARKETING"...')
+                bucketName = 'MARKETING'
+                const retry = await supabase.storage
+                    .from(bucketName)
+                    .upload(filePath, file)
+                uploadError = retry.error
+            }
 
             if (uploadError) throw uploadError
 
             const { data: { publicUrl } } = supabase.storage
-                .from('marketing')
+                .from(bucketName)
                 .getPublicUrl(filePath)
 
             setConfig(prev => ({ ...prev, image_url: publicUrl }))
             alert('Imagen subida con éxito (Recuerda guardar los cambios finales)')
         } catch (error: any) {
+            console.error('Upload error:', error)
             alert('Error al subir imagen: ' + error.message)
         } finally {
             setUploading(false)
@@ -203,7 +216,7 @@ export default function AdminSettings() {
                                 value={config.title}
                                 onChange={(e) => setConfig({ ...config, title: e.target.value })}
                                 placeholder="Ej: Encuentra tu hogar ideal..."
-                                className="bg-zinc-50 border-zinc-200"
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400"
                             />
                         </div>
                         <div className="space-y-2">
@@ -215,6 +228,7 @@ export default function AdminSettings() {
                                 value={config.subtitle}
                                 onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
                                 placeholder="Descripción corta debajo del título..."
+                                className="flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 ring-offset-background placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                             />
                         </div>
 
@@ -285,7 +299,7 @@ export default function AdminSettings() {
                                             <Input
                                                 value={plan.name}
                                                 onChange={(e) => handleUpdatePlan(plan.id, { name: e.target.value })}
-                                                className="bg-white border-zinc-200 h-8 text-sm"
+                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -294,7 +308,7 @@ export default function AdminSettings() {
                                                 type="number"
                                                 value={plan.priority || 1}
                                                 onChange={(e) => handleUpdatePlan(plan.id, { priority: parseInt(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm"
+                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                             />
                                         </div>
                                     </div>
@@ -306,7 +320,7 @@ export default function AdminSettings() {
                                                 type="number"
                                                 value={plan.monthly_price}
                                                 onChange={(e) => handleUpdatePlan(plan.id, { monthly_price: parseFloat(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm"
+                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -315,7 +329,7 @@ export default function AdminSettings() {
                                                 type="number"
                                                 value={plan.yearly_price || 0}
                                                 onChange={(e) => handleUpdatePlan(plan.id, { yearly_price: parseFloat(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm"
+                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                             />
                                         </div>
                                     </div>
@@ -350,7 +364,7 @@ export default function AdminSettings() {
                                                         type="number"
                                                         value={features.properties_limit || 5}
                                                         onChange={(e) => updatePlanFeature(plan.id, 'properties_limit', parseInt(e.target.value))}
-                                                        className="bg-white border-zinc-200 h-8 text-sm"
+                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
@@ -359,7 +373,7 @@ export default function AdminSettings() {
                                                         type="number"
                                                         value={features.images_per_property || 3}
                                                         onChange={(e) => updatePlanFeature(plan.id, 'images_per_property', parseInt(e.target.value))}
-                                                        className="bg-white border-zinc-200 h-8 text-sm"
+                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                                     />
                                                 </div>
                                             </div>
@@ -372,7 +386,7 @@ export default function AdminSettings() {
                                                     max="3"
                                                     value={features.priority_tier || 1}
                                                     onChange={(e) => updatePlanFeature(plan.id, 'priority_tier', parseInt(e.target.value))}
-                                                    className="bg-white border-zinc-200 h-8 text-sm"
+                                                    className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                                 />
                                             </div>
 
@@ -417,7 +431,7 @@ export default function AdminSettings() {
                                                         value={features.badge_text || ''}
                                                         onChange={(e) => updatePlanFeature(plan.id, 'badge_text', e.target.value)}
                                                         placeholder="Ej: Pro, Platino"
-                                                        className="bg-white border-zinc-200 h-8 text-sm"
+                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
                                                     />
                                                 </div>
                                             )}
