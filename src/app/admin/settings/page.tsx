@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Loader2, Save, Image as ImageIcon, Upload, Building2, Plus, Trash2, Check, X } from 'lucide-react'
+import { Loader2, Save, Image as ImageIcon, Upload, Building2, Plus, Trash2, Check, X, Phone, Mail, Instagram, Facebook } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 
 const supabase = createClient()
@@ -19,6 +19,13 @@ export default function AdminSettings() {
         title: '',
         subtitle: '',
         image_url: ''
+    })
+    const [contactConfig, setContactConfig] = useState({
+        phone: '',
+        email: '',
+        whatsapp: '',
+        instagram: '',
+        facebook: ''
     })
     const [plans, setPlans] = useState<any[]>([])
     const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
@@ -38,6 +45,17 @@ export default function AdminSettings() {
                 setConfig(heroData.value)
             }
 
+            // Fetch Contact Config
+            const { data: contactData } = await supabase
+                .from('site_settings')
+                .select('value')
+                .eq('key', 'contact_config')
+                .single()
+
+            if (contactData) {
+                setContactConfig(contactData.value)
+            }
+
             // Fetch Plans
             const { data: plansData } = await supabase
                 .from('subscriptions_config')
@@ -52,6 +70,24 @@ export default function AdminSettings() {
         }
         fetchData()
     }, [])
+
+    const handleSaveContact = async () => {
+        setSaving(true)
+        const { error } = await supabase
+            .from('site_settings')
+            .upsert({
+                key: 'contact_config',
+                value: contactConfig,
+                updated_at: new Date().toISOString()
+            })
+
+        if (error) {
+            alert('Error guardando contacto: ' + error.message)
+        } else {
+            alert('¡Información de contacto actualizada!')
+        }
+        setSaving(false)
+    }
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -266,6 +302,86 @@ export default function AdminSettings() {
                         <Button onClick={handleSaveHero} disabled={saving || uploading} className="w-full gap-2 py-6 text-lg font-bold shadow-lg shadow-blue-500/20">
                             {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
                             Guardar Configuración Hero
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Contact Config Card */}
+                <Card className="border-zinc-200 shadow-xl bg-white">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-zinc-700">
+                            <Phone className="h-5 w-5" />
+                            Información de Contacto
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="contact_phone" className="text-zinc-700">Teléfono</Label>
+                                <Input
+                                    id="contact_phone"
+                                    value={contactConfig.phone}
+                                    onChange={(e) => setContactConfig({ ...contactConfig, phone: e.target.value })}
+                                    placeholder="+52 (81) ..."
+                                    className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="contact_email" className="text-zinc-700">Email</Label>
+                                <Input
+                                    id="contact_email"
+                                    value={contactConfig.email}
+                                    onChange={(e) => setContactConfig({ ...contactConfig, email: e.target.value })}
+                                    placeholder="contacto@..."
+                                    className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="contact_whatsapp" className="text-zinc-700">Enlace WhatsApp</Label>
+                            <Input
+                                id="contact_whatsapp"
+                                value={contactConfig.whatsapp}
+                                onChange={(e) => setContactConfig({ ...contactConfig, whatsapp: e.target.value })}
+                                placeholder="https://wa.me/..."
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="social_instagram" className="text-zinc-700">Instagram URL</Label>
+                                <div className="relative">
+                                    <Instagram className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+                                    <Input
+                                        id="social_instagram"
+                                        value={contactConfig.instagram}
+                                        onChange={(e) => setContactConfig({ ...contactConfig, instagram: e.target.value })}
+                                        placeholder="https://instagram.com/..."
+                                        className="pl-9 bg-zinc-50 border-zinc-200 text-zinc-900"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="social_facebook" className="text-zinc-700">Facebook URL</Label>
+                                <div className="relative">
+                                    <Facebook className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+                                    <Input
+                                        id="social_facebook"
+                                        value={contactConfig.facebook}
+                                        onChange={(e) => setContactConfig({ ...contactConfig, facebook: e.target.value })}
+                                        placeholder="https://facebook.com/..."
+                                        className="pl-9 bg-zinc-50 border-zinc-200 text-zinc-900"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button onClick={handleSaveContact} disabled={saving} className="w-full gap-2 py-6 text-lg font-bold shadow-lg shadow-blue-500/20 bg-zinc-800 hover:bg-zinc-900 text-white">
+                            {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                            Guardar Contacto
                         </Button>
                     </CardFooter>
                 </Card>

@@ -1,5 +1,5 @@
 import { Services } from "@/components/marketing/Services"
-import { Navbar } from "@/components/layout/Navbar"
+import { SecondaryNavbar } from "@/components/layout/SecondaryNavbar"
 import { Footer } from "@/components/layout/Footer"
 import { getSiteSettings } from "@/lib/settings"
 
@@ -10,8 +10,8 @@ export default async function ServicesPage() {
 
     return (
         <div className="min-h-screen bg-zinc-50">
-            <Navbar contactConfig={contactConfig} />
-            <main className="pt-20">
+            <SecondaryNavbar contactConfig={contactConfig} />
+            <main className="pt-32">
                 <div className="bg-zinc-100 py-20 px-4 text-center">
                     <h1 className="text-4xl md:text-5xl font-black text-zinc-700 mb-4">Servicios Inteligentes</h1>
                     <p className="text-zinc-500 max-w-2xl mx-auto">Tecnología y experiencia humana para potenciar tu inversión.</p>

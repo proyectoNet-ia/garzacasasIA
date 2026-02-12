@@ -15,10 +15,16 @@ export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   const heroConfig = await getSiteSettings('hero_config')
-  const contactConfig = await getSiteSettings('contact_config')
+  const contactConfig = await getSiteSettings('contact_config') || {
+    phone: "+52 (81) 1234-5678",
+    email: "contacto@garzacasas.com",
+    instagram: "https://instagram.com",
+    facebook: "https://facebook.com",
+    whatsapp: "https://wa.me/528112345678"
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-blue-500/30 selection:text-blue-200 font-sans">
+    <div className="min-h-screen bg-white text-zinc-900 selection:bg-blue-600/30 selection:text-blue-900 font-sans">
       <Navbar contactConfig={contactConfig} />
 
       <main>
@@ -49,7 +55,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <Footer />
+      <Footer contactConfig={contactConfig} />
     </div>
   )
 }

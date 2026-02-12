@@ -13,7 +13,8 @@ import {
     LogOut,
     Menu,
     X,
-    Loader2
+    Loader2,
+    Settings
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -73,6 +74,15 @@ export function DashboardSidebar() {
             badge: profile?.subscriptions_config?.name || 'Básico'
         },
     ]
+
+    if (profile?.role === 'admin') {
+        links.push({
+            label: 'Panel de Admin',
+            href: '/admin',
+            icon: Crown, // Or another icon like ShieldAlert or Lock
+            badge: 'Admin'
+        })
+    }
 
     const userInitial = profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || '?'
 

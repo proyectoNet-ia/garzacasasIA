@@ -52,11 +52,11 @@ export default function CompararPage() {
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="flex flex-row overflow-x-auto snap-x snap-mandatory pb-8 -mx-6 px-6 gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 md:mx-0 md:px-0 scrollbar-hide">
                     {compareList.map((property) => {
                         const features = property.features || {}
                         return (
-                            <div key={property.id} className="bg-white border border-black/5 rounded-[3rem] overflow-hidden flex flex-col group hover:border-blue-500/30 transition-all duration-500 shadow-sm">
+                            <div key={property.id} className="snap-center shrink-0 w-[85vw] md:w-auto bg-white border border-black/5 rounded-[3rem] overflow-hidden flex flex-col group hover:border-blue-500/30 transition-all duration-500 shadow-sm">
                                 <div className="h-64 relative overflow-hidden">
                                     <img
                                         src={property.main_image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800"}
@@ -141,7 +141,7 @@ export default function CompararPage() {
                     })}
 
                     {compareList.length < 3 && Array.from({ length: 3 - compareList.length }).map((_, i) => (
-                        <Link key={`empty-${i}`} href="/" className="border-2 border-dashed border-black/5 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center group hover:bg-black/[0.01] transition-all">
+                        <Link key={`empty-${i}`} href="/" className="snap-center shrink-0 w-[85vw] md:w-auto border-2 border-dashed border-black/5 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center group hover:bg-black/[0.01] transition-all min-h-[500px]">
                             <div className="h-16 w-16 rounded-full bg-black/5 flex items-center justify-center text-zinc-400 group-hover:text-blue-500 transition-colors mb-6">
                                 <Zap className="h-8 w-8" />
                             </div>

@@ -8,11 +8,7 @@ import { useState } from "react"
 import Image from "next/image"
 
 interface HeroProps {
-    config?: {
-        title?: string
-        subtitle?: string
-        image_url?: string
-    }
+    config?: any;
 }
 
 export function Hero({ config }: HeroProps) {
@@ -39,13 +35,15 @@ export function Hero({ config }: HeroProps) {
         <section className="relative flex min-h-[95vh] flex-col items-center justify-center overflow-hidden pt-20 bg-zinc-950 transition-colors duration-300">
             {/* Background Image with Overlay */}
             <div className="absolute inset-0 z-0 select-none">
+                {/* Fallback image if config.image_url is missing */}
                 <Image
-                    src={image}
+                    src={config?.image_url || "https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=1600&auto=format&fit=crop"}
                     alt="Hero background"
                     fill
                     priority
                     className="h-full w-full object-cover opacity-50 contrast-125"
                 />
+                {/* Gradient overlay: Dark for text contrast */}
                 <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/60 to-zinc-950" />
             </div>
 
@@ -57,14 +55,15 @@ export function Hero({ config }: HeroProps) {
                             Análisis predictivo de precios disponible
                         </div>
                         <h1 className="text-4xl font-black tracking-tighter text-white sm:text-6xl md:text-7xl lg:text-8xl">
-                            {title}
+                            {config?.title || "Encuentra tu hogar ideal impulsado por IA"}
                         </h1>
                         <p className="mx-auto max-w-[700px] text-zinc-400 md:text-xl/relaxed lg:text-2xl/relaxed">
-                            {subtitle}
+                            {config?.subtitle || "La plataforma inteligente que conecta compradores y agentes con análisis de mercado en tiempo real."}
                         </p>
                     </div>
 
                     <div className="mx-auto w-full max-w-4xl">
+                        {/* Search Bar - Dark Mode */}
                         <div className="relative flex flex-col items-center gap-4 rounded-3xl bg-zinc-900/40 p-3 backdrop-blur-2xl border border-white/5 md:flex-row shadow-2xl">
                             <div className="relative w-full flex-1">
                                 <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />

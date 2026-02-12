@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Building2, LayoutDashboard, Settings, LogIn, Phone, Mail, Instagram, Facebook, Heart, GitCompare, User, Menu } from "lucide-react"
+import { Building2, Phone, Mail, Instagram, Facebook, Heart, GitCompare, User } from "lucide-react"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { MobileMenu } from "./MobileMenu"
+import { NAVIGATION_LINKS } from "@/constants/navigation"
 
 interface ContactConfig {
     phone: string;
@@ -17,7 +18,7 @@ interface ContactConfig {
 }
 
 interface NavbarProps {
-    contactConfig?: ContactConfig | null;
+    contactConfig?: any;
 }
 
 export function Navbar({ contactConfig }: NavbarProps) {
@@ -37,7 +38,7 @@ export function Navbar({ contactConfig }: NavbarProps) {
             {/* Top Bar - Manageable */}
             <div className={`w-full border-b transition-all duration-500 overflow-hidden ${isScrolled
                 ? "h-0 opacity-0 border-transparent"
-                : "h-10 opacity-100 bg-zinc-950 border-white/5"
+                : "h-10 opacity-100 bg-transparent border-white/5"
                 }`}>
                 <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-6">
                     <div className="flex items-center gap-6">
@@ -77,114 +78,71 @@ export function Navbar({ contactConfig }: NavbarProps) {
 
             {/* Main Navbar */}
             <div className={`border-b transition-all duration-500 ${isScrolled
-                ? "bg-white/80 backdrop-blur-xl border-black/5 shadow-sm"
-                : "bg-zinc-950/20 backdrop-blur-3xl border-transparent"
+                ? "bg-white/80 backdrop-blur-xl border-zinc-200 shadow-sm"
+                : "bg-transparent border-transparent"
                 }`}>
                 <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
                     <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
-                        <div className={`${isScrolled ? "bg-black/5 border-black/10" : "bg-white/5 border-white/10"} border px-3 py-1 rounded-xl transition-colors w-fit`}>
-                            <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? "text-zinc-700" : "text-white"}`}>
-                                Garza Casas <span className="text-blue-500">IA</span>
-                            </span>
+                        <div className={`${isScrolled ? "bg-blue-600 shadow-blue-500/20" : "bg-white/10 border-white/10 border"} flex items-center justify-center w-10 h-10 rounded-xl transition-all`}>
+                            <Building2 className={`h-5 w-5 ${isScrolled ? "text-white" : "text-white"}`} />
                         </div>
+                        <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? "text-zinc-900" : "text-white"}`}>
+                            Garza Casas <span className="text-blue-500">IA</span>
+                        </span>
                     </Link>
                     {/* Navigation Menu */}
-                    <nav className="hidden lg:flex items-center gap-8">
-                        {[
-                            { label: "Inicio", href: "/" },
-                            { label: "Propiedades", href: "/propiedades" },
-                            { label: "Agentes", href: "/agentes" },
-                            { label: "Planes", href: "/planes" },
-                            { label: "Servicios", href: "/servicios" },
-                            { label: "Contacto", href: "/contacto" },
-                        ].map((link) => (
+                    <nav className="hidden lg:flex items-center gap-1 bg-black/5 backdrop-blur-sm p-1 rounded-full border border-white/5">
+                        {NAVIGATION_LINKS.map((link) => (
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className={`text-[11px] font-black uppercase tracking-widest transition-all hover:-translate-y-0.5 ${isScrolled ? "text-zinc-500 hover:text-blue-600" : "text-zinc-400 hover:text-white"
+                                className={`group px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${isScrolled
+                                    ? "text-zinc-600 hover:text-blue-600 hover:bg-white"
+                                    : "text-zinc-300 hover:text-white hover:bg-white/10"
                                     }`}
                             >
+                                <link.icon className={`h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 ${isScrolled ? "text-zinc-400 group-hover:text-blue-500" : "text-zinc-400 group-hover:text-white"}`} />
                                 {link.label}
                             </Link>
                         ))}
                     </nav>
-                    {/* Action Icons */}
+                    {/* Action Icons & Mobile Menu Trigger */}
                     <div className="flex items-center gap-2 md:gap-4">
-                        <div className="flex items-center gap-1 md:gap-3 mr-2 md:mr-4 border-r border-zinc-500/10 pr-4">
-                            <Link href="/favoritos">
-                                <Button variant="ghost" size="icon" className={`relative rounded-full h-9 w-9 ${isScrolled ? "text-zinc-400 hover:text-red-500 hover:bg-red-50" : "text-zinc-500 hover:text-red-400 hover:bg-white/5"}`}>
-                                    <Heart className={cn("h-4 w-4 transition-all", favorites.length > 0 && "fill-red-500 text-red-500 ")} />
-                                    {favorites.length > 0 && (
-                                        <span className="absolute -top-0 -right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-in zoom-in">
-                                            {favorites.length}
-                                        </span>
-                                    )}
-                                </Button>
-                            </Link>
-                            <Link href="/comparar">
-                                <Button variant="ghost" size="icon" className={`rounded-full h-9 w-9 ${isScrolled ? "text-zinc-400 hover:text-blue-600 hover:bg-blue-50" : "text-zinc-500 hover:text-blue-400 hover:bg-white/5"}`}>
-                                    <GitCompare className="h-4 w-4" />
+                        {/* Desktop Action Icons */}
+                        <div className="hidden lg:flex items-center gap-2 md:gap-4">
+                            <div className="flex items-center gap-1 md:gap-3 mr-2 md:mr-4 border-r border-zinc-500/10 pr-4">
+                                <Link href="/favoritos">
+                                    <Button variant="ghost" size="icon" className={`relative rounded-full h-9 w-9 ${isScrolled ? "text-zinc-400 hover:text-red-500 hover:bg-red-50" : "text-zinc-400 hover:text-red-400 hover:bg-white/10"}`}>
+                                        <Heart className={cn("h-4 w-4 transition-all", favorites.length > 0 && "fill-red-500 text-red-500 ")} />
+                                        {favorites.length > 0 && (
+                                            <span className="absolute -top-0 -right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-white animate-in zoom-in">
+                                                {favorites.length}
+                                            </span>
+                                        )}
+                                    </Button>
+                                </Link>
+                                <Link href="/comparar">
+                                    <Button variant="ghost" size="icon" className={`rounded-full h-9 w-9 ${isScrolled ? "text-zinc-400 hover:text-blue-600 hover:bg-blue-50" : "text-zinc-400 hover:text-blue-400 hover:bg-white/10"}`}>
+                                        <GitCompare className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </div>
+
+                            <Link href="/dashboard">
+                                <Button className={`font-black uppercase tracking-widest text-[10px] rounded-full shadow-lg transition-all px-6 h-11 flex items-center gap-2 ${isScrolled
+                                    ? "bg-blue-600 text-white shadow-blue-600/20 hover:bg-blue-700"
+                                    : "bg-white text-zinc-950 hover:bg-zinc-100"
+                                    } hover:-translate-y-0.5`}>
+                                    <User className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Entrar</span>
                                 </Button>
                             </Link>
                         </div>
 
-                        <Link href="/dashboard">
-                            <Button className={`font-black uppercase tracking-widest text-[10px] rounded-full shadow-lg transition-all px-6 h-11 flex items-center gap-2 ${isScrolled
-                                ? "bg-blue-600 text-white shadow-blue-600/20 hover:bg-blue-700"
-                                : "bg-white text-zinc-950 hover:bg-zinc-100"
-                                } hover:-translate-y-0.5`}>
-                                <User className="h-4 w-4" />
-                                <span className="hidden sm:inline">Entrar</span>
-                            </Button>
-                        </Link>
+                        {/* Mobile Menu Trigger */}
+                        <MobileMenu triggerColor={isScrolled ? "text-zinc-900 hover:bg-zinc-100" : "text-white hover:bg-white/10"} />
                     </div>
                 </div>
-            </div>
-            {/* Mobile Menu Sheet */}
-            <div className="lg:hidden absolute top-4 left-4 z-50">
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className={`transition-colors ${isScrolled ? "text-zinc-900 hover:bg-zinc-100" : "text-white hover:bg-white/10"}`}>
-                            <Menu className="h-6 w-6" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="bg-zinc-950 border-zinc-800 text-white w-[300px]">
-                        <SheetHeader className="mb-8">
-                            <SheetTitle className="text-left text-white flex items-center gap-2">
-                                <div className="border border-white/10 px-3 py-1 rounded-xl bg-white/5">
-                                    <span className="text-xl font-black tracking-tighter">
-                                        Garza Casas <span className="text-blue-500">IA</span>
-                                    </span>
-                                </div>
-                            </SheetTitle>
-                        </SheetHeader>
-                        <div className="flex flex-col gap-4">
-                            {[
-                                { label: "Inicio", href: "/" },
-                                { label: "Propiedades", href: "/propiedades" },
-                                { label: "Agentes", href: "/agentes" },
-                                { label: "Planes", href: "/planes" },
-                                { label: "Servicios", href: "/servicios" },
-                                { label: "Contacto", href: "/contacto" },
-                            ].map((link) => (
-                                <Link
-                                    key={link.label}
-                                    href={link.href}
-                                    className="text-lg font-medium text-zinc-400 hover:text-white hover:pl-2 transition-all p-2 rounded-lg hover:bg-white/5"
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                            <div className="h-px bg-zinc-800 my-4" />
-                            <Link href="/dashboard" className="w-full">
-                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                                    <User className="mr-2 h-4 w-4" />
-                                    Entrar / Dashboard
-                                </Button>
-                            </Link>
-                        </div>
-                    </SheetContent>
-                </Sheet>
             </div>
         </header >
     )

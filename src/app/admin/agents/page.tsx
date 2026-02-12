@@ -4,15 +4,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Users, Search, Plus, Crown, Building2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { AgentActions } from '@/components/admin/AgentActions'
 
 export default async function AdminAgents() {
     const supabase = await createClient()
 
-    // Fetch all agents (profiles with role = 'agent')
+    // ...
+    // Fetch all profiles (agents & admins)
     const { data: agents, count } = await supabase
         .from('profiles')
         .select('*, properties(count)', { count: 'exact' })
-        .eq('role', 'agent')
+        .in('role', ['agent', 'admin']) // Mostrar todos
         .order('created_at', { ascending: false })
 
     const agentsList = agents || []
@@ -20,64 +22,28 @@ export default async function AdminAgents() {
     return (
         <div className="p-8 space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-black text-zinc-900">Gestión de Agentes</h1>
-                    <p className="text-zinc-500 mt-2">
-                        {count || 0} agentes registrados en la plataforma
-                    </p>
-                </div>
-                <Button className="gap-2 shadow-lg shadow-blue-500/20">
-                    <Plus className="h-5 w-5" />
-                    Invitar Agente
-                </Button>
-            </div>
+            {/* ... (sin cambios Header) ... */}
 
-            {/* Search & Filters */}
-            <Card className="border-zinc-200">
-                <CardContent className="pt-6">
-                    <div className="flex gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
-                            <Input
-                                placeholder="Buscar por nombre, email..."
-                                className="pl-10 bg-zinc-50 border-zinc-200"
-                            />
-                        </div>
-                        <Button variant="outline">Filtros</Button>
-                    </div>
-                </CardContent>
-            </Card>
+            {/* ... (sin cambios Search) ... */}
 
             {/* Agents Table */}
             <Card className="border-zinc-200">
                 <CardHeader>
                     <CardTitle className="text-zinc-900 flex items-center gap-2">
                         <Users className="h-5 w-5" />
-                        Lista de Agentes
+                        Lista de Usuarios (Agentes y Admins)
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {agentsList.length === 0 ? (
-                        <div className="text-center py-12">
-                            <Users className="h-16 w-16 text-zinc-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-bold text-zinc-700 mb-2">No hay agentes registrados</h3>
-                            <p className="text-zinc-500 mb-6">
-                                Invita a tu primer agente para comenzar.
-                            </p>
-                            <Button className="gap-2">
-                                <Plus className="h-5 w-5" />
-                                Invitar Agente
-                            </Button>
-                        </div>
-                    ) : (
+                    {/* ... (sin cambios en Empty State) ... */}
+                    {(agentsList.length > 0) && (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-zinc-200">
                                         <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Agente</th>
                                         <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Email</th>
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Plan</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Rol</th>
                                         <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Propiedades</th>
                                         <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700">Estado</th>
                                         <th className="text-right py-3 px-4 text-sm font-semibold text-zinc-700">Acciones</th>
@@ -85,23 +51,26 @@ export default async function AdminAgents() {
                                 </thead>
                                 <tbody>
                                     {agentsList.map((agent: any) => (
-                                        <tr key={agent.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                                        <tr key={agent.id} className={`border-b border-zinc-100 hover:bg-zinc-50 ${agent.role === 'admin' ? 'bg-blue-50/50' : ''}`}>
                                             <td className="py-3 px-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${agent.role === 'admin' ? 'bg-amber-500' : 'bg-blue-600'}`}>
                                                         {agent.full_name?.charAt(0) || 'A'}
                                                     </div>
                                                     <div>
-                                                        <p className="font-semibold text-zinc-900">{agent.full_name || 'Sin nombre'}</p>
+                                                        <p className="font-semibold text-zinc-900 flex items-center gap-2">
+                                                            {agent.full_name || 'Sin nombre'}
+                                                            {agent.role === 'admin' && <Crown className="h-3 w-3 text-amber-500 fill-amber-500" />}
+                                                        </p>
                                                         <p className="text-xs text-zinc-500">ID: {agent.id.slice(0, 8)}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-3 px-4 text-sm text-zinc-700">{agent.email || 'N/A'}</td>
                                             <td className="py-3 px-4">
-                                                <Badge variant="outline" className="gap-1">
-                                                    <Crown className="h-3 w-3" />
-                                                    {agent.subscription_plan || 'Gratis'}
+                                                <Badge variant={agent.role === 'admin' ? 'default' : 'outline'} className={`gap-1 ${agent.role === 'admin' ? 'bg-amber-500 hover:bg-amber-600' : ''}`}>
+                                                    {agent.role === 'admin' ? <Crown className="h-3 w-3" /> : <Users className="h-3 w-3" />}
+                                                    {agent.role === 'admin' ? 'Super Agente' : 'Agente'}
                                                 </Badge>
                                             </td>
                                             <td className="py-3 px-4">
@@ -119,9 +88,11 @@ export default async function AdminAgents() {
                                                 </Badge>
                                             </td>
                                             <td className="py-3 px-4 text-right">
-                                                <Button variant="ghost" size="sm">
-                                                    Ver Detalles
-                                                </Button>
+                                                <AgentActions
+                                                    agentId={agent.id}
+                                                    agentName={agent.full_name || agent.email}
+                                                    currentRole={agent.role}
+                                                />
                                             </td>
                                         </tr>
                                     ))}

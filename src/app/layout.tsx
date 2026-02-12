@@ -6,6 +6,7 @@ import { SearchProvider } from "@/providers/SearchProvider";
 import { ComparisonTray } from "@/components/marketing/ComparisonTray";
 import { DynamicFavicon } from "@/components/DynamicFavicon";
 import { Toaster } from "sonner";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
 
 const montserrat = Montserrat({
@@ -25,8 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} font-montserrat antialiased bg-zinc-950 text-white transition-colors duration-300`}>
+      <body className={`${montserrat.variable} font-montserrat antialiased bg-white text-zinc-950 transition-colors duration-300`}>
         <DynamicFavicon />
+        <ScrollToTop />
         <InteractionsProvider>
           <SearchProvider>
             {children}

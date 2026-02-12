@@ -6,12 +6,17 @@ interface SearchFilters {
     location: string;
     type: string;
     priceRange: string;
+    minPrice?: number;
+    maxPrice?: number;
+    beds?: number;
+    baths?: number;
+    amenities?: string[];
 }
 
 interface SearchContextType {
     filters: SearchFilters;
     setFilters: (filters: SearchFilters) => void;
-    updateFilter: (key: keyof SearchFilters, value: string) => void;
+    updateFilter: (key: keyof SearchFilters, value: any) => void;
     clearFilters: () => void;
 }
 
@@ -21,10 +26,15 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const [filters, setFilters] = useState<SearchFilters>({
         location: '',
         type: '',
-        priceRange: ''
+        priceRange: '',
+        minPrice: undefined,
+        maxPrice: undefined,
+        beds: undefined,
+        baths: undefined,
+        amenities: []
     })
 
-    const updateFilter = useCallback((key: keyof SearchFilters, value: string) => {
+    const updateFilter = useCallback((key: keyof SearchFilters, value: any) => {
         setFilters(prev => ({ ...prev, [key]: value }))
     }, [])
 
@@ -32,7 +42,12 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         setFilters({
             location: '',
             type: '',
-            priceRange: ''
+            priceRange: '',
+            minPrice: undefined,
+            maxPrice: undefined,
+            beds: undefined,
+            baths: undefined,
+            amenities: []
         })
     }, [])
 

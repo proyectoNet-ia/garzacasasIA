@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Heart, Scale } from "lucide-react"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 interface PropertyCardInteractionsProps {
     property: any
@@ -12,9 +13,14 @@ interface PropertyCardInteractionsProps {
 
 export function PropertyCardInteractions({ property, variant }: PropertyCardInteractionsProps) {
     const { toggleFavorite, isFavorite, toggleCompare, isComparing } = useInteractions()
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     if (variant === 'like') {
-        const active = isFavorite(property.id)
+        const active = isMounted && isFavorite(property.id)
         return (
             <Button
                 size="icon"
@@ -35,25 +41,23 @@ export function PropertyCardInteractions({ property, variant }: PropertyCardInte
     }
 
     if (variant === 'compare') {
-        const active = isComparing(property.id)
+        const active = isMounted && isComparing(property.id)
         return (
-            <Button
-                size="icon"
-                variant="outline"
+            <button
                 onClick={(e) => {
                     e.preventDefault()
                     toggleCompare(property)
                 }}
                 className={cn(
-                    "h-14 w-14 rounded-2xl border transition-all duration-300 active:scale-90 hover:scale-110 shadow-lg",
+                    "h-14 w-14 rounded-2xl border transition-all duration-300 active:scale-90 hover:scale-110 shadow-lg flex items-center justify-center",
                     active
                         ? "bg-blue-600 border-blue-600 text-white shadow-blue-600/20"
                         : "border-black/10 bg-white text-zinc-500 hover:text-zinc-700 hover:bg-black/5 hover:border-black/20 hover:shadow-xl"
                 )}
                 title="Comparar"
             >
-                <Scale className="h-6 w-6 transition-transform duration-300" />
-            </Button>
+                <Scale className="h-4 w-4 transition-transform duration-300" />
+            </button>
         )
     }
 

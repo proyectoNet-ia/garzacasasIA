@@ -30,7 +30,7 @@ export default function LoginPage() {
                     .single()
 
                 if (profile?.role === 'admin') {
-                    router.push('/admin')
+                    router.push('/dashboard')
                 } else {
                     router.push('/dashboard')
                 }
@@ -73,7 +73,7 @@ export default function LoginPage() {
 
             // Redirigir según el rol
             if (profile?.role === 'admin') {
-                router.push('/admin')
+                router.push('/dashboard')
             } else {
                 router.push('/dashboard')
             }
@@ -98,35 +98,35 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
             {/* Decorative Background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50" />
+                <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50" />
             </div>
 
             <div className="w-full max-w-md relative z-10">
                 {/* Logo/Brand */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/50">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/20">
                         <Building2 className="h-8 w-8 text-white" />
                     </div>
-                    <h1 className="text-3xl font-black text-white mb-2">Garza Casas IA</h1>
-                    <p className="text-zinc-400">Panel de Administración</p>
+                    <h1 className="text-3xl font-black text-zinc-900 mb-2">Garza Casas IA</h1>
+                    <p className="text-zinc-500">Panel de Administración</p>
                 </div>
 
                 {/* Login Card */}
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl">
+                <Card className="border-zinc-200 bg-white shadow-xl">
                     <CardHeader className="space-y-1">
-                        <CardTitle className="text-2xl font-bold text-white">Iniciar Sesión</CardTitle>
-                        <CardDescription className="text-zinc-400">
+                        <CardTitle className="text-2xl font-bold text-zinc-900">Iniciar Sesión</CardTitle>
+                        <CardDescription className="text-zinc-500">
                             Ingresa tus credenciales para acceder al dashboard
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleLogin} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-zinc-300">Email</Label>
+                                <Label htmlFor="email" className="text-zinc-700 font-medium">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -135,16 +135,16 @@ export default function LoginPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-blue-500"
+                                    className="bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-blue-500 focus:ring-2 transition-all"
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-zinc-300">Contraseña</Label>
+                                    <Label htmlFor="password" className="text-zinc-700 font-medium">Contraseña</Label>
                                     <Link
                                         href="/forgot-password"
-                                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                                        className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
                                     >
                                         ¿Olvidaste tu contraseña?
                                     </Link>
@@ -157,14 +157,14 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-blue-500"
+                                    className="bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-blue-500 focus:ring-2 transition-all"
                                 />
                             </div>
 
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/40"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/40 h-11 font-bold"
                             >
                                 {loading ? (
                                     <>
@@ -181,11 +181,11 @@ export default function LoginPage() {
                         </form>
 
                         {/* Info Box */}
-                        <div className="mt-6 p-4 bg-blue-950/30 border border-blue-900/50 rounded-lg">
+                        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
                             <div className="flex gap-3">
-                                <AlertCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                                <div className="text-sm text-zinc-400">
-                                    <p className="font-semibold text-blue-400 mb-1">Acceso Restringido</p>
+                                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <div className="text-sm text-zinc-600">
+                                    <p className="font-bold text-blue-700 mb-1">Acceso Restringido</p>
                                     <p>Solo usuarios autorizados pueden acceder al panel de administración.</p>
                                 </div>
                             </div>
@@ -195,7 +195,7 @@ export default function LoginPage() {
                         <div className="mt-6 text-center">
                             <Link
                                 href="/"
-                                className="text-sm text-zinc-400 hover:text-white transition-colors"
+                                className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors font-medium"
                             >
                                 ← Volver al inicio
                             </Link>
@@ -204,7 +204,7 @@ export default function LoginPage() {
                 </Card>
 
                 {/* Footer */}
-                <p className="text-center text-zinc-500 text-sm mt-8">
+                <p className="text-center text-zinc-400 text-sm mt-8">
                     © 2026 Garza Casas IA. Todos los derechos reservados.
                 </p>
             </div>

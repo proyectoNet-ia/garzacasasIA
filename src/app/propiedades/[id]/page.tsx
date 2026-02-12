@@ -82,7 +82,7 @@ export default function PropertyDetailPage() {
         <div className="min-h-screen bg-zinc-50">
             <SecondaryNavbar contactConfig={contactConfig} />
 
-            <main className="pt-24 pb-20 lg:pb-32">
+            <main className="pt-32 pb-20 lg:pb-32">
                 <div className="container mx-auto px-4 md:px-6">
                     {/* Breadcrumbs & Actions */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
