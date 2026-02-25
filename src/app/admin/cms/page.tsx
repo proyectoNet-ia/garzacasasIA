@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react'
+import { CMSSkeleton } from '@/components/admin/AdminSkeletons'
 import { toast } from 'sonner'
 
 const supabase = createClient()
@@ -257,11 +258,7 @@ export default function AdminCMS() {
     }
 
     if (loading) {
-        return (
-            <div className="p-8 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
-        )
+        return <CMSSkeleton />
     }
 
     const isDefaultHeroImage = heroImageUrl === DEFAULT_HERO_IMAGE
@@ -271,7 +268,7 @@ export default function AdminCMS() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-black text-zinc-900">CMS - Gestión de Contenido</h1>
-                    <p className="text-zinc-500 mt-2">Edita el contenido y apariencia del sitio</p>
+                    <p className="text-zinc-600 mt-2 font-medium">Edita el contenido y apariencia del sitio</p>
                 </div>
                 <Button
                     onClick={handleSaveSettings}
@@ -290,7 +287,7 @@ export default function AdminCMS() {
                 <Card className="border-zinc-200 lg:col-span-2">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-zinc-900 flex items-center gap-2">
+                            <CardTitle className="text-zinc-900 flex items-center gap-2 font-black">
                                 <ImageIcon className="h-5 w-5" /> Banner Hero (Página Principal)
                             </CardTitle>
                             {!isDefaultHeroImage && (
@@ -339,12 +336,12 @@ export default function AdminCMS() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="hero-title">Título Principal</Label>
-                                <Input id="hero-title" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} className="bg-zinc-50 border-zinc-200" />
+                                <Label htmlFor="hero-title" className="text-zinc-700 font-bold">Título Principal</Label>
+                                <Input id="hero-title" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="hero-subtitle">Subtítulo</Label>
-                                <Input id="hero-subtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} className="bg-zinc-50 border-zinc-200" />
+                                <Label htmlFor="hero-subtitle" className="text-zinc-700 font-bold">Subtítulo</Label>
+                                <Input id="hero-subtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400" />
                             </div>
                         </div>
                     </CardContent>
@@ -352,7 +349,7 @@ export default function AdminCMS() {
 
                 <Card className="border-zinc-200">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
                             <ImageIcon className="h-5 w-5" />
                             Favicon (Icono del Sitio)
                         </CardTitle>
@@ -398,22 +395,22 @@ export default function AdminCMS() {
                 </Card>
 
                 <Card className="border-zinc-200">
-                    <CardHeader><CardTitle>Redes Sociales</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="text-zinc-900 font-black">Redes Sociales</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
-                        <div className="space-y-1"><Label>Facebook</Label><Input value={socialMedia.facebook} onChange={(e) => setSocialMedia({ ...socialMedia, facebook: e.target.value })} className="bg-zinc-50" /></div>
-                        <div className="space-y-1"><Label>Instagram</Label><Input value={socialMedia.instagram} onChange={(e) => setSocialMedia({ ...socialMedia, instagram: e.target.value })} className="bg-zinc-50" /></div>
-                        <div className="space-y-1"><Label>LinkedIn</Label><Input value={socialMedia.linkedin} onChange={(e) => setSocialMedia({ ...socialMedia, linkedin: e.target.value })} className="bg-zinc-50" /></div>
+                        <div className="space-y-1"><Label className="text-zinc-700 font-bold">Facebook</Label><Input value={socialMedia.facebook} onChange={(e) => setSocialMedia({ ...socialMedia, facebook: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                        <div className="space-y-1"><Label className="text-zinc-700 font-bold">Instagram</Label><Input value={socialMedia.instagram} onChange={(e) => setSocialMedia({ ...socialMedia, instagram: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                        <div className="space-y-1"><Label className="text-zinc-700 font-bold">LinkedIn</Label><Input value={socialMedia.linkedin} onChange={(e) => setSocialMedia({ ...socialMedia, linkedin: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
                     </CardContent>
                 </Card>
 
                 <Card className="border-zinc-200 lg:col-span-2">
-                    <CardHeader><CardTitle>Configuración SEO</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="text-zinc-900 font-black">Configuración SEO</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1"><Label>Meta Title</Label><Input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} className="bg-zinc-50" /></div>
-                            <div className="space-y-1"><Label>Keywords</Label><Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} className="bg-zinc-50" /></div>
+                            <div className="space-y-1"><Label className="text-zinc-700 font-bold">Meta Title</Label><Input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                            <div className="space-y-1"><Label className="text-zinc-700 font-bold">Keywords</Label><Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
                         </div>
-                        <div className="space-y-1"><Label>Meta Description</Label><Textarea rows={3} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="bg-zinc-50" /></div>
+                        <div className="space-y-1"><Label className="text-zinc-700 font-bold">Meta Description</Label><Textarea rows={3} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
                     </CardContent>
                 </Card>
             </div>

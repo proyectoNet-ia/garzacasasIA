@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Phone, Mail, Instagram, Facebook, Heart, GitCompare, User } from "lucide-react"
+import { Phone, Mail, Heart, GitCompare, User } from "lucide-react"
+import { IconInstagram, IconFacebook, IconWhatsApp } from "@/components/ui/SocialIcons"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
 import { MobileMenu } from "./MobileMenu"
@@ -66,18 +67,18 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
                         <div className="flex items-center gap-3 pr-4 border-r border-slate-800">
                             {contactConfig?.instagram && (
                                 <a href={contactConfig.instagram} target="_blank" rel="noreferrer" className="hover:text-pink-500 transition-colors">
-                                    <Instagram className="h-4 w-4" />
+                                    <IconInstagram className="h-4 w-4" />
                                 </a>
                             )}
                             {contactConfig?.facebook && (
                                 <a href={contactConfig.facebook} target="_blank" rel="noreferrer" className="hover:text-blue-500 transition-colors">
-                                    <Facebook className="h-4 w-4" />
+                                    <IconFacebook className="h-4 w-4" />
                                 </a>
                             )}
                         </div>
                         {contactConfig?.whatsapp && (
-                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-green-500/10 text-green-400 px-4 py-1.5 rounded-full hover:bg-green-500 hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider group">
-                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 group-hover:bg-white animate-pulse" />
+                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-green-500/10 text-green-400 px-4 py-1.5 rounded-full hover:bg-green-500 hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider">
+                                <IconWhatsApp className="h-4 w-4" />
                                 WhatsApp
                             </a>
                         )}
@@ -100,12 +101,12 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
                     </Link>
 
                     {/* Navigation Menu */}
-                    <nav className="hidden lg:flex items-center gap-6">
+                    <nav className="hidden lg:flex items-center gap-2 ml-auto mr-8">
                         {NAVIGATION_LINKS.map((link) => (
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className="group flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest transition-all hover:-translate-y-0.5 text-zinc-600 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50/50"
+                                className="group flex items-center gap-1 text-[11px] font-bold uppercase tracking-tight transition-all hover:-translate-y-0.5 text-zinc-600 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50/50"
                             >
                                 <link.icon className="h-3.5 w-3.5 text-zinc-400 group-hover:text-blue-500 transition-colors" />
                                 {link.label}

@@ -104,7 +104,7 @@ export default function CompararPage() {
                                                 <div className="p-3 rounded-xl bg-black/5">
                                                     <BedDouble className="h-5 w-5" />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase tracking-widest">Dormitorios</span>
+                                                <span className="text-xs font-bold uppercase tracking-widest">{Number(features.beds) === 1 ? 'Habitación' : 'Habitaciones'}</span>
                                             </div>
                                             <span className="text-lg font-medium text-zinc-700">{features.beds || '-'}</span>
                                         </div>

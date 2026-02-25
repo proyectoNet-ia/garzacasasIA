@@ -1,6 +1,6 @@
-import React from 'react'
 import { CheckCircle2, MousePointerClick, Zap, Layers, BarChart3, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { ScrollReveal } from "@/components/ui/ScrollReveal"
 
 const advantages = [
     {
@@ -48,9 +48,9 @@ export function Advantages() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent)] pointer-events-none" />
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="grid lg:grid-cols-2 gap-16 items-stretch">
                     <div className="space-y-8">
-                        <div className="space-y-4">
+                        <ScrollReveal className="space-y-4">
                             <Badge variant="outline" className="border-blue-600/10 bg-blue-600/5 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
                                 Herramientas Elite
                             </Badge>
@@ -60,24 +60,30 @@ export function Advantages() {
                             <p className="text-zinc-500 text-lg md:text-xl font-medium leading-relaxed">
                                 Eficiencia diseñada para el agente moderno en México. Menos papeleo, más resultados reales.
                             </p>
-                        </div>
+                        </ScrollReveal>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                            {advantages.map((adv) => (
-                                <div key={adv.title} className="group p-8 rounded-[2.5rem] border border-black/[0.03] bg-white transition-all hover:bg-white hover:border-black/[0.08] hover:shadow-xl hover:-translate-y-1">
-                                    <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/20 text-white mb-6 group-hover:scale-110 transition-transform">
-                                        <adv.icon className="h-6 w-6" />
+                            {advantages.map((adv, index) => (
+                                <ScrollReveal
+                                    key={adv.title}
+                                    delay={index * 0.1}
+                                    className="h-full"
+                                >
+                                    <div className="group h-full p-8 rounded-[2.5rem] border border-black/[0.03] bg-white transition-all hover:bg-white hover:border-black/[0.08] hover:shadow-xl hover:-translate-y-1">
+                                        <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/20 text-white mb-6 group-hover:scale-110 transition-transform">
+                                            <adv.icon className="h-6 w-6" />
+                                        </div>
+                                        <h4 className="text-lg font-bold text-zinc-700 mb-2 uppercase tracking-tight">{adv.title}</h4>
+                                        <p className="text-sm text-zinc-500 font-medium leading-relaxed">{adv.description}</p>
                                     </div>
-                                    <h4 className="text-lg font-bold text-zinc-700 mb-2 uppercase tracking-tight">{adv.title}</h4>
-                                    <p className="text-sm text-zinc-500 font-medium leading-relaxed">{adv.description}</p>
-                                </div>
+                                </ScrollReveal>
                             ))}
                         </div>
                     </div>
 
-                    <div className="relative">
+                    <ScrollReveal direction="left" className="relative h-full">
                         <div className="absolute -inset-10 bg-blue-600/10 rounded-full blur-[120px] opacity-10" />
-                        <div className="relative aspect-square md:aspect-[4/5] rounded-[3.5rem] border border-black/[0.05] overflow-hidden shadow-2xl group bg-white">
+                        <div className="relative h-full rounded-[3.5rem] border border-black/[0.05] overflow-hidden shadow-2xl group bg-white">
                             <img
                                 src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop"
                                 alt="Propiedad de Lujo"
@@ -98,7 +104,7 @@ export function Advantages() {
                                 <p className="text-sm text-zinc-500 italic">"Garza Casas IA duplicó mi volumen de ventas en solo 3 meses."</p>
                             </div>
                         </div>
-                    </div>
+                    </ScrollReveal>
                 </div>
             </div>
         </section>

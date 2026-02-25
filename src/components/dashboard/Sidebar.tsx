@@ -14,7 +14,8 @@ import {
     Menu,
     X,
     Loader2,
-    Settings
+    Settings,
+    ShieldCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -30,26 +31,61 @@ export function DashboardSidebar() {
     const [loading, setLoading] = useState(true)
     const supabase = createClient()
 
+    // Expose toggle to window for layout access (simple bridge)
     useEffect(() => {
+        (window as any).__toggleMobileMenu = () => setMobileOpen(prev => !prev)
+    }, [])
+
+    useEffect(() => {
+        let channel: any;
+
         async function fetchProfile() {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                const { data } = await supabase
+                // Initial Fetch
+                const { data: profileData } = await supabase
                     .from('profiles')
-                    .select('*, subscriptions_config(name)')
+                    .select('*, subscription_plan, is_unlimited, role')
                     .eq('id', user.id)
                     .single()
 
-                const { count } = await supabase
-                    .from('properties')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('agent_id', user.id)
+                const fetchCount = async () => {
+                    const { count } = await supabase
+                        .from('properties')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('agent_id', user.id)
+                    return count || 0
+                }
 
-                setProfile({ ...data, properties_count: count || 0 })
+                const count = await fetchCount()
+                setProfile({ ...profileData, properties_count: count, email: user.email })
+
+                // Real-time Subscription
+                channel = supabase
+                    .channel('properties-count-sync')
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'properties',
+                            filter: `agent_id=eq.${user.id}`
+                        },
+                        async () => {
+                            const newCount = await fetchCount()
+                            setProfile((prev: any) => prev ? { ...prev, properties_count: newCount } : null)
+                        }
+                    )
+                    .subscribe()
             }
             setLoading(false)
         }
+
         fetchProfile()
+
+        return () => {
+            if (channel) supabase.removeChannel(channel)
+        }
     }, [supabase])
 
     // Close mobile menu on path change
@@ -57,10 +93,19 @@ export function DashboardSidebar() {
         setMobileOpen(false)
     }, [pathname])
 
-    const links = [
+    interface SidebarLink {
+        label: string
+        href: string
+        icon: any
+        badge?: string | null
+        isAdmin?: boolean
+        description?: string
+    }
+
+    const links: SidebarLink[] = [
         { label: 'Inicio', href: '/dashboard', icon: LayoutDashboard, badge: null },
         {
-            label: 'Mis Propiedades',
+            label: 'Propiedades',
             href: '/dashboard/listings',
             icon: Building2,
             badge: profile ? `${profile.properties_count || 0}` : null
@@ -71,16 +116,17 @@ export function DashboardSidebar() {
             label: 'Mi Plan',
             href: '/dashboard/subscription',
             icon: Crown,
-            badge: profile?.subscriptions_config?.name || 'Básico'
+            badge: profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')
         },
     ]
 
     if (profile?.role === 'admin') {
         links.push({
-            label: 'Panel de Admin',
+            label: 'cPanel Admin',
             href: '/admin',
-            icon: Crown, // Or another icon like ShieldAlert or Lock
-            badge: 'Admin'
+            icon: ShieldCheck,
+            isAdmin: true,
+            description: 'Control global'
         })
     }
 
@@ -88,27 +134,6 @@ export function DashboardSidebar() {
 
     const SidebarContent = ({ isMobile = false }) => (
         <>
-            {/* Header */}
-            <div className="flex h-16 items-center justify-between px-6 border-b border-zinc-200">
-                {(!collapsed || isMobile) && (
-                    <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-lg font-black tracking-tighter text-zinc-900"
-                    >
-                        GARZA CASAS <span className="text-blue-600">IA</span>
-                    </motion.span>
-                )}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => isMobile ? setMobileOpen(false) : setCollapsed(!collapsed)}
-                    className="text-zinc-400 hover:text-zinc-900 lg:flex"
-                >
-                    {isMobile ? <X className="h-5 w-5" /> : (collapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />)}
-                </Button>
-            </div>
-
             {/* Navigation */}
             <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
                 {links.map((link) => {
@@ -119,7 +144,9 @@ export function DashboardSidebar() {
                                 "group relative flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
                                 isActive
                                     ? "bg-blue-50 text-blue-700"
-                                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                                    : link.isAdmin
+                                        ? "bg-indigo-50/50 text-indigo-700 hover:bg-indigo-50 border border-indigo-100/50"
+                                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                             )}>
                                 <div className="flex items-center gap-3">
                                     {isActive && (
@@ -130,15 +157,30 @@ export function DashboardSidebar() {
                                     )}
                                     <link.icon className={cn(
                                         "h-5 w-5 shrink-0",
-                                        isActive ? "text-blue-600" : "text-zinc-400 group-hover:text-zinc-600"
+                                        isActive
+                                            ? "text-blue-600"
+                                            : link.isAdmin
+                                                ? "text-indigo-600"
+                                                : "text-zinc-400 group-hover:text-zinc-600"
                                     )} />
                                     {(!collapsed || isMobile) && (
-                                        <motion.span
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                        >
-                                            {link.label}
-                                        </motion.span>
+                                        <div className="flex flex-col items-start leading-tight">
+                                            <motion.span
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="whitespace-nowrap"
+                                            >
+                                                {link.label}
+                                            </motion.span>
+                                            {link.description && (
+                                                <span className={cn(
+                                                    "text-[9px] font-medium opacity-60 leading-none mt-0.5 whitespace-nowrap",
+                                                    link.isAdmin ? "text-indigo-600" : "text-zinc-500"
+                                                )}>
+                                                    {link.description}
+                                                </span>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                                 {(!collapsed || isMobile) && link.badge && (
@@ -161,7 +203,7 @@ export function DashboardSidebar() {
                         <div className="flex items-center gap-2 mb-2">
                             <Crown className="h-4 w-4 text-blue-600" />
                             <span className="text-xs font-bold text-blue-900 uppercase tracking-tighter">
-                                Plan {profile?.subscriptions_config?.name || 'Básico'}
+                                Plan {profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')}
                             </span>
                         </div>
                         <p className="text-[10px] text-zinc-600 mb-2">

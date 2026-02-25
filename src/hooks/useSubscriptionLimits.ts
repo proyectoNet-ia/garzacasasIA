@@ -46,15 +46,14 @@ export function useSubscriptionLimits() {
 
     const fetchLimitsAndUsage = async () => {
         try {
-            // For development: mock user data
-            // TODO: Replace with real auth when implemented
-            const mockUserId = 'dev-user-id'
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
 
             // Fetch user profile and subscription plan
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('subscription_plan, is_unlimited, role')
-                .eq('id', mockUserId)
+                .eq('id', user.id)
                 .single()
 
             // Check if user is admin with unlimited access
@@ -105,7 +104,7 @@ export function useSubscriptionLimits() {
             const { count: propertiesCount } = await supabase
                 .from('properties')
                 .select('*', { count: 'exact', head: true })
-                .eq('agent_id', mockUserId)
+                .eq('agent_id', user.id)
 
             const currentCount = propertiesCount || 0
             const limit = planConfig?.features?.properties_limit || 5

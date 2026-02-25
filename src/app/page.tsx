@@ -10,6 +10,8 @@ import { Pricing } from "@/components/marketing/Pricing"
 import { Contact } from "@/components/marketing/Contact"
 import { CTA } from "@/components/marketing/CTA"
 import { getSiteSettings } from "@/lib/settings"
+import { ScrollReveal } from "@/components/ui/ScrollReveal"
+import { ZoneExplorer } from "@/components/marketing/ZoneExplorer"
 
 export const dynamic = 'force-dynamic'
 
@@ -30,27 +32,44 @@ export default async function Home() {
       <main>
         <Hero config={heroConfig} />
 
-
         {/* Real Data Properties Section */}
         <FeaturedProperties limit={6} randomize={true} />
+
+        {/* Services Section */}
+        <Services />
+
+        {/* Zone Explorer Section */}
+        <ZoneExplorer />
 
         {/* Bento Grid Features Section */}
         <BentoFeatures />
 
+        {/* Advantages Section */}
+        <Advantages />
+
         {/* Call to Action Section */}
         <CTA />
+
+        {/* Agents Section */}
+        <Agents />
+
+        {/* Pricing Section */}
+        <Pricing />
+
+        {/* Contact Section */}
+        <Contact />
 
         {/* Decorative Quote / Impact Section */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="container mx-auto px-4 text-center md:px-6">
-            <div className="max-w-3xl mx-auto space-y-6">
+            <ScrollReveal distance={80} className="max-w-3xl mx-auto space-y-6">
               <h2 className="text-4xl font-black italic tracking-tighter sm:text-5xl opacity-80 font-heading">
                 "La IA no reemplaza al agente, lo hace extraordinario."
               </h2>
               <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full" />
               <p className="text-zinc-500 font-medium">Liderando el cambio en el mercado inmobiliario de Nuevo León.</p>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       </main>

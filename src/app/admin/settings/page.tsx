@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Label } from '@/components/ui/label'
 import { Loader2, Save, Image as ImageIcon, Upload, Building2, Plus, Trash2, Check, X, Phone, Mail, Instagram, Facebook } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 
 const supabase = createClient()
 
@@ -82,9 +83,9 @@ export default function AdminSettings() {
             })
 
         if (error) {
-            alert('Error guardando contacto: ' + error.message)
+            toast.error('Error guardando contacto: ' + error.message)
         } else {
-            alert('¡Información de contacto actualizada!')
+            toast.success('¡Información de contacto actualizada!')
         }
         setSaving(false)
     }
@@ -122,10 +123,10 @@ export default function AdminSettings() {
                 .getPublicUrl(filePath)
 
             setConfig(prev => ({ ...prev, image_url: publicUrl }))
-            alert('Imagen subida con éxito (Recuerda guardar los cambios finales)')
+            toast.success('Imagen subida con éxito (Recuerda guardar los cambios finales)')
         } catch (error: any) {
             console.error('Upload error:', error)
-            alert('Error al subir imagen: ' + error.message)
+            toast.error('Error al subir imagen: ' + error.message)
         } finally {
             setUploading(false)
         }
@@ -142,9 +143,9 @@ export default function AdminSettings() {
             })
 
         if (error) {
-            alert('Error guardando configuración: ' + error.message)
+            toast.error('Error guardando configuración: ' + error.message)
         } else {
-            alert('¡Configuración de Hero actualizada!')
+            toast.success('¡Configuración de Hero actualizada!')
         }
         setSaving(false)
     }
@@ -156,7 +157,7 @@ export default function AdminSettings() {
             .eq('id', planId)
 
         if (error) {
-            alert('Error actualizando plan: ' + error.message)
+            toast.error('Error actualizando plan: ' + error.message)
         } else {
             setPlans(plans.map(p => p.id === planId ? { ...p, ...updates } : p))
         }
@@ -183,9 +184,10 @@ export default function AdminSettings() {
             .eq('id', planId)
 
         if (error) {
-            alert('Error eliminando plan: ' + error.message)
+            toast.error('Error eliminando plan: ' + error.message)
         } else {
             setPlans(plans.filter(p => p.id !== planId))
+            toast.success('Plan eliminado correctamente')
         }
     }
 
@@ -214,9 +216,10 @@ export default function AdminSettings() {
             .single()
 
         if (error) {
-            alert('Error creando plan: ' + error.message)
+            toast.error('Error creando plan: ' + error.message)
         } else if (data) {
             setPlans([...plans, data])
+            toast.success('Plan creado correctamente')
         }
     }
 
@@ -231,22 +234,22 @@ export default function AdminSettings() {
     return (
         <div className="container mx-auto py-10 px-4 max-w-7xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold font-heading text-zinc-700">Panel de Administración</h1>
-                <p className="text-zinc-500">Gestiona la configuración visual y comercial de Garza Casas IA.</p>
+                <h1 className="text-3xl font-black font-heading text-zinc-900">Configuración Global</h1>
+                <p className="text-zinc-600 font-medium">Gestiona la configuración visual y comercial de Garza Casas IA.</p>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2">
                 {/* Hero Config Card */}
                 <Card className="border-zinc-200 shadow-xl bg-white">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-zinc-700">
+                        <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
                             <ImageIcon className="h-5 w-5" />
                             Configuración del Hero
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="title" className="text-zinc-700">Título del Banner</Label>
+                            <Label htmlFor="title" className="text-zinc-700 font-bold">Título del Banner</Label>
                             <Input
                                 id="title"
                                 value={config.title}
@@ -309,7 +312,7 @@ export default function AdminSettings() {
                 {/* Contact Config Card */}
                 <Card className="border-zinc-200 shadow-xl bg-white">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-zinc-700">
+                        <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
                             <Phone className="h-5 w-5" />
                             Información de Contacto
                         </CardTitle>
@@ -390,11 +393,11 @@ export default function AdminSettings() {
                 <Card className="border-zinc-200 shadow-xl bg-white lg:col-span-1">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2 text-zinc-700">
+                            <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
                                 <Building2 className="h-5 w-5" />
                                 Planes y Suscripciones
                             </CardTitle>
-                            <Button onClick={handleAddPlan} size="sm" className="gap-2">
+                            <Button onClick={handleAddPlan} size="sm" className="gap-2 font-bold shadow-sm">
                                 <Plus className="h-4 w-4" />
                                 Nuevo Plan
                             </Button>

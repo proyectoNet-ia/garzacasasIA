@@ -10,6 +10,8 @@ import { useSearch } from "@/providers/SearchProvider"
 import { createClient } from "@/lib/supabase-client"
 import { PropertyGridSkeleton } from "./PropertySkeletons"
 import { trackPropertyInteraction } from "@/lib/analytics"
+import { cn } from "@/lib/utils"
+import { ScrollReveal } from "@/components/ui/ScrollReveal"
 
 export interface FeaturedPropertiesProps {
     limit?: number;
@@ -27,6 +29,8 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
     const [page, setPage] = useState(0)
     const [hasMore, setHasMore] = useState(true)
 
+
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
     // Use state initializer to create stable client instance once
     const [supabase] = useState(() => createClient())
@@ -71,6 +75,7 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
             // Apply DB level filters
             if (filters.location) query = query.ilike('location', `%${filters.location}%`)
             if (filters.type) query = query.eq('property_type', filters.type)
+            if (filters.listing_type) query = query.eq('listing_type', filters.listing_type)
 
             // Price filters
             if (filters.minPrice && !isNaN(Number(filters.minPrice))) {
@@ -124,7 +129,11 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                 setProperties(randomizedList)
                 setHasMore(false)
             } else {
-                setProperties(prev => isInitial ? newData : [...prev, ...newData])
+                setProperties(prev => {
+                    const combined = isInitial ? newData : [...prev, ...newData]
+                    // De-duplicate by ID to prevent duplicate key errors
+                    return Array.from(new Map(combined.map(item => [item.id, item])).values())
+                })
                 setHasMore(newData.length >= ITEMS_PER_PAGE && !limit)
                 if (!isInitial) setPage(prev => prev + 1)
             }
@@ -139,7 +148,7 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
 
     useEffect(() => {
         fetchProperties(true)
-    }, [filters.location, filters.type, filters.priceRange, filters.minPrice, filters.maxPrice, filters.beds, filters.baths])
+    }, [filters.location, filters.type, filters.listing_type, filters.priceRange, filters.minPrice, filters.maxPrice, filters.beds, filters.baths])
 
     const lastElementRef = useCallback((node: any) => {
         if (loadingRef.current || limit) return
@@ -153,7 +162,12 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
     const displayProperties = properties
 
     return (
-        <section id="propiedades-destacadas" className={`${sidebarLayout ? 'py-0 w-full bg-transparent' : 'py-24 bg-white'} relative ${sidebarLayout ? '' : 'overflow-hidden'} transition-colors duration-300`}>
+        <section id="propiedades-destacadas" className={cn(
+            sidebarLayout ? 'py-0 w-full bg-transparent' : 'py-24 bg-white shadow-[0_-50px_100px_-20px_rgba(0,0,0,0.3)] -mt-20 rounded-t-[4rem]',
+            "relative",
+            !sidebarLayout && "overflow-hidden",
+            "transition-all duration-300 z-20"
+        )}>
             {!sidebarLayout && (
                 <>
                     <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -163,7 +177,7 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
 
             <div className={`${sidebarLayout ? '' : 'container mx-auto px-4 md:px-6'} relative`}>
                 <div className={`flex flex-col md:flex-row md:items-end justify-between gap-8 ${sidebarLayout ? 'mb-8' : 'mb-20'}`}>
-                    <div className="space-y-4 max-w-2xl text-left w-full flex items-center justify-between">
+                    <ScrollReveal className="space-y-4 max-w-2xl text-left w-full flex items-center justify-between">
                         {!sidebarLayout ? (
                             <div>
                                 <Badge variant="outline" className="border-blue-500/20 bg-blue-500/5 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
@@ -183,140 +197,153 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                                 </p>
                             </div>
                         )}
-                    </div>
-                    {!sidebarLayout && (filters.location || filters.type || filters.priceRange || filters.minPrice || filters.maxPrice || filters.beds || filters.baths) && (
-                        <Button onClick={clearFilters} variant="ghost" className="text-blue-600 font-bold hover:bg-blue-50">
-                            Limpiar Filtros
-                        </Button>
-                    )}
+                    </ScrollReveal>
+
+                    <div />
+
                 </div>
 
                 {loading ? (
                     <PropertyGridSkeleton count={limit || 6} />
                 ) : displayProperties.length > 0 ? (
                     <>
-                        <div className="grid gap-8 grid-cols-1">
+                        <div className={cn(
+                            "grid gap-8",
+                            viewMode === 'grid'
+                                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                                : "grid-cols-1"
+                        )}>
                             {displayProperties.map((property, index) => {
                                 const features = property.features as any || {}
                                 const agent = property.agent as any || {}
                                 const isLast = index === displayProperties.length - 1
 
                                 return (
-                                    <div
+                                    <ScrollReveal
                                         key={property.id}
-                                        ref={isLast ? lastElementRef : null}
-                                        className="group relative flex flex-col md:flex-row rounded-[2.5rem] bg-white border border-black/5 overflow-hidden transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.1)] hover:border-black/10 shadow-sm"
+                                        delay={(index % 4) * 0.1}
+                                        className="h-full"
                                     >
-                                        {/* Media Section */}
-                                        <div className="relative w-full aspect-[4/3] md:aspect-auto md:h-auto md:w-2/5 md:min-h-[240px] shrink-0 overflow-hidden">
-                                            <img
-                                                src={property.main_image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800"}
-                                                alt={property.title}
-                                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+                                        <div
+                                            ref={isLast ? lastElementRef : null}
+                                            className={cn(
+                                                "group relative flex h-full rounded-[2rem] bg-white border border-black/5 overflow-hidden transition-all duration-700 hover:-translate-y-1 hover:shadow-xl hover:border-black/10 shadow-sm",
+                                                viewMode === 'grid' ? "flex-col" : "flex-col md:flex-row h-auto md:h-[240px]"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "relative overflow-hidden shrink-0",
+                                                viewMode === 'grid' ? "w-full aspect-[4/3]" : "w-full md:w-[320px] h-[200px] md:h-full"
+                                            )}>
+                                                <img
+                                                    src={property.main_image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800"}
+                                                    alt={property.title}
+                                                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50" />
 
-                                            <div className="absolute top-6 left-6 right-6 flex justify-between items-start z-10">
-                                                <div className="flex flex-col gap-2">
-                                                    <Badge className="w-fit bg-white/90 backdrop-blur-md text-zinc-900 border-none rounded-full px-4 py-1.5 font-bold text-[10px] uppercase tracking-widest shadow-lg">
+                                                <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                                                    <Badge className="w-fit bg-white/95 backdrop-blur-md text-zinc-900 border-none rounded-full px-3 py-1 font-bold text-[9px] uppercase tracking-widest shadow-md">
                                                         {property.property_type}
                                                     </Badge>
-                                                    {property.priority_tier === 3 && (
-                                                        <Badge className="bg-amber-500 text-zinc-900 border-none rounded-full px-4 py-1.5 flex items-center gap-2 font-black shadow-lg shadow-amber-500/20 text-[10px] tracking-widest">
-                                                            <Crown className="h-3 w-3" />
-                                                            PLATINO
-                                                        </Badge>
-                                                    )}
-                                                    {property.priority_tier === 2 && (
-                                                        <Badge className="bg-blue-600 text-white border-none rounded-full px-4 py-1.5 flex items-center gap-2 font-black shadow-lg shadow-blue-600/20 text-[10px] tracking-widest">
-                                                            <Zap className="h-3 w-3 fill-white" />
-                                                            PRO
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        size="icon"
-                                                        className="h-12 w-12 rounded-2xl backdrop-blur-xl border bg-white/40 text-zinc-700 border-black/10 transition-all duration-300 active:scale-90 hover:scale-110 hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/30 shadow-sm flex items-center justify-center group/share"
-                                                    >
-                                                        <Share2 className="h-6 w-6 transition-transform duration-300 group-hover/share:scale-110" />
-                                                    </Button>
                                                     <PropertyCardInteractions property={property} variant="like" />
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Content Section */}
-                                        <div className="flex flex-col justify-between p-6 md:w-3/5">
-                                            <div className="space-y-6">
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center gap-2 text-blue-600 text-[10px] font-bold uppercase tracking-widest">
-                                                        <MapPin className="h-3 w-3" />
-                                                        {property.location}
+                                                {viewMode === 'list' && (
+                                                    <div className="absolute bottom-4 left-4 z-10">
+                                                        <Badge className={cn(
+                                                            "border-none rounded-full px-3 py-1 font-black text-[9px] tracking-widest shadow-lg",
+                                                            property.listing_type === 'Venta' ? "bg-blue-600 text-white" : "bg-zinc-900 text-white"
+                                                        )}>
+                                                            {property.listing_type === 'Renta' ? 'RENTA' : 'VENTA'}
+                                                        </Badge>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="text-xl font-bold text-zinc-800 leading-tight group-hover:text-blue-600 transition-colors duration-300 line-clamp-2 mb-2">
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-col flex-1 p-5 md:p-6 justify-between">
+                                                <div className="space-y-3">
+                                                    <div className="space-y-1.5">
+                                                        <div className="flex items-center gap-2 text-blue-600 text-[9px] font-black uppercase tracking-[0.2em]">
+                                                            <MapPin className="h-3 w-3" />
+                                                            {property.location}
+                                                        </div>
+
+                                                        <h3 className={cn(
+                                                            "font-bold text-zinc-800 leading-tight group-hover:text-blue-600 transition-colors duration-300 line-clamp-1",
+                                                            viewMode === 'list' ? "text-xl" : "text-lg"
+                                                        )}>
                                                             {property.title}
                                                         </h3>
+
                                                         <div className="flex items-baseline gap-1 text-zinc-800">
-                                                            <span className="text-xs font-semibold text-zinc-400">$</span>
-                                                            <span className="text-2xl font-black tracking-tight">
-                                                                {property.price.toLocaleString()}
+                                                            <span className="text-[10px] font-medium text-zinc-400">$</span>
+                                                            <span className={cn(
+                                                                "font-extrabold tracking-tight",
+                                                                viewMode === 'list' ? "text-xl" : "text-lg"
+                                                            )}>
+                                                                {property.price ? property.price.toLocaleString() : 'P.N.A'}
+                                                            </span>
+                                                            <span className="text-[9px] font-bold text-zinc-400 ml-0.5 uppercase tracking-wider">MXN</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className={cn(
+                                                        "flex items-center gap-5 py-3 border-y border-zinc-100/60",
+                                                        viewMode === 'list' ? "max-w-xs" : ""
+                                                    )}>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <BedDouble className="h-4 w-4 text-blue-500/50" />
+                                                            <span className="text-xs font-bold text-zinc-600">
+                                                                {features.beds || 3} <span className="text-[9px] font-medium text-zinc-400 uppercase">{Number(features.beds || 3) === 1 ? 'Hab.' : 'Hab.'}</span>
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Bath className="h-4 w-4 text-blue-500/50" />
+                                                            <span className="text-xs font-bold text-zinc-600">
+                                                                {features.baths || 2} <span className="text-[9px] font-medium text-zinc-400 uppercase">Bañ.</span>
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Square className="h-4 w-4 text-blue-500/50" />
+                                                            <span className="text-xs font-bold text-zinc-600">
+                                                                {features.sqft || 250} <span className="text-[9px] font-medium text-zinc-400 uppercase">m²</span>
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center justify-between md:justify-start md:gap-6 py-4 border-y border-zinc-100">
-                                                    <div className="flex items-center gap-2">
-                                                        <BedDouble className="h-4 w-4 text-zinc-400" />
-                                                        <span className="text-sm font-bold text-zinc-700">{features.beds || 3} <span className="text-[10px] font-medium text-zinc-400 uppercase hidden sm:inline">Camas</span></span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Bath className="h-4 w-4 text-zinc-400" />
-                                                        <span className="text-sm font-bold text-zinc-700">{features.baths || 2} <span className="text-[10px] font-medium text-zinc-400 uppercase hidden sm:inline">Baños</span></span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Square className="h-4 w-4 text-zinc-400" />
-                                                        <span className="text-sm font-bold text-zinc-700">{features.sqft || 250} <span className="text-[10px] font-medium text-zinc-400 uppercase hidden sm:inline">m²</span></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between pt-6 mt-auto">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-10 rounded-full bg-zinc-100 overflow-hidden ring-2 ring-white shadow-md">
-                                                        {agent?.avatar_url ? (
-                                                            <img src={agent.avatar_url} alt={agent.full_name} className="h-full w-full object-cover" />
-                                                        ) : (
-                                                            <div className="h-full w-full flex items-center justify-center bg-zinc-200">
-                                                                <User className="h-5 w-5 text-zinc-400" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Agente</span>
-                                                        <span className="text-xs font-bold text-zinc-700 truncate max-w-[100px]">
-                                                            {agent?.full_name || 'Consultor'}
+                                                <div className="flex items-center justify-between pt-4 mt-2">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="h-8 w-8 rounded-full bg-zinc-100 overflow-hidden ring-1 ring-zinc-200">
+                                                            {agent?.avatar_url ? (
+                                                                <img src={agent.avatar_url} alt={agent.full_name} className="h-full w-full object-cover" />
+                                                            ) : (
+                                                                <div className="h-full w-full flex items-center justify-center bg-zinc-200">
+                                                                    <User className="h-4 w-4 text-zinc-400" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[11px] font-bold text-zinc-700 truncate max-w-[100px]">
+                                                            {agent?.full_name || 'Agente'}
                                                         </span>
                                                     </div>
-                                                </div>
 
-                                                <div className="flex items-center gap-3">
-                                                    <PropertyCardInteractions property={property} variant="compare" />
-                                                    <Link href={`/propiedades/${property.id}`}>
-                                                        <Button
-                                                            size="icon"
-                                                            className="h-14 w-14 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20 transition-all duration-300 hover:scale-110 active:scale-90 hover:bg-blue-500 hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.6)] border-none flex items-center justify-center p-0"
-                                                            title="Ver detalles"
-                                                        >
-                                                            <Eye className="h-6 w-6 transition-transform duration-300" />
-                                                        </Button>
-                                                    </Link>
+                                                    <div className="flex items-center gap-2">
+                                                        <PropertyCardInteractions property={property} variant="compare" />
+                                                        <Link href={`/propiedades/${property.id}`}>
+                                                            <Button
+                                                                size="icon"
+                                                                className="h-9 w-9 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 border-none"
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </ScrollReveal>
                                 )
                             })}
                         </div>
@@ -330,11 +357,27 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                             </div>
                         )}
 
-                        {!hasMore && properties.length > 0 && !limit && (
-                            <div className="mt-20 text-center">
-                                <p className="text-zinc-400 text-sm font-medium uppercase tracking-[0.2em]">Has llegado al final</p>
+                        {!sidebarLayout && (
+                            <div className="mt-20 flex justify-center">
+                                <ScrollReveal delay={0.6} direction="up">
+                                    <Link href="/propiedades">
+                                        <Button
+                                            size="lg"
+                                            className="group h-16 px-10 rounded-2xl bg-zinc-900 overflow-hidden relative transition-all duration-500 hover:scale-105 active:scale-95 shadow-2xl border-none"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                            <div className="relative z-10 flex items-center gap-3">
+                                                <span className="text-sm font-black uppercase tracking-widest text-white">Ver todas las propiedades</span>
+                                                <div className="h-8 w-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-all duration-500">
+                                                    <ArrowRight className="h-4 w-4" />
+                                                </div>
+                                            </div>
+                                        </Button>
+                                    </Link>
+                                </ScrollReveal>
                             </div>
                         )}
+
                     </>
                 ) : (
                     <div className="py-20 text-center space-y-4">

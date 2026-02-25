@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Building2, Phone, Mail, Instagram, Facebook, Heart, GitCompare, User } from "lucide-react"
+import { Building2, Phone, Mail, Heart, GitCompare, User } from "lucide-react"
+import { IconInstagram, IconFacebook, IconWhatsApp } from "@/components/ui/SocialIcons"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
 import { MobileMenu } from "./MobileMenu"
@@ -58,17 +59,17 @@ export function Navbar({ contactConfig }: NavbarProps) {
                     <div className="flex items-center gap-4">
                         {contactConfig?.instagram && (
                             <a href={contactConfig.instagram} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
-                                <Instagram className="h-3.5 w-3.5" />
+                                <IconInstagram className="h-3.5 w-3.5" />
                             </a>
                         )}
                         {contactConfig?.facebook && (
                             <a href={contactConfig.facebook} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
-                                <Facebook className="h-3.5 w-3.5" />
+                                <IconFacebook className="h-3.5 w-3.5" />
                             </a>
                         )}
                         {contactConfig?.whatsapp && (
-                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest">
-                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold text-green-400 hover:text-green-300 transition-colors uppercase tracking-widest">
+                                <IconWhatsApp className="h-3.5 w-3.5" />
                                 WhatsApp
                             </a>
                         )}
@@ -96,7 +97,7 @@ export function Navbar({ contactConfig }: NavbarProps) {
                             <Link
                                 key={link.label}
                                 href={link.href}
-                                className={`group px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${isScrolled
+                                className={`group px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${isScrolled
                                     ? "text-zinc-600 hover:text-blue-600 hover:bg-white"
                                     : "text-zinc-300 hover:text-white hover:bg-white/10"
                                     }`}

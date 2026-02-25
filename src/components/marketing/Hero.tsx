@@ -3,9 +3,17 @@
 import { Button } from "@/components/ui/button"
 import { Search, MapPin, Home as HomeIcon, DollarSign, ChevronDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { useSearch } from "@/providers/SearchProvider"
 import { useState } from "react"
 import Image from "next/image"
+import { ScrollReveal } from "@/components/ui/ScrollReveal"
 
 interface HeroProps {
     config?: any;
@@ -35,110 +43,162 @@ export function Hero({ config }: HeroProps) {
         <section className="relative flex min-h-[95vh] flex-col items-center justify-center overflow-hidden pt-20 bg-zinc-950 transition-colors duration-300">
             {/* Background Image with Overlay */}
             <div className="absolute inset-0 z-0 select-none">
-                {/* Fallback image if config.image_url is missing */}
                 <Image
                     src={config?.image_url || "https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=1600&auto=format&fit=crop"}
                     alt="Hero background"
                     fill
                     priority
-                    className="h-full w-full object-cover opacity-50 contrast-125"
+                    className="h-full w-full object-cover opacity-40 mix-blend-overlay"
                 />
-                {/* Gradient overlay: Dark for text contrast */}
-                <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/60 to-zinc-950" />
+                {/* Advanced Multi-layer Gradient */}
+                <div className="absolute inset-0 bg-zinc-950/40" />
+                <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-transparent to-zinc-950" />
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-transparent to-zinc-950 opacity-60" />
             </div>
 
             <div className="relative z-10 container mx-auto px-4 text-center md:px-6">
                 <div className="mx-auto max-w-5xl space-y-10">
-                    <div className="space-y-4">
+                    <ScrollReveal className="space-y-4">
                         <div className="inline-block rounded-lg bg-zinc-900/50 px-3 py-1 text-sm text-blue-400 border border-blue-500/20 backdrop-blur-md">
                             <Badge variant="secondary" className="bg-blue-500/10 text-blue-400 border-blue-500/20 mr-2">Novedad</Badge>
                             Análisis predictivo de precios disponible
                         </div>
-                        <h1 className="text-4xl font-black tracking-tighter text-white sm:text-6xl md:text-7xl lg:text-8xl">
+                        <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
                             {config?.title || "Encuentra tu hogar ideal impulsado por IA"}
                         </h1>
-                        <p className="mx-auto max-w-[700px] text-zinc-400 md:text-xl/relaxed lg:text-2xl/relaxed">
+                        <p className="mx-auto max-w-[700px] text-zinc-300 font-medium md:text-lg lg:text-xl">
                             {config?.subtitle || "La plataforma inteligente que conecta compradores y agentes con análisis de mercado en tiempo real."}
                         </p>
-                    </div>
+                    </ScrollReveal>
 
-                    <div className="mx-auto w-full max-w-4xl">
-                        {/* Search Bar - Dark Mode */}
-                        <div className="relative flex flex-col items-center gap-4 rounded-3xl bg-zinc-900/40 p-3 backdrop-blur-2xl border border-white/5 md:flex-row shadow-2xl">
-                            <div className="relative w-full flex-1">
-                                <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
-                                <input
-                                    type="text"
-                                    placeholder="¿Dónde quieres vivir? (Monterrey, San Pedro...)"
-                                    className="h-14 w-full rounded-2xl bg-zinc-950/50 pl-12 text-white outline-none ring-1 ring-white/10 transition-all focus:ring-2 focus:ring-blue-500/50"
-                                    value={localLocation}
-                                    onChange={(e) => setLocalLocation(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                />
-                            </div>
-
-                            <div className="hidden h-10 w-px bg-white/10 md:block" />
-
-                            <div className="flex w-full flex-1 items-center gap-2 px-2 md:w-auto">
-                                <Button
-                                    variant="ghost"
-                                    className="h-12 flex-1 justify-between rounded-xl px-4 text-zinc-300 hover:bg-white/5"
-                                    onClick={() => updateFilter('type', filters.type === 'Casa' ? 'Departamento' : 'Casa')}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <HomeIcon className="h-4 w-4 text-blue-400" />
-                                        <span>{filters.type || "Tipo"}</span>
-                                    </div>
-                                    <ChevronDown className="h-4 w-4 opacity-50" />
-                                </Button>
-
-                                <Button
-                                    variant="ghost"
-                                    className="h-12 flex-1 justify-between rounded-xl px-4 text-zinc-300 hover:bg-white/5"
-                                    onClick={() => updateFilter('priceRange', filters.priceRange === '3M - 5M' ? '5M - 10M' : '3M - 5M')}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <DollarSign className="h-4 w-4 text-blue-400" />
-                                        <span>{filters.priceRange || "Precio"}</span>
-                                    </div>
-                                    <ChevronDown className="h-4 w-4 opacity-50" />
-                                </Button>
-                            </div>
-
-                            <Button
-                                className="h-14 w-full rounded-2xl bg-blue-600 px-8 font-bold text-white transition-all hover:bg-blue-500 hover:scale-[1.02] active:scale-95 md:w-auto shadow-lg shadow-blue-600/20"
-                                onClick={handleSearch}
-                            >
-                                <Search className="mr-2 h-5 w-5" />
-                                Buscar
-                            </Button>
-                        </div>
-
-                        <div className="mt-6 flex flex-wrap justify-center gap-3">
-                            <span className="text-sm font-medium text-zinc-500">Búsquedas populares:</span>
-                            {["San Pedro", "Cumbres", "Carretera Nacional"].map((city) => (
+                    <ScrollReveal delay={0.2} className="mx-auto w-full max-w-4xl space-y-6">
+                        {/* Transaction Type Toggle */}
+                        <div className="flex justify-center">
+                            <div className="inline-flex p-1 bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
                                 <button
-                                    key={city}
-                                    className="rounded-full bg-zinc-900/50 px-4 py-1.5 text-xs font-semibold text-zinc-300 transition-all hover:bg-zinc-800 hover:text-white border border-white/5"
-                                    onClick={() => {
-                                        setLocalLocation(city)
-                                        handleSearch()
-                                    }}
+                                    onClick={() => updateFilter('listing_type', 'Venta')}
+                                    className={`px-8 py-2.5 rounded-xl text-sm font-black transition-all duration-500 uppercase tracking-widest ${filters.listing_type === 'Venta'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
+                                        : 'text-zinc-400 hover:text-white'
+                                        }`}
                                 >
-                                    {city}
+                                    Comprar
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => updateFilter('listing_type', 'Renta')}
+                                    className={`px-8 py-2.5 rounded-xl text-sm font-black transition-all duration-500 uppercase tracking-widest ${filters.listing_type === 'Renta'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
+                                        : 'text-zinc-400 hover:text-white'
+                                        }`}
+                                >
+                                    Rentar
+                                </button>
+                            </div>
                         </div>
-                    </div>
+
+                        {/* Search Bar - Premium Dark Mode */}
+                        <div className="relative group/searchbar">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[2.5rem] blur-2xl opacity-0 group-hover/searchbar:opacity-100 transition duration-1000" />
+                            <div className="relative flex flex-col items-center gap-2 rounded-[2.5rem] bg-zinc-900/60 p-2 backdrop-blur-3xl border border-white/10 md:flex-row shadow-2xl transition-all duration-500 hover:border-white/20">
+                                {/* Location Input */}
+                                <div className="relative w-full flex-[1.5]">
+                                    <MapPin className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="¿En qué zona buscas?"
+                                        className="h-16 w-full rounded-[2rem] bg-transparent pl-14 pr-4 text-white placeholder:text-zinc-500 outline-none transition-all"
+                                        value={localLocation}
+                                        onChange={(e) => setLocalLocation(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    />
+                                </div>
+
+                                <div className="hidden h-10 w-px bg-white/10 md:block" />
+
+                                {/* Property Type Select */}
+                                <div className="w-full md:w-auto min-w-[160px]">
+                                    <Select
+                                        value={filters.type || 'all'}
+                                        onValueChange={(val) => updateFilter('type', val === 'all' ? '' : val)}
+                                    >
+                                        <SelectTrigger className="h-16 border-none bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-2xl px-6">
+                                            <div className="flex items-center gap-3">
+                                                <HomeIcon className="h-5 w-5 text-blue-400" />
+                                                <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Tipo" /></span>
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
+                                            <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Tipo</SelectItem>
+                                            <SelectItem value="Casa" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Casa</SelectItem>
+                                            <SelectItem value="Departamento" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Departamento</SelectItem>
+                                            <SelectItem value="Terreno" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Terreno</SelectItem>
+                                            <SelectItem value="Local" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Comercial</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="hidden h-10 w-px bg-white/10 md:block" />
+
+                                {/* Price Range Select */}
+                                <div className="w-full md:w-auto min-w-[180px]">
+                                    <Select
+                                        value={filters.priceRange || 'all'}
+                                        onValueChange={(val) => updateFilter('priceRange', val === 'all' ? '' : val)}
+                                    >
+                                        <SelectTrigger className="h-16 border-none bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-2xl px-6">
+                                            <div className="flex items-center gap-3">
+                                                <DollarSign className="h-5 w-5 text-blue-400" />
+                                                <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Precio" /></span>
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
+                                            <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Precio</SelectItem>
+                                            <SelectItem value="0-5M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Hasta $5M</SelectItem>
+                                            <SelectItem value="5-15M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">$5M - $15M</SelectItem>
+                                            <SelectItem value="15M+" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Más de $15M</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Search Button */}
+                                <Button
+                                    className="h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-full bg-blue-600 p-0 text-white transition-all duration-300 hover:bg-blue-500 hover:scale-[1.1] active:scale-95 shadow-xl shadow-blue-600/30 md:mr-2"
+                                    onClick={handleSearch}
+                                    size="icon"
+                                >
+                                    <Search className="h-6 w-6" />
+                                    <span className="sr-only">Buscar</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </ScrollReveal>
+
+                    {/* Quick Filter Badges */}
+                    <ScrollReveal delay={0.4} className="mt-8 flex flex-wrap justify-center gap-3">
+                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] self-center mr-2">Top Zonas:</span>
+                        {["San Pedro", "Cumbres", "Carretera Nacional", "Valle Poniente"].map((city) => (
+                            <button
+                                key={city}
+                                className="group relative overflow-hidden rounded-full px-5 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all hover:text-white border border-white/5 hover:border-blue-500/50 bg-white/5 backdrop-blur-sm"
+                                onClick={() => {
+                                    setLocalLocation(city)
+                                    handleSearch()
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors" />
+                                {city}
+                            </button>
+                        ))}
+                    </ScrollReveal>
                 </div>
             </div>
 
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer p-2" onClick={() => {
+            <ScrollReveal delay={1} direction="down" distance={20} className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer p-2" onClick={() => {
                 const results = document.getElementById('propiedades-destacadas')
                 if (results) results.scrollIntoView({ behavior: 'smooth' })
             }}>
-                <ChevronDown className="h-6 w-6 text-zinc-500" />
-            </div>
-        </section>
+                <ChevronDown className="h-6 w-6 text-zinc-400" />
+            </ScrollReveal>
+        </section >
     )
 }

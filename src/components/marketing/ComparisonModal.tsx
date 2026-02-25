@@ -64,7 +64,7 @@ export function ComparisonModal({ open, onOpenChange }: ComparisonModalProps) {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3 text-zinc-500">
                                                     <BedDouble className="h-5 w-5" />
-                                                    <span className="text-xs font-bold uppercase tracking-wider">Camas</span>
+                                                    <span className="text-xs font-bold uppercase tracking-wider">{Number(features.beds) === 1 ? 'Habitación' : 'Habitaciones'}</span>
                                                 </div>
                                                 <span className="text-white font-bold">{features.beds || '-'}</span>
                                             </div>

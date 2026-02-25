@@ -28,6 +28,9 @@ export default function StatsPage() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
+            // Refresh stats cache automatically
+            await refreshAgentStats(user.id)
+
             // Fetch cached stats
             const agentStats = await getAgentStats(user.id)
             setStats(agentStats)
@@ -264,9 +267,9 @@ export default function StatsPage() {
                                     className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 rounded-xl lg:rounded-2xl border border-zinc-100 hover:bg-zinc-50 transition-all group"
                                 >
                                     <div className={`flex items-center justify-center h-8 w-8 lg:h-12 lg:w-12 rounded-lg lg:rounded-xl font-black text-xs lg:text-lg shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-600' :
-                                            i === 1 ? 'bg-zinc-100 text-zinc-500' :
-                                                i === 2 ? 'bg-orange-100 text-orange-600' :
-                                                    'bg-zinc-50 text-zinc-400'
+                                        i === 1 ? 'bg-zinc-100 text-zinc-500' :
+                                            i === 2 ? 'bg-orange-100 text-orange-600' :
+                                                'bg-zinc-50 text-zinc-400'
                                         }`}>
                                         {i + 1}
                                     </div>

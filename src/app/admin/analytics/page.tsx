@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+import { AnalyticsSkeleton } from '@/components/admin/AdminSkeletons'
 
 interface AgentPerformance {
     id: string
@@ -124,11 +124,7 @@ export default function AdminAnalyticsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="p-8 flex items-center justify-center min-h-[400px]">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
-        )
+        return <AnalyticsSkeleton />
     }
 
     const platformCards = [
@@ -256,9 +252,9 @@ export default function AdminAnalyticsPage() {
                                             </div>
                                         )}
                                         <div className={`flex items-center justify-center h-14 w-14 rounded-xl font-black text-lg shrink-0 ${i === 0 ? 'bg-amber-500 text-white' :
-                                                i === 1 ? 'bg-zinc-400 text-white' :
-                                                    i === 2 ? 'bg-orange-600 text-white' :
-                                                        'bg-zinc-100 text-zinc-600'
+                                            i === 1 ? 'bg-zinc-400 text-white' :
+                                                i === 2 ? 'bg-orange-600 text-white' :
+                                                    'bg-zinc-100 text-zinc-600'
                                             }`}>
                                             #{i + 1}
                                         </div>
@@ -310,8 +306,8 @@ export default function AdminAnalyticsPage() {
                                         </div>
                                         <div className="text-center">
                                             <div className={`flex items-center justify-center gap-1 font-bold ${agent.engagement_rate >= 10 ? 'text-green-600' :
-                                                    agent.engagement_rate >= 5 ? 'text-orange-600' :
-                                                        'text-red-600'
+                                                agent.engagement_rate >= 5 ? 'text-orange-600' :
+                                                    'text-red-600'
                                                 }`}>
                                                 <TrendingUp className="h-4 w-4" />
                                                 {agent.engagement_rate.toFixed(1)}%
@@ -355,8 +351,8 @@ export default function AdminAnalyticsPage() {
                         {agents.slice(0, 3).map((agent, i) => (
                             <div key={agent.id} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50">
                                 <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold ${i === 0 ? 'bg-amber-500 text-white' :
-                                        i === 1 ? 'bg-zinc-400 text-white' :
-                                            'bg-orange-600 text-white'
+                                    i === 1 ? 'bg-zinc-400 text-white' :
+                                        'bg-orange-600 text-white'
                                     }`}>
                                     {i + 1}
                                 </div>

@@ -1,4 +1,5 @@
-import { Phone, Mail, Instagram, Facebook } from "lucide-react"
+import { Phone, Mail } from "lucide-react"
+import { IconInstagram, IconFacebook, IconWhatsApp } from "@/components/ui/SocialIcons"
 
 interface FooterProps {
     contactConfig?: {
@@ -41,15 +42,26 @@ export function Footer({ contactConfig }: FooterProps) {
                                     {contactConfig.email}
                                 </a>
                             )}
-                            <div className="flex gap-4 pt-2">
+                            <div className="flex gap-3 pt-2">
                                 {contactConfig?.instagram && (
-                                    <a href={contactConfig.instagram} target="_blank" rel="noreferrer" className="bg-zinc-100 p-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                        <Instagram className="h-5 w-5" />
+                                    <a href={contactConfig.instagram} target="_blank" rel="noreferrer"
+                                        className="bg-zinc-100 p-2.5 rounded-xl hover:bg-pink-50 hover:text-pink-600 transition-all text-zinc-500"
+                                        aria-label="Instagram">
+                                        <IconInstagram className="h-5 w-5" />
                                     </a>
                                 )}
                                 {contactConfig?.facebook && (
-                                    <a href={contactConfig.facebook} target="_blank" rel="noreferrer" className="bg-zinc-100 p-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                        <Facebook className="h-5 w-5" />
+                                    <a href={contactConfig.facebook} target="_blank" rel="noreferrer"
+                                        className="bg-zinc-100 p-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all text-zinc-500"
+                                        aria-label="Facebook">
+                                        <IconFacebook className="h-5 w-5" />
+                                    </a>
+                                )}
+                                {contactConfig?.whatsapp && (
+                                    <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer"
+                                        className="bg-zinc-100 p-2.5 rounded-xl hover:bg-green-50 hover:text-green-600 transition-all text-zinc-500"
+                                        aria-label="WhatsApp">
+                                        <IconWhatsApp className="h-5 w-5" />
                                     </a>
                                 )}
                             </div>

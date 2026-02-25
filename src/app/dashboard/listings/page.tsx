@@ -21,12 +21,15 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
 } from "@/components/ui/dialog"
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase'
 import { PropertyForm } from '@/components/dashboard/PropertyForm'
 import { ListingSkeleton } from '@/components/dashboard/ListingSkeleton'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
-import { cn } from '@/lib/utils'
+import { cn, formatPrice } from '@/lib/utils'
+import { StatusModal } from '@/components/ui/StatusModal'
 import Link from 'next/link'
 
 const supabase = createClient()
@@ -37,14 +40,21 @@ export default function ListingsPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingProperty, setEditingProperty] = useState<any>(null)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
 
     const { limits, usage, planName, isUnlimited, checkCanCreateProperty, refreshUsage } = useSubscriptionLimits()
 
     const fetchProperties = async () => {
         setLoading(true)
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
         const { data } = await supabase
             .from('properties')
             .select('*')
+            .eq('agent_id', user.id)
             .order('created_at', { ascending: false })
 
         if (data) setProperties(data)
@@ -56,22 +66,38 @@ export default function ListingsPage() {
         fetchProperties()
     }, [])
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de eliminar esta propiedad?')) return
+    const handleDelete = async () => {
+        if (!propertyToDelete) return
 
+        setIsDeleting(true)
         const { error } = await supabase
             .from('properties')
             .delete()
-            .eq('id', id)
+            .eq('id', propertyToDelete)
 
-        if (!error) fetchProperties()
+        if (!error) {
+            toast.success('Propiedad eliminada correctamente')
+            fetchProperties()
+        } else {
+            toast.error('Error al eliminar la propiedad')
+        }
+
+        setIsDeleting(false)
+        setIsDeleteDialogOpen(false)
+        setPropertyToDelete(null)
+    }
+
+    const confirmDelete = (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation()
+        setPropertyToDelete(id)
+        setIsDeleteDialogOpen(true)
     }
 
     const handleCreateNew = () => {
         const canCreate = checkCanCreateProperty()
 
         if (!canCreate.allowed) {
-            alert(canCreate.message)
+            toast.error(canCreate.message)
             return
         }
 
@@ -235,7 +261,7 @@ export default function ListingsPage() {
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
                                                 <span className="text-sm font-black text-blue-600">
-                                                    ${(parseFloat(property.price) / 1000000).toFixed(2)}M
+                                                    {formatPrice(property.price)}
                                                 </span>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
@@ -253,8 +279,8 @@ export default function ListingsPage() {
                                                             <Edit className="h-4 w-4" /> Editar Propiedad
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={() => handleDelete(property.id)}
-                                                            className="text-red-600 gap-2 py-3 cursor-pointer"
+                                                            onClick={(e) => confirmDelete(property.id, e)}
+                                                            className="text-red-600 gap-2 py-3 cursor-pointer font-bold focus:bg-red-50"
                                                         >
                                                             <Trash2 className="h-4 w-4" /> Eliminar permanentemente
                                                         </DropdownMenuItem>
@@ -304,7 +330,7 @@ export default function ListingsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm font-black text-zinc-900">
-                                                ${(parseFloat(property.price) / 1000000).toFixed(2)}M
+                                                {formatPrice(property.price)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <Badge className={cn(
@@ -332,8 +358,8 @@ export default function ListingsPage() {
                                                             <Edit className="h-4 w-4" /> Editar
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
-                                                            onClick={() => handleDelete(property.id)}
-                                                            className="text-red-600 gap-2 cursor-pointer"
+                                                            onClick={(e) => confirmDelete(property.id, e)}
+                                                            className="text-red-600 gap-2 py-3 cursor-pointer font-bold focus:bg-red-50"
                                                         >
                                                             <Trash2 className="h-4 w-4" /> Eliminar
                                                         </DropdownMenuItem>
@@ -348,6 +374,18 @@ export default function ListingsPage() {
                     </>
                 )}
             </div>
+            {/* Universal Status Modal for Deletion */}
+            <StatusModal
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                type="danger"
+                title="¿Eliminar Propiedad?"
+                description="Esta acción no se puede deshacer y se borrarán todas las fotos asociadas."
+                confirmLabel="Sí, eliminar definitivamente"
+                onConfirm={handleDelete}
+                onCancel={() => setIsDeleteDialogOpen(false)}
+                loading={isDeleting}
+            />
         </div>
     )
 }

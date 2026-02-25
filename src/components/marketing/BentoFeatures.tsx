@@ -1,6 +1,7 @@
 import React from 'react'
 import { Brain, Search, ShieldCheck, Zap, Sparkles, LayoutGrid } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 export function BentoFeatures() {
     return (
@@ -9,7 +10,7 @@ export function BentoFeatures() {
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
+                <ScrollReveal className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
                     <Badge variant="outline" className="border-blue-500/20 bg-blue-50 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
                         Innovación
                     </Badge>
@@ -19,11 +20,14 @@ export function BentoFeatures() {
                     <p className="max-w-[700px] text-zinc-500 md:text-xl font-medium">
                         Nuestra tecnología optimiza la búsqueda y gestión de tu próximo hogar.
                     </p>
-                </div>
+                </ScrollReveal>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[250px]">
                     {/* Big Bento Box 1 */}
-                    <div className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-[3rem] border border-zinc-100 bg-zinc-50 p-10 transition-all hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/5">
+                    <ScrollReveal
+                        className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-[3rem] border border-zinc-100 bg-zinc-50 p-10 transition-all hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/5"
+                        delay={0.1}
+                    >
                         <div className="relative z-10 flex h-full flex-col justify-between">
                             <div className="flex items-center justify-center h-16 w-16 rounded-3xl bg-blue-600 shadow-xl shadow-blue-600/20">
                                 <Brain className="h-8 w-8 text-white" />
@@ -38,10 +42,13 @@ export function BentoFeatures() {
                         <div className="absolute top-10 right-10 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Sparkles className="h-32 w-32 text-blue-600" />
                         </div>
-                    </div>
+                    </ScrollReveal>
 
                     {/* Small Bento Box 1 */}
-                    <div className="group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white p-8 transition-all hover:border-zinc-200 hover:shadow-lg">
+                    <ScrollReveal
+                        className="group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white p-8 transition-all hover:border-zinc-200 hover:shadow-lg"
+                        delay={0.2}
+                    >
                         <div className="flex flex-col h-full items-center justify-center text-center gap-4">
                             <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <Zap className="h-6 w-6 text-blue-600" />
@@ -49,10 +56,13 @@ export function BentoFeatures() {
                             <h4 className="text-lg font-bold text-zinc-900 uppercase tracking-tight">Velocidad</h4>
                             <p className="text-xs text-zinc-500 font-medium">Carga instantánea con Next.js 15.</p>
                         </div>
-                    </div>
+                    </ScrollReveal>
 
                     {/* Small Bento Box 2 */}
-                    <div className="group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white p-8 transition-all hover:border-zinc-200 hover:shadow-lg">
+                    <ScrollReveal
+                        className="group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-white p-8 transition-all hover:border-zinc-200 hover:shadow-lg"
+                        delay={0.3}
+                    >
                         <div className="flex flex-col h-full items-center justify-center text-center gap-4">
                             <div className="h-12 w-12 rounded-2xl bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <ShieldCheck className="h-6 w-6 text-green-600" />
@@ -60,10 +70,13 @@ export function BentoFeatures() {
                             <h4 className="text-lg font-bold text-zinc-900 uppercase tracking-tight">Seguridad</h4>
                             <p className="text-xs text-zinc-500 font-medium">Agentes verificados con Supabase.</p>
                         </div>
-                    </div>
+                    </ScrollReveal>
 
                     {/* Medium Bento Box 1 */}
-                    <div className="md:col-span-2 group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-zinc-900 p-8 transition-all hover:border-zinc-800 shadow-2xl">
+                    <ScrollReveal
+                        className="md:col-span-2 group relative overflow-hidden rounded-[2.5rem] border border-zinc-100 bg-zinc-900 p-8 transition-all hover:border-zinc-800 shadow-2xl"
+                        delay={0.4}
+                    >
                         {/* Keeping this one dark for contrast/emphasis, but cleaner */}
                         <div className="flex items-center gap-8 h-full">
                             <div className="flex-1 space-y-2">
@@ -74,8 +87,7 @@ export function BentoFeatures() {
                                 <Search className="h-10 w-10 text-white" />
                             </div>
                         </div>
-                    </div>
-
+                    </ScrollReveal>
                 </div>
             </div>
         </section>

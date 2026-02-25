@@ -6,25 +6,36 @@ import { createClient } from '@/lib/supabase-client'
  * Track a property view
  */
 export async function trackPropertyView(propertyId: string, agentId: string) {
+    if (!propertyId || !agentId) return
+
     const supabase = createClient()
 
     try {
         // Get session ID from localStorage or generate one
         let sessionId = localStorage.getItem('analytics_session_id')
         if (!sessionId) {
-            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
             localStorage.setItem('analytics_session_id', sessionId)
         }
 
-        await supabase.from('property_views').insert({
+        const { error } = await supabase.from('property_views').insert({
             property_id: propertyId,
             agent_id: agentId,
             session_id: sessionId,
             user_agent: navigator.userAgent,
             referrer: document.referrer || null
         })
+
+        if (error) {
+            console.error('Supabase error tracking view:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            })
+        }
     } catch (error) {
-        console.error('Error tracking property view:', error)
+        console.error('Unexpected error tracking property view:', error)
     }
 }
 
@@ -37,24 +48,35 @@ export async function trackPropertyInteraction(
     interactionType: 'whatsapp_click' | 'phone_click' | 'email_click' | 'share' | 'favorite' | 'compare_add',
     metadata?: Record<string, any>
 ) {
+    if (!propertyId || !agentId) return
+
     const supabase = createClient()
 
     try {
         let sessionId = localStorage.getItem('analytics_session_id')
         if (!sessionId) {
-            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
             localStorage.setItem('analytics_session_id', sessionId)
         }
 
-        await supabase.from('property_interactions').insert({
+        const { error } = await supabase.from('property_interactions').insert({
             property_id: propertyId,
             agent_id: agentId,
             interaction_type: interactionType,
             session_id: sessionId,
             metadata: metadata || {}
         })
+
+        if (error) {
+            console.error('Supabase error tracking interaction:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            })
+        }
     } catch (error) {
-        console.error('Error tracking property interaction:', error)
+        console.error('Unexpected error tracking property interaction:', error)
     }
 }
 
@@ -69,12 +91,21 @@ export async function getAgentStats(agentId: string) {
             .from('agent_stats_cache')
             .select('*')
             .eq('agent_id', agentId)
-            .single()
+            .maybeSingle()
 
-        if (error) throw error
+        if (error) {
+            console.error('Supabase error fetching agent stats:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            })
+            return null
+        }
+
         return data
     } catch (error) {
-        console.error('Error fetching agent stats:', error)
+        console.error('Unexpected error fetching agent stats:', error)
         return null
     }
 }
@@ -86,11 +117,20 @@ export async function refreshAgentStats(agentId: string) {
     const supabase = createClient()
 
     try {
-        await supabase.rpc('refresh_agent_stats_cache', {
+        const { error } = await supabase.rpc('refresh_agent_stats_cache', {
             target_agent_id: agentId
         })
+
+        if (error) {
+            console.error('Supabase error refreshing stats:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            })
+        }
     } catch (error) {
-        console.error('Error refreshing agent stats:', error)
+        console.error('Unexpected error refreshing agent stats:', error)
     }
 }
 

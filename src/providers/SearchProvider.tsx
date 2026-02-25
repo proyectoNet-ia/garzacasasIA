@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useMemo, useCall
 interface SearchFilters {
     location: string;
     type: string;
+    listing_type: 'Venta' | 'Renta';
     priceRange: string;
     minPrice?: number;
     maxPrice?: number;
@@ -26,6 +27,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const [filters, setFilters] = useState<SearchFilters>({
         location: '',
         type: '',
+        listing_type: 'Venta',
         priceRange: '',
         minPrice: undefined,
         maxPrice: undefined,
@@ -42,6 +44,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         setFilters({
             location: '',
             type: '',
+            listing_type: 'Venta',
             priceRange: '',
             minPrice: undefined,
             maxPrice: undefined,

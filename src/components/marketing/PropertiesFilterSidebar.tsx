@@ -10,16 +10,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SlidersHorizontal, BedDouble, Bath, MapPin, Search, FilterX, Building2, Check, RefreshCw } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 
-export function PropertiesFilterSidebar() {
-    const { filters, setFilters, clearFilters } = useSearch()
-    const [prices, setPrices] = useState({ min: filters.minPrice || '', max: filters.maxPrice || '' })
+interface FilterContentProps {
+    filters: any;
+    setFilters: (filters: any) => void;
+    clearFilters: () => void;
+    prices: { min: string | number; max: string | number };
+    setPrices: React.Dispatch<React.SetStateAction<{ min: string | number; max: string | number }>>;
+    propertyTypes: string[];
+    bedOptions: number[];
+    bathOptions: number[];
+}
 
-    // Available options
-    const propertyTypes = ['Casa', 'Departamento', 'Terreno', 'Local', 'Oficina']
-    const bedOptions = [1, 2, 3, 4, 5]
-    const bathOptions = [1, 2, 3, 4]
-
-    // Quick price ranges
+const FilterContent = ({
+    filters,
+    setFilters,
+    clearFilters,
+    prices,
+    setPrices,
+    propertyTypes,
+    bedOptions,
+    bathOptions
+}: FilterContentProps) => {
     const applyPriceRange = (min: number | undefined, max: number | undefined) => {
         setFilters({ ...filters, minPrice: min, maxPrice: max })
         setPrices({ min: min?.toString() || '', max: max?.toString() || '' })
@@ -37,8 +48,8 @@ export function PropertiesFilterSidebar() {
         }
     }
 
-    const FilterContent = () => (
-        <div className="space-y-8 pr-1">
+    return (
+        <div className="space-y-8 px-1 pb-1">
             {/* Location Search */}
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -58,7 +69,7 @@ export function PropertiesFilterSidebar() {
                         value={filters.location}
                         onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                         placeholder="Buscar por zona, ciudad..."
-                        className="pl-9 h-11 bg-zinc-50 border-zinc-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all rounded-xl"
+                        className="pl-9 h-12 bg-zinc-50 border-zinc-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus-visible:ring-offset-0 focus-visible:ring-blue-500/10 transition-all duration-300 rounded-2xl text-zinc-900 placeholder:text-zinc-400 border-2"
                     />
                 </div>
             </div>
@@ -151,7 +162,7 @@ export function PropertiesFilterSidebar() {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <Label className="text-zinc-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                            <BedDouble className="h-4 w-4" /> Recámaras
+                            <BedDouble className="h-4 w-4" /> Habitaciones
                         </Label>
                         {filters.beds && (
                             <button
@@ -231,6 +242,27 @@ export function PropertiesFilterSidebar() {
             </div>
         </div>
     )
+}
+
+export function PropertiesFilterSidebar() {
+    const { filters, setFilters, clearFilters } = useSearch()
+    const [prices, setPrices] = useState({ min: filters.minPrice || '', max: filters.maxPrice || '' })
+
+    // Available options
+    const propertyTypes = ['Casa', 'Departamento', 'Terreno', 'Local', 'Oficina']
+    const bedOptions = [1, 2, 3, 4, 5]
+    const bathOptions = [1, 2, 3, 4]
+
+    const commonProps = {
+        filters,
+        setFilters,
+        clearFilters,
+        prices,
+        setPrices,
+        propertyTypes,
+        bedOptions,
+        bathOptions
+    }
 
     return (
         <div className="w-full h-full">
@@ -253,7 +285,7 @@ export function PropertiesFilterSidebar() {
                             <SheetTitle className="text-2xl font-black text-zinc-800 uppercase tracking-tighter">Filtros</SheetTitle>
                             <SheetDescription className="font-medium text-zinc-500">Afina tu búsqueda para encontrar la propiedad ideal</SheetDescription>
                         </SheetHeader>
-                        <FilterContent />
+                        <FilterContent {...commonProps} />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -271,7 +303,7 @@ export function PropertiesFilterSidebar() {
                         </span>
                     )}
                 </div>
-                <FilterContent />
+                <FilterContent {...commonProps} />
             </div>
         </div>
     )
