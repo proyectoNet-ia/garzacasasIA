@@ -174,7 +174,7 @@ export default function ListingsPage() {
                     <AlertTitle className="text-orange-900 font-bold">Límite Próximo</AlertTitle>
                     <AlertDescription className="text-orange-700 text-sm">
                         Solo te quedan {usage.remaining_properties} propiedades.
-                        <Link href="/dashboard/subscription" className="font-bold underline ml-1 text-orange-800">
+                        <Link href="/dashboard/suscripcion" className="font-bold underline ml-1 text-orange-800">
                             Mejorar plan
                         </Link>
                     </AlertDescription>
@@ -187,7 +187,7 @@ export default function ListingsPage() {
                     <AlertTitle className="text-red-900 font-bold">Límite Alcanzado</AlertTitle>
                     <AlertDescription className="text-red-700 text-sm">
                         Actualiza a un plan superior para seguir publicando.
-                        <Link href="/dashboard/subscription" className="font-bold underline ml-1 text-red-800">
+                        <Link href="/dashboard/suscripcion" className="font-bold underline ml-1 text-red-800">
                             Ver Planes
                         </Link>
                     </AlertDescription>
