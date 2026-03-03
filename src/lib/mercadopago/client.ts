@@ -1,20 +1,18 @@
 import MercadoPagoConfig, { Preference, Payment } from 'mercadopago'
 
-// ─── Cliente Singleton de Mercado Pago ───────────────────────────────────────
-let mpClient: MercadoPagoConfig | null = null
-
+// ─── Cliente de Mercado Pago ──────────────────────────────────────────────────
+// NOTA: No usamos singleton para evitar que el token quede cacheado
+// en lambdas "warm" de Vercel cuando se cambia la env var.
 export function getMpClient(): MercadoPagoConfig {
-    if (!mpClient) {
-        const accessToken = process.env.MP_ACCESS_TOKEN
-        if (!accessToken) {
-            throw new Error('MP_ACCESS_TOKEN no está configurado en las variables de entorno.')
-        }
-        mpClient = new MercadoPagoConfig({
-            accessToken,
-            options: { timeout: 5000 }
-        })
+    const accessToken = process.env.MP_ACCESS_TOKEN
+    if (!accessToken) {
+        throw new Error('MP_ACCESS_TOKEN no está configurado en las variables de entorno.')
     }
-    return mpClient
+    console.log('[getMpClient] usando token:', accessToken.substring(0, 15) + '...')
+    return new MercadoPagoConfig({
+        accessToken,
+        options: { timeout: 5000 }
+    })
 }
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
