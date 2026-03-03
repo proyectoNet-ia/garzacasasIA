@@ -73,7 +73,7 @@ function PropertiesSkeleton() {
     )
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
     const [stats, setStats] = useState<DashboardStats | null>(null)
     const [topProperties, setTopProperties] = useState<TopProperty[]>([])
     const [agentName, setAgentName] = useState<string>('')
@@ -404,5 +404,13 @@ export default function DashboardPage() {
                 </Card>
             </div>
         </div>
+    )
+}
+
+export default function DashboardPage() {
+    return (
+        <React.Suspense fallback={<div className="p-8"><StatsSkeleton /></div>}>
+            <DashboardContent />
+        </React.Suspense>
     )
 }

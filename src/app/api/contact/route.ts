@@ -1,10 +1,21 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const contactEmail = process.env.CONTACT_EMAIL_TO || 'hola@garzacasas.ia';
+const contactEmail = process.env.CONTACT_EMAIL_TO || 'hola@garzacasas.com';
 
 export async function POST(req: Request) {
+    // Inicializar Resend de forma lazy para que el build no falle si la key no está
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        console.warn('RESEND_API_KEY no configurada — formulario de contacto deshabilitado');
+        return NextResponse.json(
+            { error: 'El servicio de email no está configurado.' },
+            { status: 503 }
+        );
+    }
+
+    const resend = new Resend(apiKey);
+
     try {
         const { name, email, message } = await req.json();
 
@@ -16,7 +27,7 @@ export async function POST(req: Request) {
         }
 
         const { data, error } = await resend.emails.send({
-            from: 'Garza Casas IA <onboarding@resend.dev>', // Resend requiere dominio verificado para enviar desde otro
+            from: 'Garza Casas IA <onboarding@resend.dev>',
             to: [contactEmail],
             subject: `Nuevo mensaje de contacto: ${name}`,
             replyTo: email,
