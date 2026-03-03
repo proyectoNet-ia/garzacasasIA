@@ -144,7 +144,7 @@ export default function ListingsPage() {
                         <Plus className="h-5 w-5 sm:h-4 sm:w-4" />
                         Nueva Propiedad
                     </Button>
-                    <DialogContent className="border-zinc-200 w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-lg">
+                    <DialogContent className="border-zinc-200 w-[95vw] sm:max-w-6xl max-h-[95vh] overflow-y-auto p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl">
                         <DialogHeader>
                             <DialogTitle className="text-zinc-900 text-xl font-bold">
                                 {editingProperty ? 'Editar Propiedad' : 'Nueva Propiedad'}

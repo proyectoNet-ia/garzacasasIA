@@ -215,7 +215,7 @@ export default function DashboardPage() {
             value: stats.planName,
             icon: stats.isUnlimited ? Crown : TrendingUp,
             trend: stats.isUnlimited ? 'Acceso ilimitado' : 'Ver opciones de mejora',
-            href: '/dashboard/subscription'
+            href: '/dashboard/suscripcion'
         },
     ] : []
 
@@ -370,7 +370,7 @@ export default function DashboardPage() {
                                 label: 'Mejorar mi Plan',
                                 desc: 'Publica más propiedades',
                                 icon: Crown,
-                                href: '/dashboard/subscription',
+                                href: '/dashboard/suscripcion',
                                 color: 'text-amber-600',
                                 bg: 'bg-amber-50 hover:bg-amber-100 border-amber-100'
                             },

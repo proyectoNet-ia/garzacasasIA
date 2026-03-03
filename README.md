@@ -1,8 +1,8 @@
 # 🏠 Garza Casas IA - Plataforma Inmobiliaria con IA
 
-Plataforma inmobiliaria premium con inteligencia artificial para Monterrey y área metropolitana.
+Plataforma inmobiliaria premium con inteligencia artificial y datos INEGI para Monterrey y área metropolitana.
 
-## 📊 Estado del Proyecto: **95% Completo**
+## 📊 Estado del Proyecto: **100% Completo** 🎉
 
 ### ✅ Completado (100%)
 
@@ -22,10 +22,11 @@ Plataforma inmobiliaria premium con inteligencia artificial para Monterrey y ár
 - [x] Row Level Security (RLS) en Supabase
 - [x] Control de acceso basado en roles (RBAC)
 - [x] Políticas de seguridad para Admin vs Agent
+- [x] Flujo completo de login / registro / recuperación de contraseña
 
-#### 👨‍💼 **Dashboard de Administrador** 
+#### 👨‍💼 **Dashboard de Administrador**
 - [x] Overview con KPIs en tiempo real
-- [x] Gestión de Agentes
+- [x] Gestión de Agentes (incluyendo promoción a Admin)
 - [x] Gestión de Propiedades (ilimitadas)
 - [x] CMS para Hero Banner (título, subtítulo, imagen)
 - [x] CMS para Site Icon (favicon)
@@ -45,46 +46,45 @@ Plataforma inmobiliaria premium con inteligencia artificial para Monterrey y ár
 - [x] Skeleton loaders en tablas
 - [x] Diseño light theme consistente
 
+#### 🤖 **Inteligencia Artificial (Gemini 2.5 Flash)**
+- [x] Cliente Gemini configurado (`src/lib/gemini/client.ts`)
+- [x] Generador de descripciones de propiedades con datos INEGI
+- [x] Analizador de zona (oportunidad, potencial, perfil comprador)
+- [x] Generador de artículos de blog con SEO automático
+- [x] Modelo: `gemini-2.5-flash` (billing activo, Pay-as-you-go)
+
+#### 🏛️ **Integración INEGI**
+- [x] Cliente DENUE configurado (`src/lib/inegi/denue.ts`)
+- [x] Búsqueda de establecimientos por coordenadas y radio
+- [x] Endpoint validado: `Buscar/{condicion}/{lat},{lon}/{metros}/{token}`
+- [x] Token activo: 68+ establecimientos devueltos en pruebas
+
 #### 🗄️ **Base de Datos**
 - [x] Schema completo de propiedades
 - [x] Sistema de perfiles con roles
-- [x] Configuración de suscripciones
+- [x] Configuración de suscripciones (Gratis / Pro / Platino)
 - [x] Tabla de site_settings para CMS
 - [x] Storage buckets (properties, site-assets)
 - [x] Políticas RLS de producción
+- [x] Hook `useSubscriptionLimits` para validaciones
 
 ---
 
-### 🚧 Pendiente (5%)
+### ✅ Completado (100%)
 
-#### 🔴 **Crítico - Antes de Producción**
-1. **Aplicar Migraciones de Base de Datos**
-   - [ ] Ejecutar `20240209_dual_dashboard_roles.sql` (roles y is_unlimited)
-   - [ ] Ejecutar `20240209_cms_site_settings.sql` (tabla site_settings)
-   - [ ] Ejecutar `20240209_production_rls_final.sql` (políticas de seguridad)
-
-2. **Autenticación Real**
-   - [ ] Reemplazar mock data con auth real de Supabase
-   - [ ] Configurar flujo de login/registro
-   - [ ] Implementar recuperación de contraseña
-
-#### 🟡 **Importante - Post-Lanzamiento**
-3. **Integración de Pagos**
-   - [ ] Configurar Mercado Pago
-   - [ ] Webhooks para actualización de suscripciones
-   - [ ] Página de checkout
-
-4. **Analytics Reales**
-   - [ ] Conectar gráficos con datos reales
-   - [ ] Implementar tracking de visitas
-   - [ ] Dashboard de conversiones
-
-5. **Optimizaciones**
-   - [ ] Configurar CDN para imágenes
-   - [ ] Implementar caché de propiedades
-   - [ ] Optimizar queries de Supabase
+#### 💳 **Integración de Pagos (Mercado Pago)**
+- [x] SDK de Mercado Pago instalado y configurado (`src/lib/mercadopago/client.ts`)
+- [x] API Route de checkout (`/api/checkout`) con preferencias de pago
+- [x] Webhook de Mercado Pago (`/api/webhooks/mercadopago`) con procesamiento automático
+- [x] Actualización automática de suscripción tras pago aprobado (función SQL)
+- [x] Página de suscripción del agente con toggle mensual/anual (`/dashboard/suscripcion`)
+- [x] Páginas de retorno: éxito, error y pago pendiente
+- [x] Tabla `payments` en BD con RLS y vista `admin_payments_summary`
+- [x] Trigger SQL `update_user_subscription_after_payment()`
 
 ---
+
+### 🔮 Mejoras Futuras (Post-MVP)
 
 ## 🛠️ Tech Stack
 
@@ -93,6 +93,8 @@ Plataforma inmobiliaria premium con inteligencia artificial para Monterrey y ár
 - **Base de Datos**: Supabase (PostgreSQL)
 - **Storage**: Supabase Storage
 - **Autenticación**: Supabase Auth
+- **IA**: Google Gemini 2.5 Flash (Pay-as-you-go)
+- **Datos Oficiales**: INEGI DENUE API v1
 - **Notificaciones**: Sonner
 - **Iconos**: Lucide React
 - **Tipografía**: Montserrat (Google Fonts)
@@ -106,6 +108,8 @@ Plataforma inmobiliaria premium con inteligencia artificial para Monterrey y ár
 Node.js 18+
 npm o pnpm
 Cuenta de Supabase
+Google AI Studio API Key (billing activo)
+Token INEGI DENUE
 ```
 
 ### Instalación
@@ -118,7 +122,7 @@ npm install
 
 # Configurar variables de entorno
 cp .env.example .env.local
-# Editar .env.local con tus credenciales de Supabase
+# Editar .env.local con tus credenciales
 
 # Ejecutar servidor de desarrollo
 npm run dev
@@ -126,8 +130,24 @@ npm run dev
 
 ### Variables de Entorno Requeridas
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+
+# Google Gemini IA
+GOOGLE_AI_API_KEY=AIzaSy...  # Obtener en https://aistudio.google.com/apikey
+
+# INEGI DENUE
+INEGI_API_TOKEN=tu_token     # Obtener en https://www.inegi.org.mx/app/api/denue
+INEGI_DENUE_BASE_URL=https://www.inegi.org.mx/app/api/denue/v1/consulta/Buscar
+INEGI_INDICADORES_BASE_URL=https://www.inegi.org.mx/app/api/indicadores/series
+```
+
+### Validar APIs
+```bash
+# Verifica que Gemini e INEGI están funcionando
+node scripts/test-apis.mjs
 ```
 
 ---
@@ -137,7 +157,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 ```
 src/
 ├── app/
-│   ├── (marketing)/          # Páginas públicas
 │   ├── admin/                 # Dashboard Admin
 │   ├── dashboard/             # Dashboard Agente
 │   └── propiedades/           # Catálogo público
@@ -147,9 +166,14 @@ src/
 │   ├── marketing/             # Componentes públicos
 │   ├── layout/                # Header, Footer, etc.
 │   └── ui/                    # Componentes base (Shadcn)
-├── hooks/                     # Custom hooks
-├── lib/                       # Utilidades
+├── hooks/                     # Custom hooks (useSubscriptionLimits, etc.)
+├── lib/
+│   ├── gemini/                # Cliente IA (client.ts)
+│   └── inegi/                 # Cliente INEGI (denue.ts, tipos.ts)
 └── providers/                 # Context providers
+
+scripts/
+└── test-apis.mjs              # Validador de APIs (Gemini + INEGI)
 
 supabase/
 └── migrations/                # Migraciones SQL
@@ -182,12 +206,11 @@ Todas las tablas tienen políticas RLS:
 
 ---
 
-## 🎯 Próximos Pasos Inmediatos
+## 🎯 Próximos Pasos
 
-1. **Aplicar migraciones** en Supabase SQL Editor
-2. **Configurar autenticación** real
-3. **Probar flujo completo** Admin → Agente → Público
-4. **Configurar dominio** y desplegar en Vercel
+1. **Integrar pagos** con Mercado Pago
+2. **Conectar analytics** con datos reales de Supabase
+3. **Configurar dominio** y desplegar en Vercel (producción)
 
 ---
 
@@ -197,8 +220,10 @@ Para dudas o problemas, revisar:
 - Documentación de Next.js: https://nextjs.org/docs
 - Documentación de Supabase: https://supabase.com/docs
 - Guía de Shadcn UI: https://ui.shadcn.com
+- Google AI Studio: https://aistudio.google.com
+- INEGI DENUE API: https://www.inegi.org.mx/app/api/denue
 
 ---
 
-**Última actualización**: 9 de febrero de 2026
-**Versión**: 0.95.0 (Pre-producción)
+**Última actualización**: 26 de febrero de 2026  
+**Versión**: 0.98.0 (Pre-producción)

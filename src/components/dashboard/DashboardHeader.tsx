@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Building2, Menu } from 'lucide-react'
 import { NotificationCenter } from './NotificationCenter'
 import { Button } from '@/components/ui/button'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 
 export function DashboardHeader() {
     return (
@@ -20,6 +21,16 @@ export function DashboardHeader() {
 
             <div className="flex items-center gap-2">
                 <NotificationCenter />
+
+                <div className="h-8 w-[1px] bg-zinc-200 mx-1 hidden sm:block" />
+
+                <div className="hidden sm:block">
+                    <LogoutButton
+                        showText={false}
+                        className="h-9 w-9 text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-all rounded-full"
+                    />
+                </div>
+
                 <Button
                     variant="ghost"
                     size="icon"

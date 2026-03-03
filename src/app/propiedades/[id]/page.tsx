@@ -21,6 +21,8 @@ import { trackPropertyView, trackPropertyInteraction } from '@/lib/analytics'
 import { PropertyDetailSkeleton } from '@/components/admin/AdminSkeletons'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PlusvaliaBadge } from '@/components/inegi/PlusvaliaBadge'
+import { ServiciosCercanos } from '@/components/inegi/ServiciosCercanos'
 
 export default function PropertyDetailPage() {
     const { id } = useParams()
@@ -283,6 +285,27 @@ export default function PropertyDetailPage() {
                                 <p className="text-zinc-600 leading-relaxed text-sm md:text-lg whitespace-pre-line">
                                     {property.description}
                                 </p>
+                            </div>
+
+                            {/* INEGI Premium Insights */}
+                            <div className="space-y-8">
+                                <div className="flex items-center gap-3">
+                                    <Badge className="bg-blue-600 text-white rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
+                                        Inteligencia de Zona
+                                    </Badge>
+                                    <h2 className="text-2xl font-bold text-zinc-900 leading-none">Datos Oficiales INEGI</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <PlusvaliaBadge
+                                        municipio={property.location?.split(',')[0] || 'Morelia'}
+                                        tipo={property.property_type?.toLowerCase().includes('depto') ? 'departamento' : 'casa'}
+                                    />
+                                    <ServiciosCercanos
+                                        lat={property.latitude || 25.6866}
+                                        lng={property.longitude || -100.3161}
+                                    />
+                                </div>
                             </div>
                         </div>
 

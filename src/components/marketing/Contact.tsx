@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Phone, Mail, MapPin, Send } from "lucide-react"
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
+import { toast } from "sonner"
 
 export function Contact() {
     return (
@@ -62,45 +64,101 @@ export function Contact() {
 
                         {/* Form Side */}
                         <ScrollReveal direction="left" className="p-12 lg:p-20 bg-black/40">
-                            <form className="space-y-6">
-                                <div className="grid sm:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Nombre</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Tu nombre"
-                                            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="tu@email.com"
-                                            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Mensaje</label>
-                                    <textarea
-                                        rows={4}
-                                        placeholder="¿En qué podemos ayudarte?"
-                                        className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500 resize-none"
-                                    ></textarea>
-                                </div>
-                                <Button className="w-full h-16 rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-all font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 gap-3 group">
-                                    Enviar Mensaje
-                                    <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                                </Button>
-                                <p className="text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest pt-4">
-                                    O escríbenos por <span className="text-green-500 cursor-pointer hover:underline">WhatsApp</span> para respuesta inmediata
-                                </p>
-                            </form>
+                            <ContactForm />
                         </ScrollReveal>
                     </div>
                 </div>
             </div>
         </section>
+    )
+}
+
+function ContactForm() {
+    const [loading, setLoading] = useState(false)
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        message: ''
+    })
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                toast.success('¡Mensaje enviado con éxito!', {
+                    description: 'Te contactaremos a la brevedad.'
+                })
+                setFormData({ name: '', email: '', message: '' })
+            } else {
+                throw new Error(data.error || 'Algo salió mal')
+            }
+        } catch (error: any) {
+            toast.error('Error al enviar mensaje', {
+                description: error.message
+            })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Nombre</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Tu nombre"
+                        className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</label>
+                    <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="tu@email.com"
+                        className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500"
+                    />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Mensaje</label>
+                <textarea
+                    rows={4}
+                    required
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="¿En qué podemos ayudarte?"
+                    className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 outline-none focus:border-blue-500/50 transition-all text-white font-medium placeholder:text-zinc-500 resize-none"
+                ></textarea>
+            </div>
+            <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-16 rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-all font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 gap-3 group"
+            >
+                {loading ? 'Enviando...' : 'Enviar Mensaje'}
+                {!loading && <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />}
+            </Button>
+            <p className="text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest pt-4">
+                O escríbenos por <span className="text-green-500 cursor-pointer hover:underline">WhatsApp</span> para respuesta inmediata
+            </p>
+        </form>
     )
 }

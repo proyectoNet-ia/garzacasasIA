@@ -114,7 +114,7 @@ export function DashboardSidebar() {
         { label: 'Mi Perfil', href: '/dashboard/profile', icon: User, badge: null },
         {
             label: 'Mi Plan',
-            href: '/dashboard/subscription',
+            href: '/dashboard/suscripcion',
             icon: Crown,
             badge: profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')
         },
@@ -133,131 +133,165 @@ export function DashboardSidebar() {
     const userInitial = profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || '?'
 
     const SidebarContent = ({ isMobile = false }) => (
-        <>
-            {/* Navigation */}
-            <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
-                {links.map((link) => {
-                    const isActive = pathname === link.href
-                    return (
-                        <Link key={link.href} href={link.href}>
-                            <div className={cn(
-                                "group relative flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
-                                isActive
-                                    ? "bg-blue-50 text-blue-700"
-                                    : link.isAdmin
-                                        ? "bg-indigo-50/50 text-indigo-700 hover:bg-indigo-50 border border-indigo-100/50"
-                                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-                            )}>
-                                <div className="flex items-center gap-3">
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="active-nav-dashboard"
-                                            className="absolute left-0 h-8 w-1 rounded-r-full bg-blue-600"
-                                        />
-                                    )}
-                                    <link.icon className={cn(
-                                        "h-5 w-5 shrink-0",
-                                        isActive
-                                            ? "text-blue-600"
-                                            : link.isAdmin
-                                                ? "text-indigo-600"
-                                                : "text-zinc-400 group-hover:text-zinc-600"
-                                    )} />
-                                    {(!collapsed || isMobile) && (
-                                        <div className="flex flex-col items-start leading-tight">
-                                            <motion.span
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                className="whitespace-nowrap"
-                                            >
-                                                {link.label}
-                                            </motion.span>
-                                            {link.description && (
-                                                <span className={cn(
-                                                    "text-[9px] font-medium opacity-60 leading-none mt-0.5 whitespace-nowrap",
-                                                    link.isAdmin ? "text-indigo-600" : "text-zinc-500"
-                                                )}>
-                                                    {link.description}
+        <div className="flex flex-col h-full overflow-hidden select-none bg-white">
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .scrollbar-hide::-webkit-scrollbar { display: none; }
+                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+            `}} />
+
+            {/* Logo Area */}
+            <div className={cn(
+                "p-6 flex items-center shrink-0",
+                collapsed && !isMobile ? "justify-center px-0" : "justify-between"
+            )}>
+                <Link href="/" className="flex items-center gap-3 overflow-hidden">
+                    <div className="bg-blue-600 w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                        <Building2 className="h-5 w-5 text-white" />
+                    </div>
+                    {(!collapsed || isMobile) && (
+                        <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase truncate">
+                            Garza <span className="text-blue-600">IA</span>
+                        </span>
+                    )}
+                </Link>
+            </div>
+
+            {/* Scrollable Navigation Area */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 scrollbar-hide flex flex-col">
+                <nav className="space-y-1 p-4">
+                    {links.map((link) => {
+                        const isActive = pathname === link.href
+                        return (
+                            <Link key={link.href} href={link.href}>
+                                <div className={cn(
+                                    "group relative flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer overflow-hidden",
+                                    isActive
+                                        ? "bg-blue-50 text-blue-700"
+                                        : link.isAdmin
+                                            ? "bg-indigo-50/50 text-indigo-700 hover:bg-indigo-50 border border-indigo-100/50"
+                                            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                                )}>
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="active-nav-dashboard"
+                                                className="absolute left-0 h-8 w-1 rounded-r-full bg-blue-600"
+                                            />
+                                        )}
+                                        <link.icon className={cn(
+                                            "h-5 w-5 shrink-0",
+                                            isActive
+                                                ? "text-blue-600"
+                                                : link.isAdmin
+                                                    ? "text-indigo-600"
+                                                    : "text-zinc-400 group-hover:text-zinc-600"
+                                        )} />
+                                        {(!collapsed || isMobile) && (
+                                            <div className="flex flex-col items-start leading-tight truncate">
+                                                <span className="truncate font-bold">
+                                                    {link.label}
                                                 </span>
-                                            )}
-                                        </div>
+                                                {link.description && (
+                                                    <span className={cn(
+                                                        "text-[9px] font-medium opacity-60 leading-none mt-0.5 truncate",
+                                                        link.isAdmin ? "text-indigo-600" : "text-zinc-500"
+                                                    )}>
+                                                        {link.description}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {(!collapsed || isMobile) && link.badge && (
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 shrink-0">
+                                            {link.badge}
+                                        </span>
                                     )}
                                 </div>
-                                {(!collapsed || isMobile) && link.badge && (
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                                        {link.badge}
+                            </Link>
+                        )
+                    })}
+                </nav>
+
+                <div className="mt-auto">
+                    <Separator className="bg-zinc-100 mx-4" />
+                    {(!collapsed || isMobile) && profile && (
+                        <div className="p-4 pt-2">
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-sm overflow-hidden">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="h-6 w-6 rounded-lg bg-blue-600/10 flex items-center justify-center">
+                                        <Crown className="h-3.5 w-3.5 text-blue-600" />
+                                    </div>
+                                    <span className="text-[10px] font-black text-blue-900 uppercase tracking-wider truncate">
+                                        Plan {profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')}
                                     </span>
-                                )}
+                                </div>
+                                <p className="text-[10px] text-zinc-500 mb-3 font-medium truncate">
+                                    {profile.properties_count} propiedades activas
+                                </p>
+                                <Link
+                                    href="/dashboard/suscripcion"
+                                    className="block text-center text-[10px] font-bold text-blue-600 hover:text-white hover:bg-blue-600 bg-white py-2 rounded-xl transition-all border border-blue-100 shadow-sm"
+                                >
+                                    Mejorar Plan
+                                </Link>
                             </div>
-                        </Link>
-                    )
-                })}
-            </nav>
-
-            <Separator className="bg-zinc-100" />
-
-            {/* Plan Info */}
-            {(!collapsed || isMobile) && profile && (
-                <div className="p-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Crown className="h-4 w-4 text-blue-600" />
-                            <span className="text-xs font-bold text-blue-900 uppercase tracking-tighter">
-                                Plan {profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')}
-                            </span>
                         </div>
-                        <p className="text-[10px] text-zinc-600 mb-2">
-                            {profile.properties_count} propiedades activas
-                        </p>
-                        <Link
-                            href="/dashboard/subscription"
-                            className="block text-center text-[10px] font-bold text-blue-600 hover:text-blue-700 bg-white py-1.5 rounded-lg shadow-sm border border-blue-100"
-                        >
-                            Mejorar Plan →
-                        </Link>
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
 
-            <Separator className="bg-zinc-100" />
-
-            {/* User Info & Logout */}
-            <div className="p-4 space-y-2">
-                {(!collapsed || isMobile) && (
+            {/* FIXED BOTTOM SECTION */}
+            <div className="shrink-0 border-t border-zinc-100 bg-zinc-50/50 p-4 space-y-3 pb-safe-offset-4 overflow-hidden w-full max-w-full">
+                {(!collapsed || isMobile) ? (
                     <Link
                         href="/dashboard/profile"
-                        className="flex items-center gap-3 px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-100 hover:bg-zinc-100 transition-colors group cursor-pointer"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-white border border-zinc-100 hover:bg-zinc-100 transition-all group cursor-pointer shadow-sm overflow-hidden"
                     >
-                        <div className="h-10 w-10 shrink-0 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm uppercase group-hover:scale-105 transition-transform">
+                        <div className="h-9 w-9 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xs uppercase group-hover:scale-105 transition-transform shadow-md">
                             {userInitial}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-zinc-900 truncate">
+                            <p className="text-[11px] font-bold text-zinc-900 truncate tracking-tight">
                                 {profile?.full_name || 'Agente'}
                             </p>
-                            <p className="text-[10px] text-zinc-500 truncate italic">
+                            <p className="text-[9px] text-zinc-500 truncate leading-none font-medium opacity-80">
                                 {profile?.email}
                             </p>
                         </div>
                     </Link>
+                ) : (
+                    <div className="flex justify-center mb-1">
+                        <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xs shadow-md border border-blue-500/20">
+                            {userInitial}
+                        </div>
+                    </div>
                 )}
+
                 <LogoutButton
                     showText={!collapsed || isMobile}
                     className={cn(
-                        "w-full justify-start gap-3 text-zinc-600 hover:bg-red-50 hover:text-red-700 transition-colors",
-                        (collapsed && !isMobile) && "px-3"
+                        "w-full justify-start gap-3 text-zinc-500 hover:bg-red-50 hover:text-red-700 transition-all h-11 rounded-xl font-bold text-xs border border-transparent hover:border-red-100 overflow-hidden whitespace-nowrap",
+                        (collapsed && !isMobile) && "justify-center px-0 h-10 w-10 mx-auto rounded-xl shadow-sm bg-white hover:bg-red-600 hover:text-white border-zinc-200 hover:border-red-500"
                     )}
                 />
             </div>
-        </>
+        </div>
     )
 
     return (
         <>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .pb-safe-offset-4 { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
+                @media (min-width: 1024px) { .pb-safe-offset-4 { padding-bottom: 2rem; } }
+            `}} />
+
             {/* Desktop Sidebar */}
             <aside
                 className={cn(
-                    "relative hidden lg:flex h-screen flex-col border-r border-zinc-200 bg-white text-zinc-700 transition-all duration-300 ease-in-out",
+                    "relative hidden lg:flex h-[100dvh] flex-col border-r border-zinc-200 bg-white text-zinc-700 transition-all duration-300 ease-in-out overflow-hidden shadow-sm",
                     collapsed ? "w-20" : "w-64"
                 )}
             >
@@ -266,12 +300,12 @@ export function DashboardSidebar() {
 
             {/* Mobile Sidebar (Drawer) */}
             <div className={cn(
-                "fixed inset-0 z-50 lg:hidden transition-opacity duration-300",
+                "fixed inset-0 z-50 lg:hidden transition-opacity duration-300 overflow-hidden backdrop-blur-sm bg-black/40",
                 mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             )}>
                 {/* Backdrop */}
                 <div
-                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    className="absolute inset-0"
                     onClick={() => setMobileOpen(false)}
                 />
 
@@ -280,7 +314,7 @@ export function DashboardSidebar() {
                     initial={{ x: "-100%" }}
                     animate={{ x: mobileOpen ? 0 : "-100%" }}
                     transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col shadow-2xl"
+                    className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col shadow-2xl h-[100dvh] overflow-hidden"
                 >
                     <SidebarContent isMobile />
                 </motion.aside>

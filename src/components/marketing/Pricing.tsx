@@ -1,13 +1,14 @@
 import { createClient } from "@/lib/supabase-server"
 import { Check, Zap, Crown, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
+import Link from "next/link"
 
 const iconMap: any = {
     'Gratis': Building2,
     'Pro': Zap,
-    'Enterprise': Crown
+    'Enterprise': Crown,
+    'Platino': Crown,
 }
 
 export async function Pricing() {
@@ -16,6 +17,9 @@ export async function Pricing() {
         .from('subscriptions_config')
         .select('*')
         .order('priority', { ascending: true })
+
+    // Verificar si hay sesión activa
+    const { data: { user } } = await supabase.auth.getUser()
 
     if (error || !plans || plans.length === 0) {
         return null
@@ -43,6 +47,27 @@ export async function Pricing() {
                         const Icon = iconMap[plan.name] || Building2
                         const features = Array.isArray(plan.features) ? plan.features : []
                         const isPopular = plan.name === 'Pro'
+                        const isFree = !plan.monthly_price || plan.monthly_price === 0
+                        const isEnterprise = plan.name === 'Enterprise'
+
+                        // CTA destination logic:
+                        // - Free plan → registro
+                        // - Paid + logged in → dashboard suscripción
+                        // - Paid + not logged → registro
+                        // - Enterprise → contacto
+                        const ctaHref = isEnterprise
+                            ? '/contacto'
+                            : isFree
+                                ? '/registro'
+                                : user
+                                    ? '/dashboard/suscripcion'
+                                    : '/registro'
+
+                        const ctaLabel = isEnterprise
+                            ? 'Contactar'
+                            : isFree
+                                ? 'Empezar gratis'
+                                : 'Empezar ahora'
 
                         return (
                             <ScrollReveal
@@ -98,11 +123,12 @@ export async function Pricing() {
                                             ))}
                                         </ul>
 
-                                        <Button
-                                            className={`w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${isPopular ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5' : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'}`}
+                                        <Link
+                                            href={ctaHref}
+                                            className={`flex items-center justify-center w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all ${isPopular ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5' : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'}`}
                                         >
-                                            {plan.name === 'Enterprise' ? 'Contactar' : 'Empezar ahora'}
-                                        </Button>
+                                            {ctaLabel}
+                                        </Link>
                                     </div>
                                 </div>
                             </ScrollReveal>

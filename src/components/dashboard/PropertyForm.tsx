@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,11 +11,12 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select'
-import { Loader2, Upload, X, Check, Image as ImageIcon, Plus } from 'lucide-react'
+import { Loader2, Upload, X, Check, Image as ImageIcon, Plus, MapPin, Info, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { optimizeImage } from '@/lib/image-optimizer'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
 import { toast } from 'sonner'
+import { ESTADOS, getMunicipiosPorEstado, type Estado, type Municipio } from '@/lib/inegi/geografia'
 
 interface PropertyFormProps {
     initialData?: any
@@ -44,6 +45,9 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
             baths: number
             sqft: number
         }
+        municipio_clave?: string
+        latitude?: string | number
+        longitude?: string | number
     }>({
         title: initialData?.title || '',
         description: initialData?.description || '',
@@ -54,8 +58,126 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
         main_image_url: initialData?.main_image_url || '',
         images: initialData?.images || [],
         status: initialData?.status || 'active',
-        features: initialData?.features || { beds: 3, baths: 2, sqft: 200 }
+        features: initialData?.features || { beds: 3, baths: 2, sqft: 200 },
+        municipio_clave: initialData?.municipio_clave || '',
+        latitude: initialData?.latitude || '',
+        longitude: initialData?.longitude || ''
     })
+
+    const [selectedEstadoId, setSelectedEstadoId] = useState<string>('')
+    const [municipiosDisponibles, setMunicipiosDisponibles] = useState<Municipio[]>([])
+    const [loadingMunicipios, setLoadingMunicipios] = useState(false)
+    const [coordInput, setCoordInput] = useState(
+        initialData?.latitude && initialData?.longitude
+            ? `${initialData.latitude}, ${initialData.longitude}`
+            : ''
+    )
+
+    // Inicializar estados/municipios si estamos editando
+    useEffect(() => {
+        async function initLocation() {
+            if (initialData?.municipio_clave) {
+                const edoId = initialData.municipio_clave.substring(0, 2)
+                setSelectedEstadoId(edoId)
+
+                // Cargamos municipios de ese estado localmente
+                const data = getMunicipiosPorEstado(edoId)
+                setMunicipiosDisponibles(data)
+            }
+        }
+        initLocation()
+    }, [initialData])
+
+    const handleEstadoChange = (estadoId: string) => {
+        setSelectedEstadoId(estadoId)
+        setFormData(prev => ({ ...prev, municipio_clave: '' }))
+
+        // Carga instantánea desde JSON local
+        const data = getMunicipiosPorEstado(estadoId)
+        setMunicipiosDisponibles(data)
+    }
+
+    const handleMunicipioChange = (municipioId: string) => {
+        const mun = (municipiosDisponibles || []).find(m => m.id === municipioId)
+        const edo = ESTADOS.find(e => e.id === selectedEstadoId)
+        if (mun && edo) {
+            setFormData(prev => ({
+                ...prev,
+                municipio_clave: municipioId,
+                location: `${mun.nombre}, ${edo.nombre}`
+            }))
+        }
+    }
+
+    const openInGoogleMaps = () => {
+        const edo = ESTADOS.find(e => e.id === selectedEstadoId)
+        const mun = municipiosDisponibles.find(m => m.id === formData.municipio_clave)
+
+        let query = "México"
+        if (edo && mun) {
+            query = `${mun.nombre}, ${edo.nombre}, México`
+        } else if (edo) {
+            query = `${edo.nombre}, México`
+        }
+
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank')
+    }
+
+    /**
+     * Convierte coordenadas de Grados, Minutos, Segundos (DMS) o Decimales mixtos
+     */
+    const parseCoordPart = (str: string): number | null => {
+        if (!str) return null
+        const cleanStr = str.trim()
+
+        // DMS Regex: 20°20'05.2"N
+        const dmsRegex = /(\d+)[°|\s]+(\d+)['|\s]+(\d+(?:\.\d+)?)"?\s*([NSEW])/i
+        const dmsMatch = cleanStr.match(dmsRegex)
+
+        if (dmsMatch) {
+            const degrees = parseFloat(dmsMatch[1])
+            const minutes = parseFloat(dmsMatch[2])
+            const seconds = parseFloat(dmsMatch[3])
+            const direction = dmsMatch[4].toUpperCase()
+            let decimal = degrees + (minutes / 60) + (seconds / 3600)
+            if (direction === 'S' || direction === 'W') decimal *= -1
+            return parseFloat(decimal.toFixed(6))
+        }
+
+        // Decimal limpio: -102.0338
+        const decimalStr = cleanStr.replace(/[^\d.-]/g, '')
+        const num = parseFloat(decimalStr)
+        return !isNaN(num) ? num : null
+    }
+
+    const handleSmartCoordInput = (value: string) => {
+        setCoordInput(value)
+
+        // Intentar separar por coma, tab o espacio múltiple (entre lat y lng)
+        // Ejemplos: "20.3, -102.3" o "20°N 102°W"
+        let parts = value.split(/[,|\t]|\s{2,}/)
+
+        // Si no hay separador claro, intentar espacio simple si hay letras de dirección
+        if (parts.length < 2 && (value.includes('N') || value.includes('S'))) {
+            parts = value.split(/\s+(?=\d)/)
+        }
+
+        if (parts.length >= 2) {
+            const lat = parseCoordPart(parts[0])
+            const lng = parseCoordPart(parts[1])
+
+            if (lat !== null && lng !== null) {
+                setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }))
+                if (value.includes('°')) toast.success('Coordenadas DMS detectadas y sincronizadas')
+            }
+        } else {
+            // Si solo hay un número, intentar guardarlo como latitud por si el usuario escribe lento
+            const single = parseCoordPart(value)
+            if (single !== null) {
+                setFormData(prev => ({ ...prev, latitude: single }))
+            }
+        }
+    }
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const galleryInputRef = useRef<HTMLInputElement>(null)
@@ -144,6 +266,8 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                     id: initialData?.id,
                     ...formData,
                     price: parseFloat(formData.price.toString()),
+                    latitude: formData.latitude ? parseFloat(formData.latitude.toString()) : null,
+                    longitude: formData.longitude ? parseFloat(formData.longitude.toString()) : null,
                     agent_id: user.id,
                     updated_at: new Date().toISOString()
                 })
@@ -186,20 +310,6 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                             placeholder="0.00"
                         />
                     </div>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="location" className="text-zinc-900 font-bold">Ubicación / Zona</Label>
-                        <Input
-                            id="location"
-                            required
-                            value={formData.location}
-                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                            className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:ring-blue-500 h-11"
-                            placeholder="Ej: San Pedro Garza García, NL"
-                        />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label className="text-zinc-900 font-bold">Tipo</Label>
@@ -232,6 +342,99 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                                     <SelectItem value="Renta">Renta</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-zinc-900 font-bold">Estado</Label>
+                            <Select
+                                value={selectedEstadoId}
+                                onValueChange={handleEstadoChange}
+                            >
+                                <SelectTrigger className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11">
+                                    <SelectValue placeholder="Selecciona Estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ESTADOS.map(edo => (
+                                        <SelectItem key={edo.id} value={edo.id}>{edo.nombre}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-zinc-900 font-bold">Municipio</Label>
+                            <Select
+                                value={formData.municipio_clave}
+                                onValueChange={handleMunicipioChange}
+                                disabled={!selectedEstadoId || loadingMunicipios}
+                            >
+                                <SelectTrigger className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11">
+                                    <SelectValue placeholder={loadingMunicipios ? "Cargando..." : "Selecciona municipio"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(municipiosDisponibles || []).map(mun => (
+                                        <SelectItem key={mun.id} value={mun.id}>{mun.nombre}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* Geolocation Section */}
+                    <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-blue-600" />
+                                <Label className="text-zinc-900 font-bold tracking-tight">Geolocalización Precise (INEGI)</Label>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={openInGoogleMaps}
+                                className="h-8 text-[10px] font-bold uppercase gap-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800 rounded-full"
+                            >
+                                <ExternalLink className="h-3 w-3" />
+                                Buscar en el mapa
+                            </Button>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="coords" className="text-[10px] uppercase font-black text-zinc-500 tracking-wider">Punto Geográfico</Label>
+                                <Input
+                                    id="coords"
+                                    type="text"
+                                    placeholder="Ej: 19.70, -101.18 o 20°20'N 102°02'W"
+                                    value={coordInput}
+                                    onChange={(e) => handleSmartCoordInput(e.target.value)}
+                                    className="bg-white border-zinc-200 h-11 text-sm font-medium focus:ring-blue-500"
+                                />
+                            </div>
+
+                            {/* Visual Feedback of Parsed Coords */}
+                            {formData.latitude && formData.longitude && (
+                                <div className="flex items-center gap-3 px-3 py-2 bg-white rounded-xl border border-blue-50 shadow-sm animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex-1 space-y-0.5">
+                                        <p className="text-[8px] uppercase font-bold text-zinc-400">Latitud detectada</p>
+                                        <p className="text-xs font-black text-blue-600">{formData.latitude}</p>
+                                    </div>
+                                    <div className="w-px h-6 bg-zinc-100" />
+                                    <div className="flex-1 space-y-0.5">
+                                        <p className="text-[8px] uppercase font-bold text-zinc-400">Longitud detectada</p>
+                                        <p className="text-xs font-black text-blue-600">{formData.longitude}</p>
+                                    </div>
+                                    <Check className="h-4 w-4 text-emerald-500" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex items-start gap-2 text-[10px] text-blue-700 font-medium">
+                            <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                            <p className="leading-tight opacity-80">
+                                Estas coordenadas permiten que la IA genere el reporte de servicios cercanos (escuelas, hospitales, etc.) usando datos reales.
+                            </p>
                         </div>
                     </div>
                 </div>
