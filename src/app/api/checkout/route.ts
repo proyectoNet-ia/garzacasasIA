@@ -4,7 +4,16 @@ import { createPaymentPreference } from '@/lib/mercadopago/client'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(req: NextRequest) {
+    // 🔍 DEBUG — ver qué credenciales tiene el servidor en runtime
+    const token = process.env.MP_ACCESS_TOKEN || 'NO_TOKEN'
+    const pubKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || 'NO_KEY'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'NO_URL'
+    console.log('[Checkout] MP_ACCESS_TOKEN prefix:', token.substring(0, 15) + '...')
+    console.log('[Checkout] MP_PUBLIC_KEY prefix:', pubKey.substring(0, 15) + '...')
+    console.log('[Checkout] APP_URL:', appUrl)
+    // ────────────────────────────────────────────────────────────
     try {
+
         // 1. Verificar autenticación (cliente normal del usuario)
         const supabase = await createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
