@@ -43,15 +43,25 @@ export async function createPaymentPreference(
     const preference = new Preference(client)
 
     // Prioridad: APP_URL (server) → NEXT_PUBLIC_APP_URL → localhost
-    const baseUrl = (
+    const rawUrl = (
         process.env.APP_URL ||
         process.env.NEXT_PUBLIC_APP_URL ||
         'http://localhost:3000'
-    ).replace(/\/$/, '') // quitar trailing slash
+    )
+
+    // Sanitizar: quitar espacios, trailing slash y cualquier char inválido al final
+    // Esto protege contra variables de entorno mal copiadas (ej: "https://garzacasas.come")
+    const baseUrl = rawUrl
+        .trim()
+        .replace(/\/+$/, '')                    // trailing slashes
+        .replace(/[^a-zA-Z0-9\-._~:/?#@!$&'()*+,;=%]+$/, '') // chars inválidos al final
+
+    console.log('[MP] baseUrl:', baseUrl) // Debug temporal
 
     const successUrl = `${baseUrl}/dashboard/suscripcion/exito`
     const failureUrl = `${baseUrl}/dashboard/suscripcion/error`
     const pendingUrl = `${baseUrl}/dashboard/suscripcion/pendiente`
+
 
     const response = await preference.create({
         body: {
