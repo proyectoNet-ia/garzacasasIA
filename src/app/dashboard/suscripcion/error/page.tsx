@@ -47,7 +47,7 @@ function ErrorContent() {
                             asChild
                             className="w-full h-12 rounded-2xl font-black gap-2 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/20"
                         >
-                            <Link href="/planes">
+                            <Link href="/dashboard/suscripcion">
                                 <RefreshCw className="h-4 w-4" /> Intentar de nuevo
                             </Link>
                         </Button>

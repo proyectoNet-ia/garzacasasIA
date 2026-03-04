@@ -344,6 +344,39 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                             </Select>
                         </div>
                     </div>
+
+                    {/* Status selector */}
+                    <div className="space-y-2">
+                        <Label className="text-zinc-900 font-bold">Estado de la Publicación</Label>
+                        <Select
+                            value={formData.status}
+                            onValueChange={(val) => setFormData({ ...formData, status: val })}
+                        >
+                            <SelectTrigger className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="active">
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                                        Activo — visible al público
+                                    </span>
+                                </SelectItem>
+                                <SelectItem value="draft">
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-zinc-400 inline-block" />
+                                        Borrador — solo tú lo ves
+                                    </span>
+                                </SelectItem>
+                                <SelectItem value="sold">
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-red-500 inline-block" />
+                                        Vendido / Rentado
+                                    </span>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="space-y-4">
@@ -567,6 +600,6 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : initialData ? 'Guardar Cambios' : 'Publicar Inmueble'}
                 </Button>
             </div>
-        </form>
+        </form >
     )
 }

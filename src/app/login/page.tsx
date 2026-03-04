@@ -2,93 +2,79 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogIn, Loader2, AlertCircle, Building2 } from 'lucide-react'
+import { LogIn, Loader2, Building2, Lock, Mail, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
     const supabase = createClient()
 
-    // Redirect if already logged in - Security check & UX
+    // Leer el parámetro ?next= para redirigir después del login
+    const nextPath = searchParams.get('next') || '/dashboard'
+    // Leer mensaje de error del callback (link expirado, etc.)
+    const errorParam = searchParams.get('error')
+
+    useEffect(() => {
+        if (errorParam === 'link-expirado') {
+            toast.error('El enlace de verificación expiró. Por favor inicia sesión.')
+        }
+    }, [errorParam])
+
+    // Redirect si ya está loggeado
     useEffect(() => {
         async function checkUser() {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single()
-
-                if (profile?.role === 'admin') {
-                    router.push('/dashboard')
-                } else {
-                    router.push('/dashboard')
-                }
+                router.push(nextPath)
             }
         }
         checkUser()
-    }, [supabase, router])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // solo al montar — evita loop si nextPath cambia
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
 
         try {
-            // Intentar login con Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             })
 
             if (authError) throw authError
+            if (!authData.user) throw new Error('No se pudo autenticar el usuario')
 
-            if (!authData.user) {
-                throw new Error('No se pudo autenticar el usuario')
-            }
-
-            // Verificar el rol del usuario en la tabla profiles
-            const { data: profile, error: profileError } = await supabase
+            // Obtener perfil para mensaje de bienvenida
+            const { data: profile } = await supabase
                 .from('profiles')
-                .select('role, full_name, is_unlimited')
+                .select('full_name, role')
                 .eq('id', authData.user.id)
                 .single()
 
-            if (profileError) {
-                console.error('Error fetching profile:', profileError)
-                throw new Error('No se pudo obtener el perfil del usuario')
-            }
+            toast.success(`¡Bienvenido${profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!`)
 
-            // Mostrar mensaje de bienvenida
-            toast.success(`¡Bienvenido, ${profile?.full_name || 'Usuario'}!`)
-
-            // Redirigir según el rol
-            if (profile?.role === 'admin') {
-                router.push('/dashboard')
-            } else {
-                router.push('/dashboard')
-            }
-
-            // Forzar refresh para que el middleware detecte la sesión
-            router.refresh()
+            // Navegar al destino — NO llamar router.refresh() aquí:
+            // refresh() + push() simultáneos se contrarrestan y congelan el form
+            router.push(nextPath)
 
         } catch (error: any) {
             console.error('Login error:', error)
-
-            // Mensajes de error más amigables
-            if (error.message.includes('Invalid login credentials')) {
+            if (error.message?.includes('Invalid login credentials')) {
                 toast.error('Email o contraseña incorrectos')
-            } else if (error.message.includes('Email not confirmed')) {
-                toast.error('Por favor confirma tu email antes de iniciar sesión')
+            } else if (error.message?.includes('Email not confirmed')) {
+                toast.error('Confirma tu email antes de iniciar sesión')
             } else {
                 toast.error(error.message || 'Error al iniciar sesión')
             }
@@ -98,116 +84,146 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
-            {/* Decorative Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50" />
-                <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50" />
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-blue-600/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[80px]" />
             </div>
 
-            <div className="w-full max-w-md relative z-10">
-                {/* Logo/Brand */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/20">
-                        <Building2 className="h-8 w-8 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-black text-zinc-900 mb-2">Garza Casas IA</h1>
-                    <p className="text-zinc-500">Panel de Administración</p>
+            <div className="relative z-10 w-full max-w-md">
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <Link href="/" className="inline-flex items-center gap-3">
+                        <div className="h-12 w-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                            <Building2 className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-2xl font-black text-white tracking-tighter">
+                            GARZA CASAS <span className="text-blue-500">IA</span>
+                        </span>
+                    </Link>
                 </div>
 
-                {/* Login Card */}
-                <Card className="border-zinc-200 bg-white shadow-xl">
-                    <CardHeader className="space-y-1">
-                        <CardTitle className="text-2xl font-bold text-zinc-900">Iniciar Sesión</CardTitle>
-                        <CardDescription className="text-zinc-500">
-                            Ingresa tus credenciales para acceder al dashboard
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="email" className="text-zinc-700 font-medium">Email</Label>
+                {/* Card */}
+                <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-10 shadow-2xl space-y-6">
+                    <div>
+                        <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+                            Inicia sesión
+                        </h1>
+                        <p className="text-zinc-500 text-sm mt-1">
+                            Accede a tu panel de agente.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+                                Email
+                            </Label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="admin@garzacasas.com"
+                                    placeholder="tu@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-blue-500 focus:ring-2 transition-all"
+                                    className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 rounded-xl"
                                 />
                             </div>
+                        </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-zinc-700 font-medium">Contraseña</Label>
-                                    <Link
-                                        href="/forgot-password"
-                                        className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
-                                    >
-                                        ¿Olvidaste tu contraseña?
-                                    </Link>
-                                </div>
+                        {/* Password */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+                                    Contraseña
+                                </Label>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-xs text-blue-500 hover:text-blue-400 font-bold transition-colors"
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </Link>
+                            </div>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                 <Input
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="bg-white border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-blue-500 focus:ring-2 transition-all"
+                                    className="h-13 pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 rounded-xl"
                                 />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-blue-600/40 h-11 font-bold"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Iniciando sesión...
-                                    </>
-                                ) : (
-                                    <>
-                                        <LogIn className="mr-2 h-4 w-4" />
-                                        Iniciar Sesión
-                                    </>
-                                )}
-                            </Button>
-                        </form>
-
-                        {/* Info Box */}
-                        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                            <div className="flex gap-3">
-                                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                                <div className="text-sm text-zinc-600">
-                                    <p className="font-bold text-blue-700 mb-1">Acceso Restringido</p>
-                                    <p>Solo usuarios autorizados pueden acceder al panel de administración.</p>
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
                             </div>
                         </div>
 
-                        {/* Back to Home */}
-                        <div className="mt-6 text-center">
-                            <Link
-                                href="/"
-                                className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors font-medium"
-                            >
-                                ← Volver al inicio
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full h-13 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-xs group transition-all shadow-lg shadow-blue-600/20"
+                        >
+                            {loading ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...</>
+                            ) : (
+                                <>
+                                    <LogIn className="mr-2 h-4 w-4" />
+                                    Entrar
+                                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </Button>
+                    </form>
 
-                {/* Footer */}
-                <p className="text-center text-zinc-400 text-sm mt-8">
-                    © 2026 Garza Casas IA. Todos los derechos reservados.
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-white/5" />
+                        </div>
+                        <div className="relative flex justify-center">
+                            <span className="bg-zinc-900 px-3 text-xs text-zinc-600">¿No tienes cuenta?</span>
+                        </div>
+                    </div>
+
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="w-full h-12 rounded-xl border-white/10 text-zinc-300 hover:text-white hover:bg-white/5 font-bold text-sm transition-all"
+                    >
+                        <Link href="/registro">
+                            Crear cuenta gratis
+                        </Link>
+                    </Button>
+                </div>
+
+                <p className="text-center text-zinc-700 text-xs mt-6">
+                    © 2026 Garza Casas IA · <Link href="/" className="hover:text-zinc-500 transition-colors">Volver al inicio</Link>
                 </p>
             </div>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }

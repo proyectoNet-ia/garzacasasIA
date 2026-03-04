@@ -5,8 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Mail, Loader2, ArrowLeft, Building2, CheckCircle2 } from 'lucide-react'
+import { Mail, Loader2, Building2, CheckCircle2, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -28,7 +27,7 @@ export default function ForgotPasswordPage() {
             if (error) throw error
 
             setSubmitted(true)
-            toast.success('Enlace de recuperación enviado al correo')
+            toast.success('Enlace de recuperación enviado')
         } catch (error: any) {
             console.error('Reset request error:', error)
             toast.error(error.message || 'Error al enviar el enlace de recuperación')
@@ -37,114 +36,111 @@ export default function ForgotPasswordPage() {
         }
     }
 
-    if (submitted) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 flex items-center justify-center p-4">
-                <div className="w-full max-w-md">
-                    <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl text-center p-6">
-                        <CardHeader>
-                            <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
-                                <CheckCircle2 className="h-8 w-8 text-green-500" />
-                            </div>
-                            <CardTitle className="text-2xl font-bold text-white">¡Correo Enviado!</CardTitle>
-                            <CardDescription className="text-zinc-400">
-                                Hemos enviado un enlace de recuperación a <strong>{email}</strong>.
-                                Por favor revisa tu bandeja de entrada y sigue las instrucciones.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <p className="text-sm text-zinc-500">
-                                Si no encuentras el correo, revisa tu carpeta de spam.
-                            </p>
-                            <Button asChild variant="outline" className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-                                <Link href="/login">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Volver al inicio de sesión
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 flex items-center justify-center p-4">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-blue-600/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[80px]" />
             </div>
 
-            <div className="w-full max-w-md relative z-10">
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/50">
-                        <Building2 className="h-8 w-8 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-black text-white mb-2">Garza Casas IA</h1>
-                    <p className="text-zinc-400">Recuperar Contraseña</p>
+            <div className="relative z-10 w-full max-w-md">
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <Link href="/" className="inline-flex items-center gap-3">
+                        <div className="h-12 w-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                            <Building2 className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-2xl font-black text-white tracking-tighter">
+                            GARZA CASAS <span className="text-blue-500">IA</span>
+                        </span>
+                    </Link>
                 </div>
 
-                <Card className="border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl">
-                    <CardHeader className="space-y-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white">
-                                <Link href="/login">
-                                    <ArrowLeft className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                            <span className="text-xs text-zinc-500 uppercase tracking-widest font-bold">Seguridad</span>
+                {submitted ? (
+                    /* ── Éxito ── */
+                    <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-10 shadow-2xl text-center space-y-6">
+                        <div className="flex justify-center">
+                            <div className="h-20 w-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                                <CheckCircle2 className="h-10 w-10 text-green-400" />
+                            </div>
                         </div>
-                        <CardTitle className="text-2xl font-bold text-white">¿Olvidaste tu contraseña?</CardTitle>
-                        <CardDescription className="text-zinc-400">
-                            Ingresa tu email y te enviaremos un enlace para restablecer tu acceso.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleResetRequest} className="space-y-4">
+                        <div>
+                            <h1 className="text-2xl font-black text-white">¡Correo enviado!</h1>
+                            <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                                Enviamos un enlace de recuperación a{' '}
+                                <span className="text-blue-400 font-bold">{email}</span>.
+                                Revisa tu bandeja de entrada y carpeta de spam.
+                            </p>
+                        </div>
+                        <Button
+                            asChild
+                            className="w-full h-12 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 font-bold"
+                            variant="outline"
+                        >
+                            <Link href="/login">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Volver al inicio de sesión
+                            </Link>
+                        </Button>
+                    </div>
+                ) : (
+                    /* ── Formulario ── */
+                    <div className="bg-zinc-900 border border-white/10 rounded-[2rem] p-10 shadow-2xl space-y-6">
+                        <div>
+                            <Link
+                                href="/login"
+                                className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-300 uppercase tracking-widest transition-colors mb-6"
+                            >
+                                <ArrowLeft className="h-3 w-3" />
+                                Volver al login
+                            </Link>
+                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+                                ¿Olvidaste tu contraseña?
+                            </h1>
+                            <p className="text-zinc-500 text-sm mt-1">
+                                Ingresa tu email y te enviaremos un enlace para restablecer tu acceso.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleResetRequest} className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-zinc-300">Correo Electrónico</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="tu@email.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-blue-500"
-                                />
+                                <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
+                                    Correo Electrónico
+                                </Label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="tu@email.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        disabled={loading}
+                                        className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 rounded-xl"
+                                    />
+                                </div>
                             </div>
 
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all"
+                                className="w-full h-13 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20 transition-all"
                             >
                                 {loading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Enviando enlace...
-                                    </>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</>
                                 ) : (
-                                    <>
-                                        <Mail className="mr-2 h-4 w-4" />
-                                        Enviar enlace de recuperación
-                                    </>
+                                    <><Mail className="mr-2 h-4 w-4" /> Enviar enlace de recuperación</>
                                 )}
                             </Button>
                         </form>
+                    </div>
+                )}
 
-                        <div className="mt-6 text-center">
-                            <Link
-                                href="/login"
-                                className="text-sm text-zinc-400 hover:text-white transition-colors"
-                            >
-                                Recordé mi contraseña, volver al login
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
+                <p className="text-center text-zinc-700 text-xs mt-6">
+                    © 2026 Garza Casas IA · <Link href="/" className="hover:text-zinc-500 transition-colors">Volver al inicio</Link>
+                </p>
             </div>
         </div>
     )
