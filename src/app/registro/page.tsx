@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Building2, Loader2, User, Mail, Phone, Lock, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { formatPhone } from '@/hooks/usePhoneFormat'
 
 const PLAN_FEATURES = [
     'Hasta 5 propiedades activas',
@@ -226,9 +227,10 @@ export default function RegistroPage() {
                                             <Input
                                                 type="tel"
                                                 value={form.phone}
-                                                onChange={e => update('phone', e.target.value)}
-                                                placeholder="8120000000"
+                                                onChange={e => update('phone', formatPhone(e.target.value))}
+                                                placeholder="(812) 000-0000"
                                                 required
+                                                maxLength={14}
                                                 className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                             />
                                         </div>

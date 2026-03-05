@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { User, Mail, Phone, Save, Upload, Loader2, Camera, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatPhone } from '@/hooks/usePhoneFormat'
 
 export default function ProfilePage() {
     const [loading, setLoading] = useState(true)
@@ -215,10 +216,12 @@ export default function ProfilePage() {
                                     <Phone className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
                                     <Input
                                         id="phone"
+                                        type="tel"
                                         value={profile?.phone || ''}
-                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                        onChange={(e) => setProfile({ ...profile, phone: formatPhone(e.target.value) })}
                                         className="pl-10 border-zinc-200 focus:ring-blue-500"
-                                        placeholder="+52 81 0000 0000"
+                                        placeholder="(812) 000-0000"
+                                        maxLength={14}
                                     />
                                 </div>
                             </div>
@@ -228,10 +231,12 @@ export default function ProfilePage() {
                                     <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
                                     <Input
                                         id="whatsapp"
+                                        type="tel"
                                         value={profile?.whatsapp || profile?.phone || ''}
-                                        onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
+                                        onChange={(e) => setProfile({ ...profile, whatsapp: formatPhone(e.target.value) })}
                                         className="pl-10 border-zinc-200 focus:ring-blue-500"
-                                        placeholder="+52 81 0000 0000"
+                                        placeholder="(812) 000-0000"
+                                        maxLength={14}
                                     />
                                 </div>
                             </div>
