@@ -303,8 +303,13 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                                                             )}>
                                                                 {property.price ? property.price.toLocaleString() : 'P.N.A'}
                                                             </span>
-                                                            <span className="text-[9px] font-bold text-zinc-400 ml-0.5 uppercase tracking-wider">MXN</span>
+                                                            <span className="text-[9px] font-bold text-zinc-400 ml-0.5 uppercase tracking-wider">
+                                                                {property.listing_type === 'Renta' ? 'MXN / mes' : 'MXN'}
+                                                            </span>
                                                         </div>
+                                                        {property.listing_type === 'Renta' && (
+                                                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Precio de Renta</span>
+                                                        )}
                                                     </div>
 
                                                     <div className={cn(

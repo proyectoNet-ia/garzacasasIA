@@ -259,7 +259,14 @@ export default function PropertyDetailPage() {
                                     <span className="text-4xl md:text-5xl font-light text-zinc-900">
                                         {property.price ? `$${property.price.toLocaleString()}` : 'Precio no disponible'}
                                     </span>
-                                    <span className="text-zinc-500 font-medium">MXN</span>
+                                    <span className="text-zinc-500 font-medium">
+                                        {property.listing_type === 'Renta' ? 'MXN / mes' : 'MXN'}
+                                    </span>
+                                    {property.listing_type === 'Renta' && (
+                                        <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest">
+                                            Precio de Renta
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 

@@ -41,9 +41,9 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
         images: string[]
         status: string
         features: {
-            beds: number
-            baths: number
-            sqft: number
+            beds: string | number
+            baths: string | number
+            sqft: string | number
         }
         municipio_clave?: string
         latitude?: string | number
@@ -58,7 +58,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
         main_image_url: initialData?.main_image_url || '',
         images: initialData?.images || [],
         status: initialData?.status || 'active',
-        features: initialData?.features || { beds: 3, baths: 2, sqft: 200 },
+        features: initialData?.features || { beds: '', baths: '', sqft: '' },
         municipio_clave: initialData?.municipio_clave || '',
         latitude: initialData?.latitude || '',
         longitude: initialData?.longitude || ''
@@ -265,7 +265,13 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                 .upsert({
                     id: initialData?.id,
                     ...formData,
-                    price: parseFloat(formData.price.toString()),
+                    price: parseFloat(formData.price.toString()) || 0,
+                    features: {
+                        ...formData.features,
+                        beds: parseInt(formData.features.beds.toString()) || 0,
+                        baths: parseFloat(formData.features.baths.toString()) || 0,
+                        sqft: parseInt(formData.features.sqft.toString()) || 0,
+                    },
                     latitude: formData.latitude ? parseFloat(formData.latitude.toString()) : null,
                     longitude: formData.longitude ? parseFloat(formData.longitude.toString()) : null,
                     agent_id: user.id,
@@ -298,24 +304,24 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                             placeholder="Ej: Penthouse con vista al Campestre"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="price" className="text-zinc-900 font-bold">Precio (MXN)</Label>
-                        <Input
-                            id="price"
-                            type="number"
-                            required
-                            value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                            className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:ring-blue-500 h-11"
-                            placeholder="0.00"
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+
+                    <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label className="text-zinc-900 font-bold">Tipo</Label>
                             <Select
                                 value={formData.property_type}
-                                onValueChange={(val) => setFormData({ ...formData, property_type: val })}
+                                onValueChange={(val) => {
+                                    const isTerreno = val === 'Terreno'
+                                    setFormData({
+                                        ...formData,
+                                        property_type: val,
+                                        features: {
+                                            ...formData.features,
+                                            beds: isTerreno ? 0 : formData.features.beds,
+                                            baths: isTerreno ? 0 : formData.features.baths,
+                                        }
+                                    })
+                                }}
                             >
                                 <SelectTrigger className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11">
                                     <SelectValue />
@@ -342,6 +348,21 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                                     <SelectItem value="Renta">Renta</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="price-inline" className="text-zinc-900 font-bold">
+                                {formData.listing_type === 'Renta' ? 'Precio Renta /mes' : 'Precio (MXN)'}
+                            </Label>
+                            <Input
+                                id="price-inline"
+                                type="number"
+                                required
+                                min={0}
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:ring-blue-500 h-11"
+                                placeholder="0.00"
+                            />
                         </div>
                     </div>
 
@@ -552,30 +573,44 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
 
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                    <Label className="text-zinc-900 font-bold">Habitaciones</Label>
+                    <Label className={`text-zinc-900 font-bold ${formData.property_type === 'Terreno' ? 'text-zinc-400' : ''}`}>
+                        Habitaciones
+                        {formData.property_type === 'Terreno' && <span className="ml-1 text-[10px] text-zinc-400 font-normal">(N/A)</span>}
+                    </Label>
                     <Input
                         type="number"
+                        min={0}
+                        disabled={formData.property_type === 'Terreno'}
                         value={formData.features.beds}
-                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, beds: parseInt(e.target.value) || 0 } })}
-                        className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11"
+                        placeholder="0"
+                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, beds: e.target.value } })}
+                        className={`bg-zinc-50 border-zinc-200 text-zinc-900 h-11 ${formData.property_type === 'Terreno' ? 'opacity-40 cursor-not-allowed' : ''}`}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-zinc-900 font-bold">Baños</Label>
+                    <Label className={`text-zinc-900 font-bold ${formData.property_type === 'Terreno' ? 'text-zinc-400' : ''}`}>
+                        Baños
+                        {formData.property_type === 'Terreno' && <span className="ml-1 text-[10px] text-zinc-400 font-normal">(N/A)</span>}
+                    </Label>
                     <Input
                         type="number"
                         step="0.5"
+                        min={0}
+                        disabled={formData.property_type === 'Terreno'}
                         value={formData.features.baths}
-                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, baths: parseFloat(e.target.value) || 0 } })}
-                        className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11"
+                        placeholder="0"
+                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, baths: e.target.value } })}
+                        className={`bg-zinc-50 border-zinc-200 text-zinc-900 h-11 ${formData.property_type === 'Terreno' ? 'opacity-40 cursor-not-allowed' : ''}`}
                     />
                 </div>
                 <div className="space-y-2">
                     <Label className="text-zinc-900 font-bold">M²</Label>
                     <Input
                         type="number"
+                        min={0}
                         value={formData.features.sqft}
-                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, sqft: parseInt(e.target.value) || 0 } })}
+                        placeholder="0"
+                        onChange={(e) => setFormData({ ...formData, features: { ...formData.features, sqft: e.target.value } })}
                         className="bg-zinc-50 border-zinc-200 text-zinc-900 h-11"
                     />
                 </div>
