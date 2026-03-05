@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, BedDouble, Bath, Square, ArrowRight, Zap, Crown, User, Eye, SearchX, Loader2, LayoutGrid, List, Share2 } from "lucide-react"
+import { MapPin, BedDouble, Bath, Square, ArrowRight, Zap, Crown, User, Eye, SearchX, Loader2, LayoutGrid, List, Share2, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { PropertyCardInteractions } from "./PropertyCardInteractions"
 import { useSearch } from "@/providers/SearchProvider"
@@ -28,6 +28,9 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
     const [loadingMore, setLoadingMore] = useState(false)
     const [page, setPage] = useState(0)
     const [hasMore, setHasMore] = useState(true)
+    const [totalCount, setTotalCount] = useState(0)
+    const [currentPageNum, setCurrentPageNum] = useState(1) // para paginación numerada
+    const totalPages = sidebarLayout ? Math.ceil(totalCount / ITEMS_PER_PAGE) : 0
 
 
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -47,20 +50,23 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
         pageRef.current = page
     }, [loading, loadingMore, hasMore, page])
 
-    const fetchProperties = useCallback(async (isInitial = false) => {
-        if (!isInitial && (!hasMoreRef.current || loadingRef.current)) return
+    const fetchProperties = useCallback(async (isInitial = false, targetPage?: number) => {
+        if (!isInitial && !sidebarLayout && (!hasMoreRef.current || loadingRef.current)) return
 
         if (isInitial) {
             setLoading(true)
             setPage(0)
             hasMoreRef.current = true
             loadingRef.current = true
-        } else {
+        } else if (!sidebarLayout) {
             setLoadingMore(true)
             loadingRef.current = true
+        } else {
+            setLoading(true)
         }
 
-        const start = isInitial ? 0 : (pageRef.current + 1) * ITEMS_PER_PAGE
+        const pageIndex = targetPage !== undefined ? targetPage - 1 : isInitial ? 0 : (pageRef.current + 1)
+        const start = pageIndex * ITEMS_PER_PAGE
         const end = start + (limit ? limit : ITEMS_PER_PAGE) - 1
 
         try {
@@ -69,7 +75,7 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                 .select(`
                     *,
                     agent:profiles(full_name, avatar_url, phone, whatsapp, company_name)
-                `)
+                `, { count: 'exact' })
                 .eq('status', 'active')
 
             // Apply DB level filters
@@ -106,9 +112,11 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                 .order('created_at', { ascending: false })
                 .range(start, end)
 
-            const { data, error } = await query
+            const { data, error, count } = await query
 
             if (error) throw error
+
+            if (count !== null && count !== undefined) setTotalCount(count)
 
             const newData = data || []
 
@@ -130,12 +138,11 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                 setHasMore(false)
             } else {
                 setProperties(prev => {
-                    const combined = isInitial ? newData : [...prev, ...newData]
-                    // De-duplicate by ID to prevent duplicate key errors
+                    const combined = (isInitial || sidebarLayout) ? newData : [...prev, ...newData]
                     return Array.from(new Map(combined.map(item => [item.id, item])).values())
                 })
-                setHasMore(newData.length >= ITEMS_PER_PAGE && !limit)
-                if (!isInitial) setPage(prev => prev + 1)
+                setHasMore(newData.length >= ITEMS_PER_PAGE && !limit && !sidebarLayout)
+                if (!isInitial && !sidebarLayout) setPage(prev => prev + 1)
             }
         } catch (error) {
             console.error('Error fetching properties:', error)
@@ -144,20 +151,27 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
             setLoadingMore(false)
             loadingRef.current = false
         }
-    }, [filters, limit, randomize, supabase])
+    }, [filters, limit, randomize, supabase, sidebarLayout])
 
     useEffect(() => {
+        setCurrentPageNum(1)
         fetchProperties(true)
     }, [filters.location, filters.type, filters.listing_type, filters.priceRange, filters.minPrice, filters.maxPrice, filters.beds, filters.baths])
 
     const lastElementRef = useCallback((node: any) => {
-        if (loadingRef.current || limit) return
+        if (loadingRef.current || limit || sidebarLayout) return
         if (observer.current) observer.current.disconnect()
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && hasMoreRef.current) fetchProperties(false)
         })
         if (node) observer.current.observe(node)
-    }, [limit, fetchProperties])
+    }, [limit, fetchProperties, sidebarLayout])
+
+    const goToPage = (p: number) => {
+        setCurrentPageNum(p)
+        fetchProperties(false, p)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
 
     const displayProperties = properties
 
@@ -193,8 +207,13 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                         ) : (
                             <div className="flex items-center justify-between w-full">
                                 <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">
-                                    Mostrando {displayProperties.length} {displayProperties.length === 1 ? 'propiedad' : 'propiedades'}
+                                    {loading ? 'Cargando...' : `${totalCount} ${totalCount === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}`}
                                 </p>
+                                {totalPages > 1 && (
+                                    <span className="text-zinc-400 text-xs font-medium">
+                                        Página {currentPageNum} de {totalPages}
+                                    </span>
+                                )}
                             </div>
                         )}
                     </ScrollReveal>
@@ -348,12 +367,67 @@ export function FeaturedProperties({ limit, randomize = false, sidebarLayout = f
                             })}
                         </div>
 
-                        {loadingMore && (
+                        {/* Infinite scroll loader — solo en home */}
+                        {loadingMore && !sidebarLayout && (
                             <div className="mt-16 flex justify-center">
                                 <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full border border-black/5 shadow-lg">
                                     <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                                     <span className="text-sm font-bold text-zinc-600 uppercase tracking-widest">Cargando más...</span>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Paginación numerada — solo en /propiedades */}
+                        {sidebarLayout && totalPages > 1 && (
+                            <div className="mt-10 flex items-center justify-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => goToPage(currentPageNum - 1)}
+                                    disabled={currentPageNum === 1 || loading}
+                                    className="h-10 w-10 p-0 rounded-xl border-zinc-200 hover:bg-zinc-50"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPageNum) <= 1)
+                                    .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                                        if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...')
+                                        acc.push(p)
+                                        return acc
+                                    }, [])
+                                    .map((p, idx) =>
+                                        p === '...' ? (
+                                            <span key={`e-${idx}`} className="text-zinc-400 text-sm w-10 text-center">…</span>
+                                        ) : (
+                                            <Button
+                                                key={p}
+                                                size="sm"
+                                                onClick={() => goToPage(p as number)}
+                                                disabled={loading}
+                                                className={cn(
+                                                    'h-10 w-10 p-0 rounded-xl font-bold text-sm transition-all',
+                                                    currentPageNum === p
+                                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border-blue-600'
+                                                        : 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50 hover:border-blue-300'
+                                                )}
+                                            >
+                                                {p}
+                                            </Button>
+                                        )
+                                    )
+                                }
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => goToPage(currentPageNum + 1)}
+                                    disabled={currentPageNum === totalPages || loading}
+                                    className="h-10 w-10 p-0 rounded-xl border-zinc-200 hover:bg-zinc-50"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
                             </div>
                         )}
 
