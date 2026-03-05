@@ -2,8 +2,18 @@ import { Agents } from "@/components/marketing/Agents"
 import { SecondaryNavbar } from "@/components/layout/SecondaryNavbar"
 import { Footer } from "@/components/layout/Footer"
 import { getSiteSettings } from "@/lib/settings"
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+    title: 'Nuestros Agentes Inmobiliarios',
+    description: 'Conoce al equipo de agentes inmobiliarios verificados de Garza Casas IA. Profesionales con experiencia en bienes raíces en México, disponibles para asesorarte.',
+    openGraph: {
+        title: 'Agentes Inmobiliarios Verificados | Garza Casas IA',
+        description: 'Expertos en bienes raíces listos para ayudarte a encontrar tu propiedad ideal.',
+    },
+}
 
 export default async function AgentsPage() {
     const contactConfig = await getSiteSettings('contact_config')

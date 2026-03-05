@@ -3,8 +3,18 @@ import { PropertiesFilterSidebar } from "@/components/marketing/PropertiesFilter
 import { SecondaryNavbar } from "@/components/layout/SecondaryNavbar"
 import { Footer } from "@/components/layout/Footer"
 import { getSiteSettings } from "@/lib/settings"
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+    title: 'Propiedades en Venta y Renta en México',
+    description: 'Explora nuestro catálogo de casas, departamentos y terrenos en venta y renta en México. Filtra por tipo, precio y ubicación con tecnología IA.',
+    openGraph: {
+        title: 'Propiedades en Venta y Renta | Garza Casas IA',
+        description: 'Encuentra tu propiedad ideal entre cientos de inmuebles verificados.',
+    },
+}
 
 export default async function PropertiesPage() {
     const contactConfig = await getSiteSettings('contact_config') || {

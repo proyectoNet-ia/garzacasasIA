@@ -2,8 +2,18 @@ import { Pricing } from "@/components/marketing/Pricing"
 import { SecondaryNavbar } from "@/components/layout/SecondaryNavbar"
 import { Footer } from "@/components/layout/Footer"
 import { getSiteSettings } from "@/lib/settings"
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+    title: 'Planes para Agentes Inmobiliarios',
+    description: 'Elige el plan ideal para potenciar tu carrera como agente inmobiliario. Gratis, Pro y Platino con herramientas IA, datos INEGI y más propiedades publicadas.',
+    openGraph: {
+        title: 'Planes y Precios para Agentes | Garza Casas IA',
+        description: 'Potencia tu carrera inmobiliaria con IA y datos INEGI desde cualquier plan.',
+    },
+}
 
 export default async function PlansPage() {
     const contactConfig = await getSiteSettings('contact_config')

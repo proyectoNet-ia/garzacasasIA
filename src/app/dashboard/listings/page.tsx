@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Plus, Search, MoreHorizontal, MapPin, Tag, Loader2, Trash2, Edit, Crown, AlertCircle } from 'lucide-react'
+import { Plus, Search, MoreHorizontal, MapPin, Tag, Loader2, Trash2, Edit, Crown, AlertCircle, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,6 +43,10 @@ export default function ListingsPage() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [sortBy, setSortBy] = useState<'created_at' | 'price' | 'title'>('created_at')
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+    const PAGE_SIZE = 12
 
     const { limits, usage, planName, isUnlimited, checkCanCreateProperty, refreshUsage } = useSubscriptionLimits()
 
@@ -55,7 +59,7 @@ export default function ListingsPage() {
             .from('properties')
             .select('*')
             .eq('agent_id', user.id)
-            .order('created_at', { ascending: false })
+            .order(sortBy, { ascending: sortDir === 'asc' })
 
         if (data) setProperties(data)
         setLoading(false)
@@ -64,7 +68,7 @@ export default function ListingsPage() {
 
     useEffect(() => {
         fetchProperties()
-    }, [])
+    }, [sortBy, sortDir])
 
     const handleDelete = async () => {
         if (!propertyToDelete) return
@@ -109,6 +113,24 @@ export default function ListingsPage() {
         p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.location?.toLowerCase().includes(searchTerm.toLowerCase())
     )
+
+    // Reset page when search changes
+    useEffect(() => { setCurrentPage(1) }, [searchTerm])
+
+    const totalPages = Math.ceil(filteredProperties.length / PAGE_SIZE)
+    const paginatedProperties = filteredProperties.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+    )
+
+    const handleSort = (field: 'created_at' | 'price' | 'title') => {
+        if (sortBy === field) {
+            setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortBy(field)
+            setSortDir('desc')
+        }
+    }
 
     return (
         <div className="p-8 space-y-8">
@@ -211,6 +233,32 @@ export default function ListingsPage() {
 
             {/* Properties List/Table */}
             <div className="space-y-4">
+                {/* Sort Controls */}
+                {!loading && filteredProperties.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                        <span className="font-bold uppercase tracking-wider">Ordenar:</span>
+                        {(['created_at', 'price', 'title'] as const).map((field) => (
+                            <button
+                                key={field}
+                                onClick={() => handleSort(field)}
+                                className={cn(
+                                    'px-3 py-1 rounded-full font-bold transition-all',
+                                    sortBy === field
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'hover:bg-zinc-100 text-zinc-500'
+                                )}
+                            >
+                                {field === 'created_at' ? 'Fecha' : field === 'price' ? 'Precio' : 'Nombre'}
+                                {sortBy === field && (sortDir === 'desc' ? ' ↓' : ' ↑')}
+                            </button>
+                        ))}
+                        <span className="ml-auto text-zinc-400">
+                            Mostrando {Math.min((currentPage - 1) * PAGE_SIZE + 1, filteredProperties.length)}–{Math.min(currentPage * PAGE_SIZE, filteredProperties.length)} de {filteredProperties.length}
+                        </span>
+                    </div>
+                )}
+
                 {loading ? (
                     <ListingSkeleton />
                 ) : filteredProperties.length === 0 ? (
@@ -228,7 +276,7 @@ export default function ListingsPage() {
                     <>
                         {/* Mobile Grid */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden">
-                            {filteredProperties.map((property) => (
+                            {paginatedProperties.map((property) => (
                                 <Card key={property.id} className="border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex gap-4 p-4">
                                         <div className="h-24 w-24 shrink-0 rounded-xl overflow-hidden bg-zinc-100 relative">
@@ -306,7 +354,7 @@ export default function ListingsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-100">
-                                    {filteredProperties.map((property) => (
+                                    {paginatedProperties.map((property) => (
                                         <tr key={property.id} className="group hover:bg-zinc-50/50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
@@ -374,6 +422,58 @@ export default function ListingsPage() {
                     </>
                 )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="h-9 w-9 p-0 rounded-lg border-zinc-200"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                        .reduce<(number | string)[]>((acc, page, idx, arr) => {
+                            if (idx > 0 && page - (arr[idx - 1] as number) > 1) acc.push('...')
+                            acc.push(page)
+                            return acc
+                        }, [])
+                        .map((page, idx) =>
+                            page === '...' ? (
+                                <span key={`ellipsis-${idx}`} className="text-zinc-400 px-1 text-sm">…</span>
+                            ) : (
+                                <Button
+                                    key={page}
+                                    variant={currentPage === page ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(page as number)}
+                                    className={cn(
+                                        'h-9 w-9 p-0 rounded-lg font-bold text-sm',
+                                        currentPage === page ? 'bg-blue-600 text-white border-blue-600' : 'border-zinc-200'
+                                    )}
+                                >
+                                    {page}
+                                </Button>
+                            )
+                        )
+                    }
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="h-9 w-9 p-0 rounded-lg border-zinc-200"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
             {/* Universal Status Modal for Deletion */}
             <StatusModal
                 open={isDeleteDialogOpen}
