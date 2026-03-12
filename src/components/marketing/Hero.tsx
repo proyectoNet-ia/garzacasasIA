@@ -175,7 +175,7 @@ export function Hero({ config }: HeroProps) {
                     </ScrollReveal>
 
                     {/* Quick Filter Badges */}
-                    <ScrollReveal delay={0.4} className="mt-8 flex flex-col items-center gap-4 md:flex-row md:justify-center md:gap-3 md:flex-wrap">
+                    <ScrollReveal delay={0.4} className="mt-8 hidden flex-col items-center gap-4 md:flex md:flex-row md:justify-center md:gap-3 md:flex-wrap">
                         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] md:mr-2">Top Zonas:</span>
                         <div className="flex flex-wrap justify-center gap-2">
                             {["San Pedro", "Cumbres", "Carretera Nacional", "Valle Poniente"].map((city) => (
