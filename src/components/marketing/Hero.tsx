@@ -98,15 +98,15 @@ export function Hero({ config }: HeroProps) {
 
                         {/* Search Bar - Premium Dark Mode */}
                         <div className="relative group/searchbar">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[2.5rem] blur-2xl opacity-0 group-hover/searchbar:opacity-100 transition duration-1000" />
-                            <div className="relative flex flex-col items-center gap-2 rounded-[2.5rem] bg-zinc-900/60 p-2 backdrop-blur-3xl border border-white/10 md:flex-row shadow-2xl transition-all duration-500 hover:border-white/20">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[2.5rem] blur-2xl opacity-0 md:group-hover/searchbar:opacity-100 transition duration-1000" />
+                            <div className="relative flex flex-col p-4 gap-4 md:p-2 md:flex-row md:items-center md:gap-2 rounded-[2.5rem] bg-zinc-900/60 backdrop-blur-3xl border border-white/10 shadow-2xl transition-all duration-500 md:hover:border-white/20">
                                 {/* Location Input */}
                                 <div className="relative w-full flex-[1.5]">
                                     <MapPin className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
                                     <input
                                         type="text"
                                         placeholder="¿En qué zona buscas?"
-                                        className="h-16 w-full rounded-[2rem] bg-transparent pl-14 pr-4 text-white placeholder:text-zinc-500 outline-none transition-all"
+                                        className="h-14 md:h-16 w-full rounded-[2rem] bg-zinc-800/50 md:bg-transparent pl-14 pr-4 text-white placeholder:text-zinc-500 outline-none transition-all focus:bg-zinc-800/80 md:focus:bg-transparent"
                                         value={localLocation}
                                         onChange={(e) => setLocalLocation(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -115,80 +115,83 @@ export function Hero({ config }: HeroProps) {
 
                                 <div className="hidden h-10 w-px bg-white/10 md:block" />
 
-                                {/* Property Type Select */}
-                                <div className="w-full md:w-auto min-w-[160px]">
-                                    <Select
-                                        value={filters.type || 'all'}
-                                        onValueChange={(val) => updateFilter('type', val === 'all' ? '' : val)}
-                                    >
-                                        <SelectTrigger className="h-16 border-none bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-2xl px-6">
-                                            <div className="flex items-center gap-3">
-                                                <HomeIcon className="h-5 w-5 text-blue-400" />
-                                                <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Tipo" /></span>
-                                            </div>
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
-                                            <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Tipo</SelectItem>
-                                            <SelectItem value="Casa" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Casa</SelectItem>
-                                            <SelectItem value="Departamento" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Departamento</SelectItem>
-                                            <SelectItem value="Terreno" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Terreno</SelectItem>
-                                            <SelectItem value="Local" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Comercial</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                <div className="flex flex-col sm:flex-row gap-4 md:gap-0 w-full md:w-auto">
+                                    {/* Property Type Select */}
+                                    <div className="w-full min-w-[160px]">
+                                        <Select
+                                            value={filters.type || 'all'}
+                                            onValueChange={(val) => updateFilter('type', val === 'all' ? '' : val)}
+                                        >
+                                            <SelectTrigger className="h-14 md:h-16 border-none bg-zinc-800/50 md:bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-[2rem] md:rounded-2xl px-6 data-[state=open]:bg-zinc-800/80 md:data-[state=open]:bg-transparent">
+                                                <div className="flex items-center gap-3">
+                                                    <HomeIcon className="h-5 w-5 text-blue-400" />
+                                                    <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Tipo" /></span>
+                                                </div>
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
+                                                <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Tipo</SelectItem>
+                                                <SelectItem value="Casa" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Casa</SelectItem>
+                                                <SelectItem value="Departamento" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Departamento</SelectItem>
+                                                <SelectItem value="Terreno" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Terreno</SelectItem>
+                                                <SelectItem value="Local" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Comercial</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                <div className="hidden h-10 w-px bg-white/10 md:block" />
+                                    <div className="hidden h-10 w-px bg-white/10 md:block" />
 
-                                {/* Price Range Select */}
-                                <div className="w-full md:w-auto min-w-[180px]">
-                                    <Select
-                                        value={filters.priceRange || 'all'}
-                                        onValueChange={(val) => updateFilter('priceRange', val === 'all' ? '' : val)}
-                                    >
-                                        <SelectTrigger className="h-16 border-none bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-2xl px-6">
-                                            <div className="flex items-center gap-3">
-                                                <DollarSign className="h-5 w-5 text-blue-400" />
-                                                <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Precio" /></span>
-                                            </div>
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
-                                            <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Precio</SelectItem>
-                                            <SelectItem value="0-5M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Hasta $5M</SelectItem>
-                                            <SelectItem value="5-15M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">$5M - $15M</SelectItem>
-                                            <SelectItem value="15M+" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Más de $15M</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    {/* Price Range Select */}
+                                    <div className="w-full min-w-[180px]">
+                                        <Select
+                                            value={filters.priceRange || 'all'}
+                                            onValueChange={(val) => updateFilter('priceRange', val === 'all' ? '' : val)}
+                                        >
+                                            <SelectTrigger className="h-14 md:h-16 border-none bg-zinc-800/50 md:bg-transparent text-white focus:ring-0 shadow-none hover:bg-white/5 rounded-[2rem] md:rounded-2xl px-6 data-[state=open]:bg-zinc-800/80 md:data-[state=open]:bg-transparent">
+                                                <div className="flex items-center gap-3">
+                                                    <DollarSign className="h-5 w-5 text-blue-400" />
+                                                    <span className="font-bold text-sm tracking-tight"><SelectValue placeholder="Precio" /></span>
+                                                </div>
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-2xl p-1 shadow-2xl backdrop-blur-3xl">
+                                                <SelectItem value="all" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Cualquier Precio</SelectItem>
+                                                <SelectItem value="0-5M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Hasta $5M</SelectItem>
+                                                <SelectItem value="5-15M" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">$5M - $15M</SelectItem>
+                                                <SelectItem value="15M+" className="rounded-xl focus:bg-blue-600/20 focus:text-blue-400 font-bold">Más de $15M</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
 
                                 {/* Search Button */}
                                 <Button
-                                    className="h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-full bg-blue-600 p-0 text-white transition-all duration-300 hover:bg-blue-500 hover:scale-[1.1] active:scale-95 shadow-xl shadow-blue-600/30 md:mr-2"
+                                    className="mt-2 md:mt-0 h-14 w-full md:w-14 shrink-0 rounded-[2rem] md:rounded-full bg-blue-600 p-0 text-white transition-all duration-300 hover:bg-blue-500 hover:scale-[1.02] md:hover:scale-[1.1] active:scale-95 shadow-xl shadow-blue-600/30 md:mr-2 flex items-center justify-center gap-2"
                                     onClick={handleSearch}
-                                    size="icon"
                                 >
-                                    <Search className="h-6 w-6" />
-                                    <span className="sr-only">Buscar</span>
+                                    <Search className="h-5 w-5 md:h-6 md:w-6" />
+                                    <span className="font-black tracking-widest uppercase md:sr-only">Buscar</span>
                                 </Button>
                             </div>
                         </div>
                     </ScrollReveal>
 
                     {/* Quick Filter Badges */}
-                    <ScrollReveal delay={0.4} className="mt-8 flex flex-wrap justify-center gap-3">
-                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] self-center mr-2">Top Zonas:</span>
-                        {["San Pedro", "Cumbres", "Carretera Nacional", "Valle Poniente"].map((city) => (
-                            <button
-                                key={city}
-                                className="group relative overflow-hidden rounded-full px-5 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all hover:text-white border border-white/5 hover:border-blue-500/50 bg-white/5 backdrop-blur-sm"
-                                onClick={() => {
-                                    setLocalLocation(city)
-                                    handleSearch()
-                                }}
-                            >
-                                <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors" />
-                                {city}
-                            </button>
-                        ))}
+                    <ScrollReveal delay={0.4} className="mt-8 flex flex-col items-center gap-4 md:flex-row md:justify-center md:gap-3 md:flex-wrap">
+                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] md:mr-2">Top Zonas:</span>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {["San Pedro", "Cumbres", "Carretera Nacional", "Valle Poniente"].map((city) => (
+                                <button
+                                    key={city}
+                                    className="group relative overflow-hidden rounded-full px-5 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all hover:text-white border border-white/5 hover:border-blue-500/50 bg-white/5 backdrop-blur-sm"
+                                    onClick={() => {
+                                        setLocalLocation(city)
+                                        handleSearch()
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors" />
+                                    {city}
+                                </button>
+                            ))}
+                        </div>
                     </ScrollReveal>
                 </div>
             </div>
