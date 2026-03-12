@@ -15,7 +15,8 @@ import {
     X,
     Loader2,
     Settings,
-    ShieldCheck
+    ShieldCheck,
+    LifeBuoy
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -118,6 +119,7 @@ export function DashboardSidebar() {
             icon: Crown,
             badge: profile?.role === 'admin' || profile?.is_unlimited ? 'Ilimitado' : (profile?.subscription_plan || 'Básico')
         },
+        { label: 'Soporte', href: '/dashboard/support', icon: LifeBuoy, badge: null },
     ]
 
     if (profile?.role === 'admin') {
