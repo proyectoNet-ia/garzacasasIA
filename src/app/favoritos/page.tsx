@@ -1,17 +1,17 @@
 import { SecondaryNavbar } from "@/components/layout/SecondaryNavbar"
 import { Footer } from "@/components/layout/Footer"
 import { getSiteSettings } from "@/lib/settings"
-import CompararClient from "./CompararClient"
+import FavoritosClient from "./FavoritosClient"
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-    title: 'Comparar Propiedades',
-    description: 'Compara tus propiedades favoritas lado a lado para tomar la mejor decisión con Garza Casas IA.',
+    title: 'Mis Favoritos',
+    description: 'Gestiona tus propiedades favoritas guardadas en Garza Casas IA.',
 }
 
-export default async function CompararPage() {
+export default async function FavoritosPage() {
     const contactConfig = await getSiteSettings('contact_config') || {
         phone: "+52 (81) 1234-5678",
         email: "contacto@garzacasas.com",
@@ -24,7 +24,7 @@ export default async function CompararPage() {
         <div className="min-h-screen bg-white">
             <SecondaryNavbar contactConfig={contactConfig} />
             <main className="pt-32">
-                <CompararClient />
+                <FavoritosClient />
             </main>
             <Footer contactConfig={contactConfig} />
         </div>

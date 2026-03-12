@@ -13,7 +13,8 @@ import {
     AlertCircle,
     ChevronRight,
     Search,
-    Loader2
+    Loader2,
+    X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'

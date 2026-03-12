@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase-server"
-import { Check, Zap, Crown, Building2 } from 'lucide-react'
+import { Check, Zap, Crown, Building2, Brain, Search, BarChart3, ShieldCheck, Home } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
 import Link from "next/link"
@@ -10,6 +10,51 @@ const iconMap: any = {
     'Enterprise': Crown,
     'Platino': Crown,
 }
+
+const services = [
+    {
+        title: "Valuación por IA",
+        description: "Algoritmos avanzados que analizan el mercado en tiempo real para darte el precio exacto de venta o renta.",
+        icon: Brain,
+        color: "text-blue-500",
+        bg: "bg-blue-500/5"
+    },
+    {
+        title: "Búsqueda Predictiva",
+        description: "Encontramos propiedades que aún no salen al mercado basándonos en tus preferencias y comportamiento.",
+        icon: Search,
+        color: "text-purple-500",
+        bg: "bg-purple-500/5"
+    },
+    {
+        title: "Análisis de Inversión",
+        description: "Proyecciones de plusvalía y ROI detalladas para que cada centavo invertido tenga un propósito.",
+        icon: BarChart3,
+        color: "text-emerald-500",
+        bg: "bg-emerald-500/5"
+    },
+    {
+        title: "Gestión Patrimonial",
+        description: "Asesoría legal y fiscal integrada para blindar tus transacciones inmobiliarias de principio a fin.",
+        icon: ShieldCheck,
+        color: "text-amber-500",
+        bg: "bg-amber-500/5"
+    },
+    {
+        title: "Marketing Exponencial",
+        description: "Exposición masiva de tu propiedad en redes y portales premium con fotografía de alta gama.",
+        icon: Zap,
+        color: "text-rose-500",
+        bg: "bg-rose-500/5"
+    },
+    {
+        title: "Concierge Inmobiliario",
+        description: "Atención personalizada 24/7 para coordinar visitas, trámites y mudanzas sin que muevas un dedo.",
+        icon: Home,
+        color: "text-indigo-500",
+        bg: "bg-indigo-500/5"
+    }
+]
 
 export async function Pricing() {
     const supabase = await createClient()
@@ -30,11 +75,13 @@ export async function Pricing() {
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50/50 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
+                
+                {/* --- PARTE SUPERIOR: TARJETAS DE PLANES (PAQUETES) --- */}
                 <ScrollReveal className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
                     <Badge variant="outline" className="border-blue-500/10 bg-blue-500/5 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
-                        Planes
+                        Suscripciones
                     </Badge>
-                    <h2 className="text-3xl font-black tracking-tighter text-zinc-700 sm:text-5xl font-heading">
+                    <h2 className="text-3xl font-black tracking-tighter text-zinc-900 sm:text-5xl font-heading">
                         Escala tu éxito inmobiliario
                     </h2>
                     <p className="max-w-[700px] text-zinc-500 md:text-xl font-medium">
@@ -50,11 +97,6 @@ export async function Pricing() {
                         const isFree = !plan.monthly_price || plan.monthly_price === 0
                         const isEnterprise = plan.name === 'Enterprise'
 
-                        // CTA destination logic:
-                        // - Free plan → registro
-                        // - Paid + logged in → dashboard suscripción
-                        // - Paid + not logged → registro
-                        // - Enterprise → contacto
                         const ctaHref = isEnterprise
                             ? '/contacto'
                             : isFree
@@ -82,7 +124,7 @@ export async function Pricing() {
                                     {isPopular && (
                                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
                                             <div className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full shadow-[0_10px_30px_-5px_rgba(37,99,235,0.4)] flex items-center gap-2 whitespace-nowrap border-2 border-white">
-                                                <Zap className="h-3 w-3 fill-white" />
+                                                < Zap className="h-3 w-3 fill-white" />
                                                 PLAN RECOMENDADO
                                             </div>
                                         </div>
@@ -114,7 +156,7 @@ export async function Pricing() {
                                     <div className="p-8 flex-1 flex flex-col">
                                         <ul className="mb-10 space-y-4 flex-1">
                                             {features.map((feature: string) => (
-                                                <li key={feature} className="flex items-center gap-3 text-sm text-zinc-600 font-medium">
+                                                <li key={feature} className="flex items-center gap-3 text-sm text-zinc-600 font-medium text-left">
                                                     <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${isPopular ? 'bg-blue-600/10 text-blue-600' : 'bg-black/5 text-zinc-400'}`}>
                                                         <Check className="h-3 w-3" />
                                                     </div>
@@ -134,6 +176,56 @@ export async function Pricing() {
                             </ScrollReveal>
                         )
                     })}
+                </div>
+
+                <div className="h-px bg-zinc-100 w-full my-32" />
+
+                {/* --- PARTE INFERIOR: INFORMACIÓN DE SERVICIOS INTELIGENTES --- */}
+                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                    <ScrollReveal className="space-y-8 max-w-xl text-left">
+                        <Badge variant="outline" className="border-blue-500/20 bg-blue-500/5 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
+                            Nuestras Capacidades
+                        </Badge>
+                        <h2 className="text-4xl font-black tracking-tighter text-zinc-900 sm:text-7xl font-heading leading-[0.9]">
+                            Servicios <span className="text-blue-500 italic block">Premium</span>
+                        </h2>
+                        <p className="text-zinc-500 text-lg md:text-xl font-medium leading-relaxed">
+                            No solo vendemos casas, orquestamos transacciones inteligentes respaldadas por la tecnología más avanzada del sector.
+                        </p>
+                        <div className="grid grid-cols-2 gap-6 pt-4">
+                            <div className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-100">
+                                <div className="text-3xl font-black text-blue-600 mb-1">98%</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Precisión en Valuación</div>
+                            </div>
+                            <div className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-100">
+                                <div className="text-3xl font-black text-blue-600 mb-1">-30%</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Tiempo de Cierre</div>
+                            </div>
+                        </div>
+                    </ScrollReveal>
+
+                    <div className="grid sm:grid-cols-2 gap-6">
+                        {services.map((service, i) => (
+                            <ScrollReveal
+                                key={i}
+                                delay={i * 0.1}
+                                direction="left"
+                                className="h-full"
+                            >
+                                <div
+                                    className="group h-full p-8 rounded-[2.5rem] bg-white border border-zinc-100 transition-all duration-500 hover:border-blue-500/30 hover:shadow-[0_30px_60px_-20px_rgba(0,0,0,0.05)] text-left"
+                                >
+                                    <div className={`h-14 w-14 rounded-2xl ${service.bg} ${service.color} flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                                        <service.icon className="h-7 w-7" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-zinc-700 mb-2">{service.title}</h3>
+                                    <p className="text-sm font-medium text-zinc-500 leading-relaxed">
+                                        {service.description}
+                                    </p>
+                                </div>
+                            </ScrollReveal>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
