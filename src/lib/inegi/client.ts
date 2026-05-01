@@ -70,7 +70,10 @@ export async function fetchConCache<T>(
 
     // 2. Llamar a la API
     const res = await fetch(url, {
-        headers: { 'Accept': 'application/json' },
+        headers: { 
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
         next: { revalidate: ttlHoras * 3600 }, // Next.js ISR
     })
 
@@ -78,7 +81,14 @@ export async function fetchConCache<T>(
         throw new Error(`[INEGI API] Error ${res.status} en: ${url}`)
     }
 
-    const data: T = await res.json()
+    const text = await res.text()
+    let data: T
+    try {
+        data = JSON.parse(text)
+    } catch (e) {
+        console.error('[INEGI API] La respuesta no es un JSON válido:', text.substring(0, 200))
+        throw new Error('El servidor del INEGI devolvió una respuesta inválida (no JSON).')
+    }
 
     // 3. Guardar en caché
     await setCache(cacheKey, data, ttlHoras)

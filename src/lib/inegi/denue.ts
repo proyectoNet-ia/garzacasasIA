@@ -33,8 +33,8 @@ export async function getEstablecimientosCercanos(
     const cacheKey = `denue_${lat.toFixed(4)}_${lng.toFixed(4)}_${radioMetros}_${codigoActividad}`
 
     // Endpoint: buscar por radio
-    // GET /Buscar/{palabras}/{codigoActividad}/{latitud}/{longitud}/{distancia}/{token}/
-    const url = denueUrl(`Buscar/0/${codigoActividad}/${lat}/${lng}/${radioMetros}`)
+    // GET /buscar/{condicion}/{latitud,longitud}/{distancia}/{token}/
+    const url = denueUrl(`buscar/${codigoActividad}/${lat},${lng}/${radioMetros}`)
 
     const respuesta = await fetchConCache<DenueRespuesta | DenueEstablecimiento[]>(
         url,
