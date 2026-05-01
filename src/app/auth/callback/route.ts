@@ -7,17 +7,11 @@ import { type NextRequest } from 'next/server'
 // - Password recovery
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url)
-    console.log('Auth Callback Hit:', {
-        url: request.url,
-        params: Object.fromEntries(searchParams.entries())
-    })
-
     const error = searchParams.get('error')
     const error_description = searchParams.get('error_description')
 
     // If Supabase sent an error directly (e.g. link expired, already used)
     if (error) {
-        console.error('Auth Callback Error from Supabase:', { error, error_description })
         return NextResponse.redirect(`${origin}/login?error=${error}&description=${encodeURIComponent(error_description || '')}`)
     }
 
@@ -37,8 +31,6 @@ export async function GET(request: NextRequest) {
             }
             // For email confirmation, redirect to dashboard with welcome flag
             return NextResponse.redirect(next ? `${origin}${next}` : `${origin}/dashboard?verified=true`)
-        } else {
-            console.error('Auth Callback Code Exchange Error:', error.message)
         }
     }
 
@@ -51,12 +43,9 @@ export async function GET(request: NextRequest) {
                 return NextResponse.redirect(`${origin}/reset-password`)
             }
             return NextResponse.redirect(`${origin}/dashboard?verified=true`)
-        } else {
-            console.error('Auth Callback OTP Verification Error:', error.message)
         }
     }
 
     // Redirect to login with error if verification fails
-    console.warn('Auth Callback Failed: No code or token_hash found in request.')
     return NextResponse.redirect(`${origin}/login?error=link-expirado`)
 }

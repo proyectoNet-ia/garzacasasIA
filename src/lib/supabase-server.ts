@@ -4,10 +4,6 @@ import { cookies } from 'next/headers'
 
 export async function createClient() {
     const cookieStore = await cookies()
-    const allCookies = cookieStore.getAll()
-    
-    // Log cookie names (not values for security) to see if the auth cookies exist
-    console.log('Incoming Cookies at Server Client:', allCookies.map(c => c.name))
 
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
