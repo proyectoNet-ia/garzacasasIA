@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
             }
             // For email confirmation, redirect to dashboard with welcome flag
             return NextResponse.redirect(next ? `${origin}${next}` : `${origin}/dashboard?verified=true`)
+        } else {
+            console.error('Auth Callback Code Exchange Error:', error.message)
         }
     }
 
@@ -35,6 +37,8 @@ export async function GET(request: NextRequest) {
                 return NextResponse.redirect(`${origin}/reset-password`)
             }
             return NextResponse.redirect(`${origin}/dashboard?verified=true`)
+        } else {
+            console.error('Auth Callback OTP Verification Error:', error.message)
         }
     }
 
