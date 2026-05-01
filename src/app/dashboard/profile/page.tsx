@@ -72,6 +72,13 @@ export default function ProfilePage() {
         const file = e.target.files?.[0]
         if (!file) return
 
+        // Validar tamaño (Límite 2MB)
+        const MAX_SIZE = 2 * 1024 * 1024
+        if (file.size > MAX_SIZE) {
+            toast.error('La imagen es demasiado pesada (máximo 2MB)')
+            return
+        }
+
         setUploading(true)
         try {
             const { data: { user } } = await supabase.auth.getUser()
