@@ -29,7 +29,6 @@ export default function RegistroPage() {
         full_name: '',
         email: '',
         phone: '',
-        company_name: '',
         password: '',
         confirm_password: '',
     })
@@ -86,7 +85,6 @@ export default function RegistroPage() {
                     full_name: form.full_name,
                     phone: form.phone,
                     whatsapp: form.phone,
-                    company_name: form.company_name || 'Independiente',
                     role: 'agent',
                     updated_at: new Date().toISOString(),
                 })
@@ -219,33 +217,19 @@ export default function RegistroPage() {
                                         />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Teléfono</Label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                                            <Input
-                                                type="tel"
-                                                value={form.phone}
-                                                onChange={e => update('phone', formatPhone(e.target.value))}
-                                                placeholder="(812) 000-0000"
-                                                required
-                                                maxLength={14}
-                                                className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Agencia (opcional)</Label>
-                                        <div className="relative">
-                                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                                            <Input
-                                                value={form.company_name}
-                                                onChange={e => update('company_name', e.target.value)}
-                                                placeholder="Tu agencia"
-                                                className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
-                                            />
-                                        </div>
+                                <div className="space-y-2">
+                                    <Label className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Teléfono</Label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                                        <Input
+                                            type="tel"
+                                            value={form.phone}
+                                            onChange={e => update('phone', formatPhone(e.target.value))}
+                                            placeholder="(812) 000-0000"
+                                            required
+                                            maxLength={14}
+                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                        />
                                     </div>
                                 </div>
                                 <Button type="submit" className="w-full h-13 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-xs mt-2 group">
