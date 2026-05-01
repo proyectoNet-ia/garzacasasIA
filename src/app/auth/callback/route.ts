@@ -47,5 +47,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Redirect to login with error if verification fails
+    console.warn('Auth Callback Failed: No code or token_hash found in request.')
     return NextResponse.redirect(`${origin}/login?error=link-expirado`)
 }
