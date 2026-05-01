@@ -36,13 +36,39 @@ export default function RegistroPage() {
     const update = (field: string, value: string) =>
         setForm(prev => ({ ...prev, [field]: value }))
 
-    const handleNextStep = (e: React.FormEvent) => {
+    const handleNextStep = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!form.full_name || !form.email || !form.phone) {
             toast.error('Por favor completa todos los campos')
             return
         }
-        setStep(2)
+
+        setLoading(true)
+        try {
+            // Verificar si el email o teléfono ya existen
+            const { data: existing, error } = await supabase
+                .from('profiles')
+                .select('email, phone')
+                .or(`email.eq.${form.email},phone.eq.${form.phone}`)
+                .maybeSingle()
+
+            if (existing) {
+                if (existing.email === form.email) {
+                    toast.error('Este email ya está registrado')
+                } else if (existing.phone === form.phone) {
+                    toast.error('Este número de teléfono ya está registrado')
+                }
+                return
+            }
+
+            setStep(2)
+        } catch (error) {
+            console.error('Validation error:', error)
+            // Si hay error de red, permitimos pasar y que Auth maneje la validación final
+            setStep(2)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
