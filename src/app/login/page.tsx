@@ -24,12 +24,15 @@ function LoginForm() {
     const nextPath = searchParams.get('next') || '/dashboard'
     // Leer mensaje de error del callback (link expirado, etc.)
     const errorParam = searchParams.get('error')
+    const errorDescription = searchParams.get('description')
 
     useEffect(() => {
         if (errorParam === 'link-expirado') {
             toast.error('El enlace de verificación expiró. Por favor inicia sesión.')
+        } else if (errorParam) {
+            toast.error(errorDescription || 'Ocurrió un error al verificar tu cuenta')
         }
-    }, [errorParam])
+    }, [errorParam, errorDescription])
 
     // Redirect si ya está loggeado
     useEffect(() => {

@@ -11,6 +11,16 @@ export async function GET(request: NextRequest) {
         url: request.url,
         params: Object.fromEntries(searchParams.entries())
     })
+
+    const error = searchParams.get('error')
+    const error_description = searchParams.get('error_description')
+
+    // If Supabase sent an error directly (e.g. link expired, already used)
+    if (error) {
+        console.error('Auth Callback Error from Supabase:', { error, error_description })
+        return NextResponse.redirect(`${origin}/login?error=${error}&description=${encodeURIComponent(error_description || '')}`)
+    }
+
     const code = searchParams.get('code')
     const token_hash = searchParams.get('token_hash')
     const type = searchParams.get('type')
