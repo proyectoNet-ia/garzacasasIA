@@ -35,8 +35,8 @@ export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) 
                 const res = await fetch(`/api/inegi/servicios?lat=${lat}&lng=${lng}&radio=${radio}`)
                 const json = await res.json()
 
-                if (!res.ok) {
-                    throw new Error(json.error || 'Error al cargar servicios')
+                if (!res.ok || json.error) {
+                    throw new Error(json.details || json.error || 'Error al cargar servicios')
                 }
 
                 setData(json)
@@ -73,6 +73,9 @@ export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) 
                     {error.includes('Token')
                         ? 'Falta configurar el Token del INEGI. Los datos se mostrarán una vez activada la API.'
                         : 'Hubo un problema al conectar con el servidor del INEGI. Por favor, intenta más tarde.'}
+                </p>
+                <p className="mt-2 text-[8px] text-red-400 opacity-50 font-mono">
+                    Debug: {error}
                 </p>
             </div>
         )
