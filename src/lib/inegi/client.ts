@@ -100,7 +100,7 @@ export async function fetchConCache<T>(
 
 export function denueUrl(endpoint: string): string {
     if (!INEGI_TOKEN) throw new Error('[INEGI] Falta INEGI_API_TOKEN en variables de entorno')
-    return `${DENUE_BASE}/${endpoint}/${INEGI_TOKEN}/`
+    return `${DENUE_BASE}/${endpoint}/${INEGI_TOKEN}`
 }
 
 export function indicadorUrl(serie: string, area: string): string {
