@@ -56,29 +56,47 @@ export async function getEstablecimientosCercanos(
 export async function getServiciosCercanos(
     lat: number,
     lng: number,
-    radioMetros: number = 500
+    radioMetros: number = 1000
 ): Promise<ServiciosCercanos> {
-    const establecimientos = await getEstablecimientosCercanos(lat, lng, radioMetros)
+    try {
+        const establecimientos = await getEstablecimientosCercanos(lat, lng, radioMetros, 'todos')
+        
+        console.log(`[DEBUG INEGI] Encontrados ${establecimientos.length} negocios cerca de ${lat},${lng}`)
 
-    const contar = (prefijo: string) =>
-        establecimientos.filter(e => {
-            const codigo = e.codigo_act || (e as any).Codigo_scian || ''
-            return codigo.toString().startsWith(prefijo)
-        }).length
+        const stats: ServiciosCercanos = {
+            escuelas: 0,
+            hospitales: 0,
+            clinicas: 0,
+            farmacias: 0,
+            bancos: 0,
+            supermercados: 0,
+            restaurantes: 0,
+            gasolineras: 0,
+            gimnasios: 0,
+            parques: 0,
+            total: establecimientos.length,
+            detalle: establecimientos
+        }
 
-    return {
-        escuelas: contar('611'),
-        hospitales: contar('622'),
-        clinicas: contar('621'),
-        farmacias: contar('464112'),
-        bancos: contar('522'),
-        supermercados: contar('464111'),
-        restaurantes: contar('722'),
-        gasolineras: contar('447'),
-        gimnasios: contar('71394'),
-        parques: 0,
-        total: establecimientos.length,
-        detalle: establecimientos,
+        // Clasificación ultra-flexible (busca cualquier coincidencia)
+        establecimientos.forEach(est => {
+            const scian = (est.codigo_act || (est as any).Codigo_scian || '').toString()
+            const nombre = (est.nom_estab || (est as any).Nombre || '').toLowerCase()
+            
+            if (scian.startsWith('611') || nombre.includes('escuela') || nombre.includes('colegio')) stats.escuelas++
+            else if (scian.startsWith('622') || nombre.includes('hospital')) stats.hospitales++
+            else if (scian.startsWith('621') || nombre.includes('clínica')) stats.clinicas++
+            else if (scian.startsWith('464112') || nombre.includes('farmacia')) stats.farmacias++
+            else if (scian.startsWith('522') || nombre.includes('banco') || nombre.includes('bbva') || nombre.includes('santander')) stats.bancos++
+            else if (scian.startsWith('464111') || nombre.includes('super') || nombre.includes('soriana') || nombre.includes('walmart')) stats.supermercados++
+            else if (scian.startsWith('722') || nombre.includes('restaurante') || nombre.includes('comida')) stats.restaurantes++
+            else if (scian.startsWith('447') || nombre.includes('gasolinera') || nombre.includes('pemex')) stats.gasolineras++
+            else if (scian.startsWith('71394') || nombre.includes('gym') || nombre.includes('gimnasio')) stats.gimnasios++
+        })
+
+        return stats
+    } catch (error: any) {
+        throw new Error(`Error DENUE: ${error.message}`)
     }
 }
 
