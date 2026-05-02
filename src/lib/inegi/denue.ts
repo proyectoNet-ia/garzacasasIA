@@ -34,7 +34,8 @@ export async function getEstablecimientosCercanos(
 
     // Endpoint: buscar por radio
     // GET /buscar/{condicion}/{latitud,longitud}/{distancia}/{token}/
-    const url = denueUrl(`buscar/${codigoActividad}/${lat},${lng}/${radioMetros}`)
+    const condicion = codigoActividad === '0' ? 'todos' : codigoActividad
+    const url = denueUrl(`buscar/${condicion}/${lat},${lng}/${radioMetros}`)
 
     const respuesta = await fetchConCache<DenueRespuesta | DenueEstablecimiento[]>(
         url,

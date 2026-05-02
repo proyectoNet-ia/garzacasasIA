@@ -23,7 +23,7 @@ interface Props {
     className?: string
 }
 
-export function ServiciosCercanos({ lat, lng, radio = 500, className }: Props) {
+export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) {
     const [data, setData] = useState<ServiciosCercanosType | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
