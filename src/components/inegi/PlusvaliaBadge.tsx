@@ -9,16 +9,19 @@ import type { PrecioZona } from "@/lib/inegi/tipos"
 interface Props {
     municipio?: string
     tipo?: 'casa' | 'departamento'
+    lat?: number
+    lng?: number
 }
 
-export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa' }: Props) {
+export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa', lat, lng }: Props) {
     const [dato, setDato] = useState<PrecioZona | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         async function fetchPlusvalia() {
             try {
-                const res = await fetch(`/api/inegi/plusvalia?municipio=${municipio}`)
+                const url = `/api/inegi/plusvalia?municipio=${municipio}&tipo=${tipo}${lat ? `&lat=${lat}` : ''}${lng ? `&lng=${lng}` : ''}`
+                const res = await fetch(url)
                 const data = await res.json()
                 const filtered = data.find((d: PrecioZona) => d.tipo === tipo)
                 setDato(filtered || data[0])

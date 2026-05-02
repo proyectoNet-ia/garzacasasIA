@@ -307,6 +307,8 @@ export default function PropertyDetailPage() {
                                     <PlusvaliaBadge
                                         municipio={property.location?.split(',')[0]?.trim() || 'Nacional'}
                                         tipo={property.property_type?.toLowerCase().includes('depto') ? 'departamento' : 'casa'}
+                                        lat={property.latitude}
+                                        lng={property.longitude}
                                     />
                                     {(property.latitude && property.longitude) ? (
                                         <ServiciosCercanos

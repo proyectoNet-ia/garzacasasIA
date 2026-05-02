@@ -10,11 +10,28 @@ import {
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url)
-        const municipio = searchParams.get('municipio')?.toUpperCase() || 'MORELIA'
+        const municipioParam = searchParams.get('municipio')?.toUpperCase() || 'MORELIA'
         const tipo = (searchParams.get('tipo') || 'casa') as 'casa' | 'departamento'
+        const lat = parseFloat(searchParams.get('lat') || '0')
+        const lng = parseFloat(searchParams.get('lng') || '0')
 
-        // 1. Mapear municipio a clave INEGI
-        const claveArea = (MUNICIPIOS_MICHOACAN as any)[municipio] || AREAS.NACIONAL
+        let municipio = municipioParam
+        let claveArea = (MUNICIPIOS_MICHOACAN as any)[municipio] || AREAS.NACIONAL
+
+        // 1. Detección inteligente por coordenadas (si están disponibles)
+        if (lat !== 0 && lng !== 0) {
+            // Ejemplo simple de geocerca por estados (coordenadas aproximadas)
+            if (lat > 18.0 && lat < 21.0 && lng > -104.0 && lng < -100.0) {
+                claveArea = AREAS.MICHOACAN
+                municipio = 'Michoacán'
+            } else if (lat > 20.0 && lat < 23.0 && lng > -106.0 && lng < -101.0) {
+                claveArea = AREAS.JALISCO
+                municipio = 'Jalisco'
+            } else if (lat > 19.0 && lat < 20.0 && lng > -100.0 && lng < -98.0) {
+                claveArea = AREAS.CDMX
+                municipio = 'CDMX'
+            }
+        }
 
         // 2. Intentar obtener datos reales del INEGI
         try {
