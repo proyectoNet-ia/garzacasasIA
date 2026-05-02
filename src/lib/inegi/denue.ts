@@ -61,19 +61,22 @@ export async function getServiciosCercanos(
     const establecimientos = await getEstablecimientosCercanos(lat, lng, radioMetros)
 
     const contar = (prefijo: string) =>
-        establecimientos.filter(e => e.codigo_act?.startsWith(prefijo)).length
+        establecimientos.filter(e => {
+            const codigo = e.codigo_act || (e as any).Codigo_scian || ''
+            return codigo.toString().startsWith(prefijo)
+        }).length
 
     return {
-        escuelas: contar(CODIGOS_SCIAN.escuelas),
-        hospitales: contar(CODIGOS_SCIAN.hospitales),
-        clinicas: contar(CODIGOS_SCIAN.clinicas),
-        farmacias: contar(CODIGOS_SCIAN.farmacias),
-        bancos: contar(CODIGOS_SCIAN.bancos),
-        supermercados: contar(CODIGOS_SCIAN.supermercados),
-        restaurantes: contar(CODIGOS_SCIAN.restaurantes),
-        gasolineras: contar(CODIGOS_SCIAN.gasolineras),
-        gimnasios: contar(CODIGOS_SCIAN.gimnasios),
-        parques: 0, // DENUE no cubre parques — usar OpenStreetMap si se requiere
+        escuelas: contar('611'),
+        hospitales: contar('622'),
+        clinicas: contar('621'),
+        farmacias: contar('464112'),
+        bancos: contar('522'),
+        supermercados: contar('464111'),
+        restaurantes: contar('722'),
+        gasolineras: contar('447'),
+        gimnasios: contar('71394'),
+        parques: 0,
         total: establecimientos.length,
         detalle: establecimientos,
     }
