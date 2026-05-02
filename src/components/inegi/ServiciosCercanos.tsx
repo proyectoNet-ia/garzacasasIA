@@ -74,9 +74,6 @@ export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) 
                         ? 'Falta configurar el Token del INEGI. Los datos se mostrarán una vez activada la API.'
                         : 'Hubo un problema al conectar con el servidor del INEGI. Por favor, intenta más tarde.'}
                 </p>
-                <p className="mt-2 text-[8px] text-red-400 opacity-50 font-mono">
-                    Debug: {error}
-                </p>
             </div>
         )
     }

@@ -20,16 +20,20 @@ export async function GET(req: Request) {
 
         // 1. Detección inteligente por coordenadas (si están disponibles)
         if (lat !== 0 && lng !== 0) {
-            // Ejemplo simple de geocerca por estados (coordenadas aproximadas)
-            if (lat > 18.0 && lat < 21.0 && lng > -104.0 && lng < -100.0) {
+            // Rango aproximado de Morelia, Michoacán
+            if (lat > 19.6 && lat < 19.8 && lng > -101.3 && lng < -101.1) {
+                claveArea = (MUNICIPIOS_MICHOACAN as any)['MORELIA']
+                municipio = 'Morelia'
+            }
+            // Rango general de Michoacán
+            else if (lat > 18.0 && lat < 21.0 && lng > -104.0 && lng < -100.0) {
                 claveArea = AREAS.MICHOACAN
                 municipio = 'Michoacán'
-            } else if (lat > 20.0 && lat < 23.0 && lng > -106.0 && lng < -101.0) {
+            }
+            // Otros estados...
+            else if (lat > 20.0 && lat < 23.0 && lng > -106.0 && lng < -101.0) {
                 claveArea = AREAS.JALISCO
                 municipio = 'Jalisco'
-            } else if (lat > 19.0 && lat < 20.0 && lng > -100.0 && lng < -98.0) {
-                claveArea = AREAS.CDMX
-                municipio = 'CDMX'
             }
         }
 
