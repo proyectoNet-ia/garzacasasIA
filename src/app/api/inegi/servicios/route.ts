@@ -20,25 +20,17 @@ export async function GET(req: Request) {
         }
 
         const servicios = await getServiciosCercanos(lat, lng, radio)
-
         return NextResponse.json(servicios)
     } catch (error: any) {
-        console.error('[API Servicios] Error:', error.message)
-
-        // Si el error es por falta de token, devolver algo amigable pero claro
-        if (error.message.includes('Falta INEGI_API_TOKEN')) {
-            return NextResponse.json(
-                {
-                    error: 'Configuración pendiente: Token de INEGI no encontrado.',
-                    status: 'PENDING_CONFIG'
-                },
-                { status: 503 }
-            )
-        }
+        console.error('[API Servicios] Error controlado:', error.message)
 
         return NextResponse.json(
-            { error: 'Error al consultar servicios cercanos' },
-            { status: 500 }
+            { 
+                error: 'Servicios no disponibles temporalmente',
+                details: error.message,
+                fallback: true 
+            },
+            { status: 200 }
         )
     }
 }

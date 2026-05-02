@@ -32,8 +32,8 @@ export async function GET(req: Request) {
                     fuente: 'INEGI Real-time'
                 }])
             }
-        } catch (apiError) {
-            console.warn('[API Plusvalía] Falló consulta real, usando fallback:', apiError)
+        } catch (apiError: any) {
+            console.warn('[API Plusvalía] Falló consulta real, usando fallback:', apiError.message)
         }
 
         // 3. Fallback a datos estáticos si la API falla o no hay datos
@@ -43,9 +43,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json(datos.length > 0 ? datos : PRECIOS_MORELIA_2026)
     } catch (error: any) {
-        return NextResponse.json(
-            { error: 'Error al obtener indicadores de plusvalía' },
-            { status: 500 }
-        )
+        console.error('[API Plusvalía] Error controlado:', error.message)
+        return NextResponse.json(PRECIOS_MORELIA_2026) // Siempre devolver el fallback en caso de error
     }
 }
