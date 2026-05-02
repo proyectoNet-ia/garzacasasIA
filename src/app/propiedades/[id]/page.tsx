@@ -305,13 +305,21 @@ export default function PropertyDetailPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <PlusvaliaBadge
-                                        municipio={property.location?.split(',')[0] || 'Morelia'}
+                                        municipio={property.location?.split(',')[0]?.trim() || 'Nacional'}
                                         tipo={property.property_type?.toLowerCase().includes('depto') ? 'departamento' : 'casa'}
                                     />
-                                    <ServiciosCercanos
-                                        lat={property.latitude || 25.6866}
-                                        lng={property.longitude || -100.3161}
-                                    />
+                                    {(property.latitude && property.longitude) ? (
+                                        <ServiciosCercanos
+                                            lat={property.latitude}
+                                            lng={property.longitude}
+                                        />
+                                    ) : (
+                                        <div className="p-6 bg-zinc-100 rounded-[2rem] border border-dashed border-zinc-300 flex flex-col items-center justify-center text-center opacity-60">
+                                            <MapPin className="h-8 w-8 text-zinc-400 mb-2" />
+                                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Ubicación no georreferenciada</p>
+                                            <p className="text-[10px] text-zinc-400 mt-1">Registra las coordenadas para activar el análisis de servicios.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

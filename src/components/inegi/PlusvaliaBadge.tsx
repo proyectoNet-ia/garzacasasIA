@@ -63,7 +63,9 @@ export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa' }: Props) 
                         +{dato.variacion_anual}%
                         <span className="text-xs font-bold text-zinc-500 tracking-normal">anual</span>
                     </h4>
-                    <p className="text-sm font-medium text-zinc-400">Crecimiento estimado en {dato.municipio}</p>
+                    <p className="text-zinc-400 text-sm md:text-base font-medium leading-relaxed">
+                        Crecimiento estimado en <span className="text-zinc-200">{dato.municipio}</span>
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
