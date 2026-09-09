@@ -2,57 +2,61 @@ import { createClient as createBrowserClient } from '@/lib/supabase-client'
 
 
 
-export async function getSiteSettings(key: string) {
-    // We strictly use the browser client here since this utility is being imported 
-    // by Client Components that Next.js is trying to bundle for the browser.
-    // For Server Components, it's better to fetch via supabase directly.
+const COLUMN_MAP: Record<string, string> = {
+    hero_config: 'hero_title, hero_subtitle, hero_image_url',
+    contact_config: 'contact_phone, contact_email, contact_whatsapp, social_instagram, social_facebook, social_linkedin, social_twitter, social_youtube',
+    seo_config: 'seo_title, seo_description, seo_keywords'
+}
+
+export async function getSiteSettings(key: string): Promise<any> {
     const supabase = createBrowserClient()
 
     try {
-        // 1. Try Key-Value approach (New Admin System)
-        const { data: kvData } = await supabase
+        const columns = COLUMN_MAP[key] || 'hero_title, hero_subtitle, hero_image_url, contact_phone, contact_email, contact_whatsapp, social_instagram, social_facebook, social_linkedin, social_twitter, social_youtube, seo_title, seo_description, seo_keywords'
+
+        const result: any = await supabase
             .from('site_settings')
-            .select('value')
-            .eq('key', key)
-            .single()
+            .select(columns)
+            .eq('id', 1)
+            .maybeSingle()
 
-        if (kvData?.value) {
-            return kvData.value
-        }
+        const data = result?.data
+        const error = result?.error
 
-        // 2. Fallback to Flat Columns System (Old System)
-        // This is necessary if the DB hasn't been fully migrated or if we are reading legacy data
-        const { data: flatData } = await supabase
-            .from('site_settings')
-            .select('*')
-            // Don't use .single() if we suspect multiple rows (from newly added keys)
-            // Just take the first one that looks like a settings row (usually id=1)
-            .limit(1)
+        if (error || !data) return null
 
-        const data = flatData?.[0]
+        const settings = data as Record<string, any>
 
-        if (!data) return null
-
-        // Map the flat columns to the expected config objects
         if (key === 'hero_config') {
             return {
-                title: data.hero_title,
-                subtitle: data.hero_subtitle,
-                image_url: data.hero_image_url
+                title: settings.hero_title || '',
+                subtitle: settings.hero_subtitle || '',
+                image_url: settings.hero_image_url || ''
             }
         }
 
         if (key === 'contact_config') {
             return {
-                phone: data.contact_phone,
-                email: data.contact_email,
-                instagram: data.social_instagram,
-                facebook: data.social_facebook,
-                whatsapp: data.contact_whatsapp,
+                phone: settings.contact_phone || '',
+                email: settings.contact_email || '',
+                whatsapp: settings.contact_whatsapp || '',
+                instagram: settings.social_instagram || '',
+                facebook: settings.social_facebook || '',
+                linkedin: settings.social_linkedin || '',
+                twitter: settings.social_twitter || '',
+                youtube: settings.social_youtube || ''
             }
         }
 
-        return null
+        if (key === 'seo_config') {
+            return {
+                title: settings.seo_title || '',
+                description: settings.seo_description || '',
+                keywords: settings.seo_keywords || ''
+            }
+        }
+
+        return data
     } catch (e) {
         console.error("Critical error fetching site settings:", e)
         return null

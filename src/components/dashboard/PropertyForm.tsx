@@ -198,6 +198,11 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
         const uploadToast = toast.loading(isMain ? 'Optimizando portada...' : 'Optimizando imágenes...')
 
         try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user?.id) {
+                throw new Error('Debes iniciar sesión para subir imágenes.')
+            }
+            const userFolder = `${user.id}/`
             const uploadedUrls: string[] = []
 
             for (const file of Array.from(files)) {
@@ -210,7 +215,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
 
                 const fileExt = optimizedFile.name.split('.').pop()
                 const fileName = `prop-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`
-                const filePath = `${fileName}`
+                const filePath = `${userFolder}${fileName}`
 
                 let bucketName = 'properties'
                 const { error: uploadError } = await supabase.storage

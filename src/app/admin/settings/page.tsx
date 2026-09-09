@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Loader2, Save, Image as ImageIcon, Upload, Building2, Plus, Trash2, Check, X, Phone, Mail, Instagram, Facebook } from 'lucide-react'
+import { Loader2, Save, Building2, Plus, Trash2, Phone, Mail, Instagram, Facebook, ArrowRight, FileText, Sparkles } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 
@@ -15,12 +16,6 @@ const supabase = createClient()
 export default function AdminSettings() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [uploading, setUploading] = useState(false)
-    const [config, setConfig] = useState({
-        title: '',
-        subtitle: '',
-        image_url: ''
-    })
     const [contactConfig, setContactConfig] = useState({
         phone: '',
         email: '',
@@ -31,123 +26,66 @@ export default function AdminSettings() {
     const [plans, setPlans] = useState<any[]>([])
     const [expandedPlan, setExpandedPlan] = useState<string | null>(null)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
     useEffect(() => {
         async function fetchData() {
-            // Fetch Hero Config
-            const { data: heroData } = await supabase
-                .from('site_settings')
-                .select('value')
-                .eq('key', 'hero_config')
-                .single()
+            try {
+                // Fetch Global Settings (Flat Columns, id=1)
+                const { data: siteData } = await supabase
+                    .from('site_settings')
+                    .select('*')
+                    .eq('id', 1)
+                    .single()
 
-            if (heroData) {
-                setConfig(heroData.value)
+                if (siteData) {
+                    setContactConfig({
+                        phone: siteData.contact_phone || '',
+                        email: siteData.contact_email || '',
+                        whatsapp: siteData.contact_whatsapp || '',
+                        instagram: siteData.social_instagram || '',
+                        facebook: siteData.social_facebook || ''
+                    })
+                }
+
+                // Fetch Plans
+                const { data: plansData } = await supabase
+                    .from('subscriptions_config')
+                    .select('*')
+                    .order('priority', { ascending: true })
+
+                if (plansData) {
+                    setPlans(plansData)
+                }
+            } catch (error) {
+                console.error('Error fetching admin settings:', error)
+            } finally {
+                setLoading(false)
             }
-
-            // Fetch Contact Config
-            const { data: contactData } = await supabase
-                .from('site_settings')
-                .select('value')
-                .eq('key', 'contact_config')
-                .single()
-
-            if (contactData) {
-                setContactConfig(contactData.value)
-            }
-
-            // Fetch Plans
-            const { data: plansData } = await supabase
-                .from('subscriptions_config')
-                .select('*')
-                .order('priority', { ascending: true })
-
-            if (plansData) {
-                setPlans(plansData)
-            }
-
-            setLoading(false)
         }
         fetchData()
     }, [])
 
     const handleSaveContact = async () => {
         setSaving(true)
-        const { error } = await supabase
-            .from('site_settings')
-            .upsert({
-                key: 'contact_config',
-                value: contactConfig,
-                updated_at: new Date().toISOString()
-            })
-
-        if (error) {
-            toast.error('Error guardando contacto: ' + error.message)
-        } else {
-            toast.success('¡Información de contacto actualizada!')
-        }
-        setSaving(false)
-    }
-
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-
-        setUploading(true)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `hero-bg-${Math.random()}.${fileExt}`
-            const filePath = `${fileName}`
+            const { error } = await supabase
+                .from('site_settings')
+                .upsert({
+                    id: 1,
+                    contact_phone: contactConfig.phone,
+                    contact_email: contactConfig.email,
+                    contact_whatsapp: contactConfig.whatsapp,
+                    social_instagram: contactConfig.instagram,
+                    social_facebook: contactConfig.facebook,
+                    updated_at: new Date().toISOString()
+                })
 
-            // Try 'marketing' (lowercase) first
-            let bucketName = 'marketing'
-            let { error: uploadError } = await supabase.storage
-                .from(bucketName)
-                .upload(filePath, file)
-
-            // If bucket not found, try 'MARKETING' (uppercase)
-            if (uploadError && (uploadError.message.includes('Bucket not found') || (uploadError as any).error === 'Bucket not found')) {
-                console.log('Bucket "marketing" not found, trying "MARKETING"...')
-                bucketName = 'MARKETING'
-                const retry = await supabase.storage
-                    .from(bucketName)
-                    .upload(filePath, file)
-                uploadError = retry.error
-            }
-
-            if (uploadError) throw uploadError
-
-            const { data: { publicUrl } } = supabase.storage
-                .from(bucketName)
-                .getPublicUrl(filePath)
-
-            setConfig(prev => ({ ...prev, image_url: publicUrl }))
-            toast.success('Imagen subida con éxito (Recuerda guardar los cambios finales)')
+            if (error) throw error
+            toast.success('¡Información de contacto actualizada correctamente!')
         } catch (error: any) {
-            console.error('Upload error:', error)
-            toast.error('Error al subir imagen: ' + error.message)
+            toast.error('Error guardando contacto: ' + error.message)
         } finally {
-            setUploading(false)
+            setSaving(false)
         }
-    }
-
-    async function handleSaveHero() {
-        setSaving(true)
-        const { error } = await supabase
-            .from('site_settings')
-            .upsert({
-                key: 'hero_config',
-                value: config,
-                updated_at: new Date().toISOString()
-            })
-
-        if (error) {
-            toast.error('Error guardando configuración: ' + error.message)
-        } else {
-            toast.success('¡Configuración de Hero actualizada!')
-        }
-        setSaving(false)
     }
 
     async function handleUpdatePlan(planId: string, updates: any) {
@@ -239,73 +177,41 @@ export default function AdminSettings() {
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2">
-                {/* Hero Config Card */}
-                <Card className="border-zinc-200 shadow-xl bg-white">
+                {/* CMS Visual & Branding Shortcut Card */}
+                <Card className="border-zinc-200 shadow-xl bg-gradient-to-br from-indigo-900 to-zinc-950 text-white overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
-                            <ImageIcon className="h-5 w-5" />
-                            Configuración del Hero
+                        <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-1">
+                            <Sparkles className="h-4 w-4" />
+                            Personalización Visual
+                        </div>
+                        <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <FileText className="h-6 w-6 text-indigo-400" />
+                            CMS y Marca del Sitio
                         </CardTitle>
+                        <CardDescription className="text-zinc-300 text-sm leading-relaxed">
+                            Personaliza el Banner Hero de la página principal, el Favicon de la pestaña, los títulos SEO y los enlaces a redes sociales en un solo lugar.
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="title" className="text-zinc-700 font-bold">Título del Banner</Label>
-                            <Input
-                                id="title"
-                                value={config.title}
-                                onChange={(e) => setConfig({ ...config, title: e.target.value })}
-                                placeholder="Ej: Encuentra tu hogar ideal..."
-                                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="subtitle" className="text-zinc-700">Subtítulo / Descripción</Label>
-                            <textarea
-                                id="subtitle"
-                                rows={3}
-                                value={config.subtitle}
-                                onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
-                                placeholder="Descripción corta debajo del título..."
-                                className="flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 ring-offset-background placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                            />
-                        </div>
-
-                        <div className="space-y-4">
-                            <Label className="text-zinc-700">Imagen de Fondo</Label>
-                            <div className="flex flex-col gap-4">
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="relative flex aspect-video cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 transition-all hover:bg-zinc-100"
-                                >
-                                    {config.image_url ? (
-                                        <img src={config.image_url} alt="Preview" className="h-full w-full object-cover rounded-lg" />
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 text-zinc-400">
-                                            <Upload className="h-10 w-10" />
-                                            <span>Subir nueva imagen</span>
-                                        </div>
-                                    )}
-                                    {uploading && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-                                            <Loader2 className="h-8 w-8 animate-spin text-white" />
-                                        </div>
-                                    )}
-                                </div>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleFileUpload}
-                                />
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
+                            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                                <p className="font-bold text-white mb-0.5">Hero & Textos</p>
+                                <p className="text-zinc-400 text-[11px]">Título, subtítulo e imagen principal</p>
+                            </div>
+                            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                                <p className="font-bold text-white mb-0.5">Favicon & SEO</p>
+                                <p className="text-zinc-400 text-[11px]">Icono y metadatos de Google</p>
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter>
-                        <Button onClick={handleSaveHero} disabled={saving || uploading} className="w-full gap-2 py-6 text-lg font-bold shadow-lg shadow-blue-500/20">
-                            {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-                            Guardar Configuración Hero
-                        </Button>
+                    <CardFooter className="pt-2">
+                        <Link href="/admin/cms" className="w-full">
+                            <Button className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold gap-2 shadow-lg shadow-indigo-600/30">
+                                Ir al Editor de Contenido CMS
+                                <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </Link>
                     </CardFooter>
                 </Card>
 

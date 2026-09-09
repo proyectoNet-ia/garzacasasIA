@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { LayoutDashboard, Settings, Users, Building, Building2, FileText, BarChart3, User, ArrowLeftRight, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Settings, Users, Building, Building2, FileText, BarChart3, User, ArrowLeftRight, ShieldCheck, LifeBuoy } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { cn } from '@/lib/utils'
@@ -37,6 +37,7 @@ export default async function AdminLayout({
         { icon: User, label: 'Mi Perfil', href: '/admin/profile', badge: null },
         { icon: Users, label: 'Agentes', href: '/admin/agents', badge: null },
         { icon: Building, label: 'Global', href: '/admin/all-properties', badge: null },
+        { icon: LifeBuoy, label: 'Soporte', href: '/admin/support', badge: null },
         { icon: FileText, label: 'CMS', href: '/admin/cms', badge: null },
         { icon: BarChart3, label: 'Analytics', href: '/admin/analytics', badge: null },
         { icon: Settings, label: 'Configuración', href: '/admin/settings', badge: null },
