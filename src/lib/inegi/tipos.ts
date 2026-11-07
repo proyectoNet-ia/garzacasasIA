@@ -80,9 +80,9 @@ export interface PrecioZona {
     estado: string
     precio_m2: number          // Precio promedio por m²
     variacion_anual: number    // Porcentaje de crecimiento anual
-    tipo: 'casa' | 'departamento' | 'promedio'
+    tipo: 'casa' | 'departamento' | 'terreno' | 'local' | 'promedio' | string
     periodo: string            // e.g. "2025-Q3"
-    fuente: 'SHF-INEGI'
+    fuente: 'SHF-INEGI' | 'Índice SHF - INEGI' | string
 }
 
 // --- Score de zona calculado ---
