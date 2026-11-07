@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Users, Star, MessageSquare, Mail, Loader2, ArrowUpRight } from "lucide-react"
-import { IconInstagram, IconLinkedIn, IconWhatsApp } from "@/components/ui/SocialIcons"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Star, MessageSquare, ArrowUpRight } from "lucide-react"
+import { IconWhatsApp } from "@/components/ui/SocialIcons"
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
 import { createClient } from "@/lib/supabase-client"
 import Link from 'next/link'
@@ -22,32 +23,53 @@ interface Agent {
         rating: string
         experience: string
     }
-    social?: {
-        instagram?: string
-        linkedin?: string
-        email?: string
-    }
+}
+
+function AgentCardSkeleton() {
+    return (
+        <div className="h-full bg-white rounded-[3rem] p-4 border border-zinc-200">
+            <Skeleton className="aspect-[4/5] w-full rounded-[2.5rem] mb-6" />
+            <div className="px-4 pb-4 space-y-4">
+                <div className="flex justify-between items-start gap-3">
+                    <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-3/4 rounded-lg" />
+                        <Skeleton className="h-3 w-1/2 rounded-md" />
+                    </div>
+                    <Skeleton className="h-6 w-14 rounded-full shrink-0" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-100">
+                    <div className="space-y-2">
+                        <Skeleton className="h-3 w-16 rounded-md" />
+                        <Skeleton className="h-5 w-20 rounded-md" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-3 w-14 rounded-md" />
+                        <Skeleton className="h-5 w-16 rounded-md" />
+                    </div>
+                </div>
+                <Skeleton className="h-12 w-full rounded-2xl" />
+            </div>
+        </div>
+    )
 }
 
 export function Agents() {
     const [agents, setAgents] = useState<Agent[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
 
     useEffect(() => {
         async function fetchAgents() {
             try {
-                // Traemos perfiles con rol 'agent'
-                // Nota: Podríamos agregar un filtro 'is_public' en el futuro
+                // Selección explícita de columnas necesarias (sin select=*)
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('*')
+                    .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, created_at')
                     .eq('role', 'agent')
                     .limit(6)
 
                 if (error) throw error
 
-                // Adaptamos los datos o usamos fallbacks
                 const formattedAgents = (data || []).map(p => ({
                     id: p.id,
                     full_name: p.full_name || 'Agente Garza Casas',
@@ -60,11 +82,6 @@ export function Agents() {
                         sales: "10+",
                         rating: "5.0",
                         experience: p.created_at ? `${new Date().getFullYear() - new Date(p.created_at).getFullYear() + 1} años` : '1 año'
-                    },
-                    social: {
-                        email: `mailto:${p.email || ''}`,
-                        instagram: '#',
-                        linkedin: '#'
                     }
                 }))
 
@@ -77,7 +94,7 @@ export function Agents() {
         }
 
         fetchAgents()
-    }, [])
+    }, [supabase])
 
     return (
         <section id="agentes" className="py-24 bg-zinc-50 relative overflow-hidden transition-colors duration-300">
@@ -98,8 +115,10 @@ export function Agents() {
                 </ScrollReveal>
 
                 {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {Array.from({ length: 3 }).map((_, idx) => (
+                            <AgentCardSkeleton key={`agent-skeleton-${idx}`} />
+                        ))}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

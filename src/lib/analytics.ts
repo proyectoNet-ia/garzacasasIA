@@ -2,16 +2,26 @@
 
 import { createClient } from '@/lib/supabase-client'
 
+export const COOKIE_CONSENT_KEY = 'gc_cookie_consent'
+
+export function hasAnalyticsConsent(): boolean {
+    if (typeof window === 'undefined') return false
+    try {
+        return localStorage.getItem(COOKIE_CONSENT_KEY) === 'accepted'
+    } catch {
+        return false
+    }
+}
+
 /**
- * Track a property view
+ * Track a property view (gated by explicit cookie consent)
  */
 export async function trackPropertyView(propertyId: string, agentId: string) {
-    if (!propertyId || !agentId) return
+    if (!propertyId || !agentId || !hasAnalyticsConsent()) return
 
     const supabase = createClient()
 
     try {
-        // Get session ID from localStorage or generate one
         let sessionId = localStorage.getItem('analytics_session_id')
         if (!sessionId) {
             sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
@@ -40,7 +50,7 @@ export async function trackPropertyView(propertyId: string, agentId: string) {
 }
 
 /**
- * Track a property interaction (WhatsApp click, phone click, etc.)
+ * Track a property interaction (WhatsApp click, phone click, etc. — gated by consent)
  */
 export async function trackPropertyInteraction(
     propertyId: string,
@@ -48,7 +58,7 @@ export async function trackPropertyInteraction(
     interactionType: 'whatsapp_click' | 'phone_click' | 'email_click' | 'share' | 'favorite' | 'compare_add',
     metadata?: Record<string, any>
 ) {
-    if (!propertyId || !agentId) return
+    if (!propertyId || !agentId || !hasAnalyticsConsent()) return
 
     const supabase = createClient()
 
@@ -141,13 +151,11 @@ export async function getPropertyAnalytics(propertyId: string) {
     const supabase = createClient()
 
     try {
-        // Get total views
         const { count: viewCount } = await supabase
             .from('property_views')
             .select('*', { count: 'exact', head: true })
             .eq('property_id', propertyId)
 
-        // Get interactions breakdown
         const { data: interactions } = await supabase
             .from('property_interactions')
             .select('interaction_type')
@@ -158,7 +166,6 @@ export async function getPropertyAnalytics(propertyId: string) {
             return acc
         }, {}) || {}
 
-        // Get views over time (last 30 days)
         const thirtyDaysAgo = new Date()
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
@@ -187,7 +194,6 @@ export async function getTopProperties(agentId: string, limit: number = 5) {
     const supabase = createClient()
 
     try {
-        // Get all agent's properties with view counts
         const { data: properties } = await supabase
             .from('properties')
             .select(`
@@ -202,7 +208,6 @@ export async function getTopProperties(agentId: string, limit: number = 5) {
 
         if (!properties) return []
 
-        // Get view counts for each property
         const propertiesWithStats = await Promise.all(
             properties.map(async (property) => {
                 const { count: views } = await supabase
@@ -223,7 +228,6 @@ export async function getTopProperties(agentId: string, limit: number = 5) {
             })
         )
 
-        // Sort by views and return top N
         return propertiesWithStats
             .sort((a, b) => b.views - a.views)
             .slice(0, limit)

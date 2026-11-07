@@ -71,7 +71,7 @@ export function CheckoutButton({
                 throw new Error('No se pudo obtener la URL de pago')
             }
 
-            toast.info(`Redirigiendo al checkout de ${planName}...`)
+            toast.info(`Redirigiendo a PayPal para el plan ${planName}...`)
             window.location.href = checkoutUrl
 
         } catch (error: any) {
@@ -107,7 +107,7 @@ export function SecurePaymentBadge() {
     return (
         <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-400 mt-2">
             <Lock className="h-3 w-3" />
-            <span>Pago seguro con Mercado Pago · SSL 256-bit</span>
+            <span>Pago seguro con PayPal · SSL 256-bit</span>
         </div>
     )
 }

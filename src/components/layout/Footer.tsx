@@ -1,5 +1,6 @@
+import Link from "next/link"
 import { Phone, Mail } from "lucide-react"
-import { IconInstagram, IconFacebook, IconWhatsApp } from "@/components/ui/SocialIcons"
+import { IconInstagram, IconFacebook, IconWhatsApp, IconLinkedIn } from "@/components/ui/SocialIcons"
 
 interface FooterProps {
     contactConfig?: {
@@ -8,6 +9,7 @@ interface FooterProps {
         instagram?: string;
         facebook?: string;
         whatsapp?: string;
+        linkedin?: string;
     } | null;
 }
 
@@ -57,6 +59,13 @@ export function Footer({ contactConfig }: FooterProps) {
                                         <IconFacebook className="h-5 w-5" />
                                     </a>
                                 )}
+                                {contactConfig?.linkedin && (
+                                    <a href={contactConfig.linkedin} target="_blank" rel="noreferrer"
+                                        className="bg-zinc-100 p-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all text-zinc-500"
+                                        aria-label="LinkedIn">
+                                        <IconLinkedIn className="h-5 w-5" />
+                                    </a>
+                                )}
                                 {contactConfig?.whatsapp && (
                                     <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer"
                                         className="bg-zinc-100 p-2.5 rounded-xl hover:bg-green-50 hover:text-green-600 transition-all text-zinc-500"
@@ -72,8 +81,8 @@ export function Footer({ contactConfig }: FooterProps) {
                     <div className="space-y-4">
                         <h4 className="font-bold text-zinc-900">Legal</h4>
                         <div className="flex flex-col gap-2 text-sm">
-                            <a href="#" className="hover:text-blue-600 transition-colors">Política de Privacidad</a>
-                            <a href="#" className="hover:text-blue-600 transition-colors">Términos de Servicio</a>
+                            <Link href="/privacidad" className="hover:text-blue-600 transition-colors">Aviso de Privacidad</Link>
+                            <Link href="/terminos" className="hover:text-blue-600 transition-colors">Términos de Servicio</Link>
                         </div>
                     </div>
                 </div>

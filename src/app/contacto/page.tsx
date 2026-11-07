@@ -16,9 +16,9 @@ export default async function ContactPage() {
                     <h1 className="text-4xl md:text-5xl font-black text-zinc-700 mb-4">Hablemos</h1>
                     <p className="text-zinc-500 max-w-2xl mx-auto">Estamos listos para ayudarte a encontrar tu propiedad ideal o vender la tuya.</p>
                 </div>
-                <Contact />
+                <Contact contactConfig={contactConfig} />
             </main>
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

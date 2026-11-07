@@ -57,7 +57,7 @@ export default async function Home() {
         <Pricing />
 
         {/* Contact Section */}
-        <Contact />
+        <Contact contactConfig={contactConfig} />
 
         {/* Decorative Quote / Impact Section */}
         <section className="py-24 relative overflow-hidden">

@@ -7,6 +7,7 @@ import { ComparisonTray } from "@/components/marketing/ComparisonTray";
 import { DynamicFavicon } from "@/components/DynamicFavicon";
 import { Toaster } from "sonner";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://garzacasas.com'
 
@@ -70,6 +71,7 @@ export default function RootLayout({
           <SearchProvider>
             {children}
             <ComparisonTray />
+            <CookieConsentBanner />
             <Toaster position="top-right" richColors />
           </SearchProvider>
         </InteractionsProvider>

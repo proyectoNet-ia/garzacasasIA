@@ -295,191 +295,41 @@ export default function AdminSettings() {
                     </CardFooter>
                 </Card>
 
-                {/* Plans Config Card */}
-                <Card className="border-zinc-200 shadow-xl bg-white lg:col-span-1">
+                {/* Packages & PayPal Monetization Shortcut Card */}
+                <Card className="border-zinc-200 shadow-xl bg-gradient-to-br from-blue-900 via-indigo-950 to-zinc-950 text-white overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
-                                <Building2 className="h-5 w-5" />
-                                Planes y Suscripciones
-                            </CardTitle>
-                            <Button onClick={handleAddPlan} size="sm" className="gap-2 font-bold shadow-sm">
-                                <Plus className="h-4 w-4" />
-                                Nuevo Plan
-                            </Button>
+                        <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">
+                            <Sparkles className="h-4 w-4" />
+                            Comercio y PayPal API v2
                         </div>
+                        <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <Building2 className="h-6 w-6 text-blue-400" />
+                            Paquetes y Suscripciones
+                        </CardTitle>
+                        <CardDescription className="text-zinc-300 text-sm leading-relaxed">
+                            Gestiona de forma dedicada los planes (Gratis, Pro, Enterprise), los precios en MXN para PayPal, las viñetas visuales y los límites reales de software.
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
-                        {plans.map((plan) => {
-                            const isExpanded = expandedPlan === plan.id
-                            const features = plan.features || {}
-
-                            return (
-                                <div key={plan.id} className="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-4">
-                                    {/* Basic Info */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label className="text-xs text-zinc-500 uppercase">Nombre</Label>
-                                            <Input
-                                                value={plan.name}
-                                                onChange={(e) => handleUpdatePlan(plan.id, { name: e.target.value })}
-                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs text-zinc-500 uppercase">Prioridad</Label>
-                                            <Input
-                                                type="number"
-                                                value={plan.priority || 1}
-                                                onChange={(e) => handleUpdatePlan(plan.id, { priority: parseInt(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label className="text-xs text-zinc-500 uppercase">Precio Mensual ($)</Label>
-                                            <Input
-                                                type="number"
-                                                value={plan.monthly_price}
-                                                onChange={(e) => handleUpdatePlan(plan.id, { monthly_price: parseFloat(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs text-zinc-500 uppercase">Precio Anual ($)</Label>
-                                            <Input
-                                                type="number"
-                                                value={plan.yearly_price || 0}
-                                                onChange={(e) => handleUpdatePlan(plan.id, { yearly_price: parseFloat(e.target.value) })}
-                                                className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-xs text-zinc-500 uppercase">Descripción</Label>
-                                        <textarea
-                                            className="flex w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            rows={2}
-                                            value={plan.description || ''}
-                                            onChange={(e) => handleUpdatePlan(plan.id, { description: e.target.value })}
-                                        />
-                                    </div>
-
-                                    {/* Toggle Features Section */}
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setExpandedPlan(isExpanded ? null : plan.id)}
-                                        className="w-full text-xs"
-                                    >
-                                        {isExpanded ? 'Ocultar' : 'Mostrar'} Límites y Características
-                                    </Button>
-
-                                    {/* Features Section */}
-                                    {isExpanded && (
-                                        <div className="space-y-3 pt-2 border-t border-zinc-200">
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs text-zinc-500">Límite de Propiedades</Label>
-                                                    <Input
-                                                        type="number"
-                                                        value={features.properties_limit || 5}
-                                                        onChange={(e) => updatePlanFeature(plan.id, 'properties_limit', parseInt(e.target.value))}
-                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs text-zinc-500">Imágenes por Propiedad</Label>
-                                                    <Input
-                                                        type="number"
-                                                        value={features.images_per_property || 3}
-                                                        onChange={(e) => updatePlanFeature(plan.id, 'images_per_property', parseInt(e.target.value))}
-                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <Label className="text-xs text-zinc-500">Tier de Prioridad (1-3)</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    max="3"
-                                                    value={features.priority_tier || 1}
-                                                    onChange={(e) => updatePlanFeature(plan.id, 'priority_tier', parseInt(e.target.value))}
-                                                    className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label className="text-xs text-zinc-500 uppercase">Características Premium</Label>
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            checked={features.ai_analysis || false}
-                                                            onCheckedChange={(checked) => updatePlanFeature(plan.id, 'ai_analysis', checked)}
-                                                        />
-                                                        <Label className="text-xs text-zinc-700">Análisis con IA</Label>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            checked={features.advanced_stats || false}
-                                                            onCheckedChange={(checked) => updatePlanFeature(plan.id, 'advanced_stats', checked)}
-                                                        />
-                                                        <Label className="text-xs text-zinc-700">Estadísticas Avanzadas</Label>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            checked={features.priority_support || false}
-                                                            onCheckedChange={(checked) => updatePlanFeature(plan.id, 'priority_support', checked)}
-                                                        />
-                                                        <Label className="text-xs text-zinc-700">Soporte Prioritario</Label>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            checked={features.featured_badge || false}
-                                                            onCheckedChange={(checked) => updatePlanFeature(plan.id, 'featured_badge', checked)}
-                                                        />
-                                                        <Label className="text-xs text-zinc-700">Badge Destacado</Label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {features.featured_badge && (
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs text-zinc-500">Texto del Badge</Label>
-                                                    <Input
-                                                        value={features.badge_text || ''}
-                                                        onChange={(e) => updatePlanFeature(plan.id, 'badge_text', e.target.value)}
-                                                        placeholder="Ej: Pro, Platino"
-                                                        className="bg-white border-zinc-200 h-8 text-sm text-zinc-900 placeholder:text-zinc-400"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Delete Button */}
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDeletePlan(plan.id)}
-                                        className="w-full gap-2"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        Eliminar Plan
-                                    </Button>
-                                </div>
-                            )
-                        })}
-                    </CardContent>
-                    <CardFooter className="flex-col gap-2">
-                        <div className="text-[10px] text-zinc-500 text-center w-full">
-                            * Los cambios en los planes se guardan automáticamente al editar.
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
+                            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                                <p className="font-bold text-white mb-0.5">Precios PayPal</p>
+                                <p className="text-zinc-400 text-[11px]">Validación MXN y cálculo anual con descuento</p>
+                            </div>
+                            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+                                <p className="font-bold text-white mb-0.5">Viñetas & Límites</p>
+                                <p className="text-zinc-400 text-[11px]">Editor de beneficios y límites de propiedades</p>
+                            </div>
                         </div>
+                    </CardContent>
+                    <CardFooter className="pt-2">
+                        <Link href="/admin/packages" className="w-full">
+                            <Button className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold gap-2 shadow-lg shadow-blue-600/30">
+                                Abrir Gestor Especializado de Paquetes
+                                <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </Link>
                     </CardFooter>
                 </Card>
             </div>

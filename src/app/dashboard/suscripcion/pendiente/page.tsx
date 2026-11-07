@@ -24,7 +24,7 @@ function PendienteContent() {
                         Pago en proceso
                     </h1>
                     <p className="text-zinc-500 font-medium mb-6">
-                        Tu pago está siendo procesado. Algunos métodos de pago (como OXXO) pueden tardar hasta 72 horas en confirmarse.
+                        Tu pago está siendo procesado por PayPal. Una vez confirmado por la entidad bancaria, tu suscripción se activará de forma automática.
                     </p>
 
                     {paymentId && (

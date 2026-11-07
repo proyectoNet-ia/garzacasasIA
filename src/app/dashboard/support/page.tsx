@@ -44,7 +44,13 @@ export default function SupportPage() {
                 .eq('agent_id', user.id)
                 .order('last_message_at', { ascending: false })
 
-            if (error) throw error
+            if (error) {
+                if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+                    setTickets([])
+                    return
+                }
+                throw error
+            }
             setTickets(data || [])
         } catch (error: any) {
             console.error('Error fetching tickets:', error)

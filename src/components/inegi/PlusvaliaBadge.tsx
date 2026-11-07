@@ -8,23 +8,33 @@ import type { PrecioZona } from "@/lib/inegi/tipos"
 
 interface Props {
     municipio?: string
-    tipo?: 'casa' | 'departamento'
+    estado?: string
+    clave?: string
+    tipo?: 'casa' | 'departamento' | 'terreno' | 'local' | string
     lat?: number
     lng?: number
 }
 
-export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa', lat, lng }: Props) {
+export function PlusvaliaBadge({ municipio = 'Morelia', estado, clave, tipo = 'casa', lat, lng }: Props) {
     const [dato, setDato] = useState<PrecioZona | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         async function fetchPlusvalia() {
             try {
-                const url = `/api/inegi/plusvalia?municipio=${municipio}&tipo=${tipo}${lat ? `&lat=${lat}` : ''}${lng ? `&lng=${lng}` : ''}`
+                const params = new URLSearchParams()
+                if (municipio) params.set('municipio', municipio)
+                if (estado) params.set('estado', estado)
+                if (clave) params.set('clave', clave)
+                if (tipo) params.set('tipo', tipo)
+                if (lat) params.set('lat', lat.toString())
+                if (lng) params.set('lng', lng.toString())
+
+                const url = `/api/inegi/plusvalia?${params.toString()}`
                 const res = await fetch(url)
                 const data = await res.json()
-                const filtered = data.find((d: PrecioZona) => d.tipo === tipo)
-                setDato(filtered || data[0])
+                const filtered = Array.isArray(data) ? (data.find((d: PrecioZona) => d.tipo === tipo) || data[0]) : data
+                setDato(filtered)
             } catch (err) {
                 console.error(err)
             } finally {
@@ -32,7 +42,7 @@ export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa', lat, lng 
             }
         }
         fetchPlusvalia()
-    }, [municipio, tipo])
+    }, [municipio, estado, clave, tipo, lat, lng])
 
     if (loading || !dato) return null
 
@@ -67,7 +77,7 @@ export function PlusvaliaBadge({ municipio = 'Morelia', tipo = 'casa', lat, lng 
                         <span className="text-xs font-bold text-zinc-500 tracking-normal">anual</span>
                     </h4>
                     <p className="text-zinc-400 text-sm md:text-base font-medium leading-relaxed">
-                        Crecimiento estimado en <span className="text-zinc-200">{dato.municipio}</span>
+                        Crecimiento estimado en <span className="text-zinc-200">{dato.municipio}{dato.estado ? `, ${dato.estado}` : ''}</span>
                     </p>
                 </div>
 

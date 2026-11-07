@@ -19,9 +19,19 @@ const CACHE_TTL_HORAS = {
 
 // ---- Caché ----
 
+async function getSupabaseClient() {
+    try {
+        const { createServiceClient } = await import('@/lib/supabase-server')
+        return createServiceClient()
+    } catch {
+        const { createClient } = await import('@/lib/supabase')
+        return createClient()
+    }
+}
+
 async function getCached<T>(key: string): Promise<T | null> {
     try {
-        const supabase = createClient()
+        const supabase = await getSupabaseClient()
         const { data, error } = await supabase
             .from('inegi_cache')
             .select('data, expires_at')
@@ -33,7 +43,14 @@ async function getCached<T>(key: string): Promise<T | null> {
         const expired = new Date(data.expires_at) < new Date()
         if (expired) return null
 
-        return data.data as T
+        let result = data.data
+        if (typeof result === 'string') {
+            try {
+                result = JSON.parse(result)
+            } catch {}
+        }
+
+        return result as T
     } catch {
         return null
     }
@@ -41,7 +58,7 @@ async function getCached<T>(key: string): Promise<T | null> {
 
 async function setCache(key: string, data: unknown, ttlHoras: number): Promise<void> {
     try {
-        const supabase = createClient()
+        const supabase = await getSupabaseClient()
         const expiresAt = new Date(Date.now() + ttlHoras * 60 * 60 * 1000).toISOString()
 
         await supabase
@@ -82,9 +99,15 @@ export async function fetchConCache<T>(
     }
 
     const text = await res.text()
-    let data: T
+    let data: any
     try {
         data = JSON.parse(text)
+        // Por si la API del INEGI devuelve una cadena JSON doblemente serializada
+        if (typeof data === 'string') {
+            try {
+                data = JSON.parse(data)
+            } catch {}
+        }
     } catch (e) {
         console.error('[INEGI API] La respuesta no es un JSON válido:', text.substring(0, 200))
         throw new Error('El servidor del INEGI devolvió una respuesta inválida (no JSON).')
@@ -93,7 +116,7 @@ export async function fetchConCache<T>(
     // 3. Guardar en caché
     await setCache(cacheKey, data, ttlHoras)
 
-    return data
+    return data as T
 }
 
 // ---- Helpers de URL ----

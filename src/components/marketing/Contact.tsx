@@ -7,7 +7,24 @@ import { Phone, Mail, MapPin, Send } from "lucide-react"
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
 import { toast } from "sonner"
 
-export function Contact() {
+export interface ContactConfigProps {
+    phone?: string
+    email?: string
+    whatsapp?: string
+    address?: string
+}
+
+export function Contact({ contactConfig }: { contactConfig?: ContactConfigProps | null }) {
+    const displayPhone = contactConfig?.phone || "+52 (81) 1234 5678"
+    const displayEmail = contactConfig?.email || "contacto@garzacasas.com"
+    const displayAddress = contactConfig?.address || "San Pedro Garza García, NL"
+    const rawWhatsapp = contactConfig?.whatsapp || contactConfig?.phone || ""
+    const whatsappHref = rawWhatsapp.startsWith("http")
+        ? rawWhatsapp
+        : rawWhatsapp.replace(/\D/g, "")
+            ? `https://wa.me/${rawWhatsapp.replace(/\D/g, "")}`
+            : null
+
     return (
         <section id="contacto" className="py-24 bg-zinc-950 relative overflow-hidden">
             {/* Dark Aesthetic Decor */}
@@ -32,31 +49,31 @@ export function Contact() {
                             </div>
 
                             <div className="space-y-8">
-                                <div className="flex items-center gap-6 group">
+                                <a href={`tel:${displayPhone.replace(/\s+/g, '')}`} className="flex items-center gap-6 group">
                                     <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 ring-1 ring-white/10">
                                         <Phone className="h-6 w-6" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Llámanos</p>
-                                        <p className="text-xl font-bold text-white">+52 (81) 1234 5678</p>
+                                        <p className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">{displayPhone}</p>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-6 group">
+                                </a>
+                                <a href={`mailto:${displayEmail}`} className="flex items-center gap-6 group">
                                     <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 ring-1 ring-white/10">
                                         <Mail className="h-6 w-6" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Email</p>
-                                        <p className="text-xl font-bold text-white">hola@garzacasas.ia</p>
+                                        <p className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">{displayEmail}</p>
                                     </div>
-                                </div>
+                                </a>
                                 <div className="flex items-center gap-6 group">
                                     <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 ring-1 ring-white/10">
                                         <MapPin className="h-6 w-6" />
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Oficina</p>
-                                        <p className="text-xl font-bold text-white">San Pedro Garza García, NL</p>
+                                        <p className="text-xl font-bold text-white">{displayAddress}</p>
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +81,7 @@ export function Contact() {
 
                         {/* Form Side */}
                         <ScrollReveal direction="left" className="p-12 lg:p-20 bg-black/40">
-                            <ContactForm />
+                            <ContactForm whatsappHref={whatsappHref} />
                         </ScrollReveal>
                     </div>
                 </div>
@@ -73,7 +90,7 @@ export function Contact() {
     )
 }
 
-function ContactForm() {
+function ContactForm({ whatsappHref }: { whatsappHref: string | null }) {
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
@@ -156,9 +173,20 @@ function ContactForm() {
                 {loading ? 'Enviando...' : 'Enviar Mensaje'}
                 {!loading && <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />}
             </Button>
-            <p className="text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest pt-4">
-                O escríbenos por <span className="text-green-500 cursor-pointer hover:underline">WhatsApp</span> para respuesta inmediata
-            </p>
+            {whatsappHref && (
+                <p className="text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest pt-4">
+                    O escríbenos por{' '}
+                    <a
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-500 hover:underline"
+                    >
+                        WhatsApp
+                    </a>{' '}
+                    para respuesta inmediata
+                </p>
+            )}
         </form>
     )
 }

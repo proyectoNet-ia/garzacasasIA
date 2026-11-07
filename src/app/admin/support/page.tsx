@@ -143,7 +143,14 @@ export default function AdminSupportPage() {
                 .select('*')
                 .order('last_message_at', { ascending: false })
 
-            if (ticketsError) throw ticketsError
+            if (ticketsError) {
+                if (ticketsError.code === 'PGRST205' || ticketsError.message?.includes('schema cache')) {
+                    console.warn('La tabla support_tickets aún no está creada en Supabase.')
+                    setTickets([])
+                    return
+                }
+                throw ticketsError
+            }
 
             // Fetch agents data
             if (ticketsData && ticketsData.length > 0) {

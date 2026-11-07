@@ -38,7 +38,8 @@ export function DashboardSidebar() {
     }, [])
 
     useEffect(() => {
-        let channel: any;
+        let propertiesChannel: any;
+        let profileChannel: any;
 
         async function fetchProfile() {
             const { data: { user } } = await supabase.auth.getUser()
@@ -61,9 +62,9 @@ export function DashboardSidebar() {
                 const count = await fetchCount()
                 setProfile({ ...profileData, properties_count: count, email: user.email })
 
-                // Real-time Subscription
-                channel = supabase
-                    .channel('properties-count-sync')
+                // Real-time Subscription para properties
+                propertiesChannel = supabase
+                    .channel(`properties-count-sync-${user.id}`)
                     .on(
                         'postgres_changes',
                         {
@@ -78,6 +79,28 @@ export function DashboardSidebar() {
                         }
                     )
                     .subscribe()
+
+                // Real-time Subscription para profiles (sincroniza cambios de plan inmediatamente)
+                profileChannel = supabase
+                    .channel(`profile-sync-${user.id}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'profiles',
+                            filter: `id=eq.${user.id}`
+                        },
+                        (payload: any) => {
+                            if (payload.new) {
+                                setProfile((prev: any) => ({
+                                    ...prev,
+                                    ...payload.new,
+                                }))
+                            }
+                        }
+                    )
+                    .subscribe()
             }
             setLoading(false)
         }
@@ -85,9 +108,10 @@ export function DashboardSidebar() {
         fetchProfile()
 
         return () => {
-            if (channel) supabase.removeChannel(channel)
+            if (propertiesChannel) supabase.removeChannel(propertiesChannel)
+            if (profileChannel) supabase.removeChannel(profileChannel)
         }
-    }, [supabase])
+    }, [supabase, pathname])
 
     // Close mobile menu on path change
     useEffect(() => {
@@ -236,7 +260,9 @@ export function DashboardSidebar() {
                                     href="/dashboard/suscripcion"
                                     className="block text-center text-[10px] font-bold text-blue-600 hover:text-white hover:bg-blue-600 bg-white py-2 rounded-xl transition-all border border-blue-100 shadow-sm"
                                 >
-                                    Mejorar Plan
+                                    {profile?.subscription_plan && profile.subscription_plan !== 'Gratis' && profile.subscription_plan !== 'Básico'
+                                        ? 'Gestionar Plan'
+                                        : 'Mejorar Plan'}
                                 </Link>
                             </div>
                         </div>

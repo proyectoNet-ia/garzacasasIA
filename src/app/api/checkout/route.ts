@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
-import { createPaymentPreference } from '@/lib/mercadopago/client'
-import { v4 as uuidv4 } from 'uuid'
+import { createPayPalOrder } from '@/lib/paypal/client'
 
 export async function POST(req: NextRequest) {
-    // 🔍 DEBUG — ver qué credenciales tiene el servidor en runtime
-    const token = process.env.MP_ACCESS_TOKEN || 'NO_TOKEN'
-    const pubKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || 'NO_KEY'
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'NO_URL'
-    console.log('[Checkout] MP_ACCESS_TOKEN prefix:', token.substring(0, 15) + '...')
-    console.log('[Checkout] MP_PUBLIC_KEY prefix:', pubKey.substring(0, 15) + '...')
-    console.log('[Checkout] APP_URL:', appUrl)
-    // ────────────────────────────────────────────────────────────
     try {
-
-        // 1. Verificar autenticación (cliente normal del usuario)
+        // 1. Verificar autenticación del usuario
         const supabase = await createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -25,7 +15,7 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // 2. Obtener datos del body
+        // 2. Obtener datos de la solicitud
         const body = await req.json()
         const { planId, billingPeriod = 'monthly' } = body
 
@@ -36,10 +26,9 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // Service client para operaciones de BD con bypass de RLS
         const serviceSupabase = createServiceClient()
 
-        // 3. Obtener info del plan de la BD
+        // 3. Obtener información del plan desde la base de datos
         const { data: plan, error: planError } = await serviceSupabase
             .from('subscriptions_config')
             .select('*')
@@ -53,7 +42,7 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // No se puede pagar el plan gratuito
+        // El plan gratuito no requiere pago
         if (!plan.monthly_price || plan.monthly_price === 0) {
             return NextResponse.json(
                 { error: 'Este plan es gratuito, no requiere pago.' },
@@ -61,7 +50,7 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // 4. Obtener nombre del perfil (email viene de auth.getUser)
+        // 4. Obtener nombre del perfil
         const { data: profile } = await serviceSupabase
             .from('profiles')
             .select('full_name')
@@ -69,13 +58,13 @@ export async function POST(req: NextRequest) {
             .single()
 
         const amount = billingPeriod === 'yearly'
-            ? (plan.yearly_price ?? plan.monthly_price * 10)  // 2 meses gratis si paga anual
+            ? (plan.yearly_price ?? plan.monthly_price * 10) // 2 meses de descuento en pago anual
             : plan.monthly_price
 
-        // 5. Crear referencia externa única para este intento de pago
-        const externalReference = uuidv4()
+        // 5. Generar referencia interna única (Web Crypto nativa)
+        const externalReference = crypto.randomUUID()
 
-        // 6. Registrar el intento de pago en la BD usando service client (bypass RLS)
+        // 6. Registrar el intento de pago en Supabase
         const { error: paymentError } = await serviceSupabase
             .from('payments')
             .insert({
@@ -85,61 +74,49 @@ export async function POST(req: NextRequest) {
                 amount,
                 currency: 'MXN',
                 status: 'pending',
+                gateway: 'paypal',
                 billing_period: billingPeriod,
-                mp_external_reference: externalReference,
+                mp_external_reference: externalReference, // Compatibilidad con schema previo
             })
 
         if (paymentError) {
-            console.error('Error registrando pago:', paymentError)
+            console.error('Error registrando pago en Supabase:', paymentError)
             return NextResponse.json(
-                { error: 'Error interno al registrar el pago.' },
+                { error: 'Error interno al registrar el pago preliminar.' },
                 { status: 500 }
             )
         }
 
-        // 7. Crear preferencia en Mercado Pago
-        // ⚠️ IMPORTANTE SANDBOX: MP rechaza si el payer email pertenece
-        // a una cuenta real de MP. En TEST usamos el email del comprador de prueba.
-        const isSandboxToken = process.env.MP_ACCESS_TOKEN?.startsWith('TEST-')
-        const payerEmail = isSandboxToken
-            ? 'test_user_1562492252061690351@testuser.com'  // Comprador de prueba
-            : (user.email ?? '')
-
-        const preference = await createPaymentPreference({
+        // 7. Crear la orden de pago en PayPal
+        const order = await createPayPalOrder({
             planName: plan.name,
             planId: plan.id,
             amount,
             billingPeriod,
             userId: user.id,
-            userEmail: payerEmail,
-            userName: profile?.full_name ?? 'Agente',
+            userEmail: user.email ?? '',
+            userName: profile?.full_name ?? 'Agente Inmobiliario',
             externalReference,
         })
 
-
-        // 8. Actualizar el payment con el preference_id de MP (service client)
+        // 8. Asociar el ID de orden de PayPal al registro de pago
         await serviceSupabase
             .from('payments')
-            .update({ mp_preference_id: preference.preferenceId })
+            .update({
+                paypal_order_id: order.orderId,
+                mp_preference_id: order.orderId, // Para compatibilidad
+            })
             .eq('mp_external_reference', externalReference)
 
         return NextResponse.json({
-            preferenceId: preference.preferenceId,
-            // El servidor decide qué URL usar según el token configurado
-            // TEST- = sandbox,  APP- = producción
-            checkoutUrl: process.env.MP_ACCESS_TOKEN?.startsWith('TEST-')
-                ? preference.sandboxInitPoint
-                : preference.initPoint,
-            // También exponer ambas por si se necesitan
-            initPoint: preference.initPoint,
-            sandboxInitPoint: preference.sandboxInitPoint,
+            orderId: order.orderId,
+            checkoutUrl: order.approveUrl,
         })
 
-
     } catch (error: any) {
-        console.error('Error en /api/checkout:', error)
+        console.error('Error en /api/checkout (PayPal):', error)
         return NextResponse.json(
-            { error: error.message ?? 'Error interno del servidor' },
+            { error: error.message ?? 'Error interno del servidor procesando el pago.' },
             { status: 500 }
         )
     }

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { LayoutDashboard, Settings, Users, Building, Building2, FileText, BarChart3, User, ArrowLeftRight, ShieldCheck, LifeBuoy } from 'lucide-react'
+import { LayoutDashboard, Settings, Users, Building, Building2, FileText, BarChart3, User, ArrowLeftRight, ShieldCheck, LifeBuoy, DollarSign, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { cn } from '@/lib/utils'
@@ -13,7 +13,7 @@ export default async function AdminLayout({
     const supabase = await createClient()
 
     // Check if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (!user) redirect('/login')
 
@@ -33,6 +33,8 @@ export default async function AdminLayout({
     const menuItems = [
         { icon: ArrowLeftRight, label: 'Regresar al CMS', href: '/dashboard', badge: 'Agente', isSpecial: true, description: 'Vista de Agente' },
         { icon: ShieldCheck, label: 'Resumen', href: '/admin', badge: null },
+        { icon: DollarSign, label: 'Ventas', href: '/admin/sales', badge: null },
+        { icon: Sparkles, label: 'Paquetes', href: '/admin/packages', badge: null },
         { icon: Building2, label: 'Propiedades', href: '/admin/my-properties', badge: 'Ilimitadas' },
         { icon: User, label: 'Mi Perfil', href: '/admin/profile', badge: null },
         { icon: Users, label: 'Agentes', href: '/admin/agents', badge: null },

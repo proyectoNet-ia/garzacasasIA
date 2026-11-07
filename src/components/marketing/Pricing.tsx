@@ -93,23 +93,27 @@ export async function Pricing() {
                     {plans.map((plan, index) => {
                         const Icon = iconMap[plan.name] || Building2
                         const features = Array.isArray(plan.features) ? plan.features : []
-                        const isPopular = plan.name === 'Pro'
+                        const isPopular = Boolean(plan.is_popular !== undefined ? plan.is_popular : plan.name === 'Pro')
                         const isFree = !plan.monthly_price || plan.monthly_price === 0
-                        const isEnterprise = plan.name === 'Enterprise'
+                        const isContact = plan.cta_type === 'contact' || plan.name === 'Enterprise'
 
-                        const ctaHref = isEnterprise
-                            ? '/contacto'
-                            : isFree
-                                ? '/registro'
-                                : user
-                                    ? '/dashboard/suscripcion'
-                                    : '/registro'
+                        const ctaHref = plan.cta_url || (
+                            isContact
+                                ? '/contacto'
+                                : isFree
+                                    ? '/registro'
+                                    : user
+                                        ? '/dashboard/suscripcion'
+                                        : '/registro'
+                        )
 
-                        const ctaLabel = isEnterprise
-                            ? 'Contactar'
-                            : isFree
-                                ? 'Empezar gratis'
-                                : 'Empezar ahora'
+                        const ctaLabel = plan.cta_label || (
+                            isContact
+                                ? 'Contactar'
+                                : isFree
+                                    ? 'Empezar gratis'
+                                    : 'Empezar ahora'
+                        )
 
                         return (
                             <ScrollReveal

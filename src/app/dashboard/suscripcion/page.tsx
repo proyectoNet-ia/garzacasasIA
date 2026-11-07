@@ -379,8 +379,9 @@ export default function SuscripcionPage() {
                     {plans.map((plan) => {
                         const Icon = PLAN_ICONS[plan.name] || Building2
                         const features = Array.isArray(plan.features) ? plan.features : []
-                        const isPopular = plan.name === 'Pro'
+                        const isPopular = Boolean(plan.is_popular !== undefined ? plan.is_popular : plan.name === 'Pro')
                         const isFree = !plan.monthly_price || plan.monthly_price === 0
+                        const isContact = plan.cta_type === 'contact' || plan.name === 'Enterprise'
                         const isCurrentPlanCard = plan.name === currentPlan
 
                         const displayAmount = billingPeriod === 'yearly'
@@ -472,14 +473,14 @@ export default function SuscripcionPage() {
                                     </ul>
 
                                     <div>
-                                        {plan.name === 'Enterprise' ? (
+                                        {isContact ? (
                                             <a
-                                                href="https://wa.me/528180000000"
+                                                href={plan.cta_url || "https://wa.me/528180000000"}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center justify-center w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
                                             >
-                                                Contactar ventas
+                                                {plan.cta_label || 'Contactar ventas'}
                                             </a>
                                         ) : (
                                             <CheckoutButton
@@ -509,9 +510,9 @@ export default function SuscripcionPage() {
                     <Shield className="h-5 w-5 text-zinc-400" />
                 </div>
                 <div>
-                    <p className="font-bold text-zinc-700 mb-1">Pagos 100% seguros con Mercado Pago</p>
+                    <p className="font-bold text-zinc-700 mb-1">Pagos 100% seguros con PayPal</p>
                     <p className="text-sm text-zinc-500 leading-relaxed">
-                        Aceptamos tarjetas de crédito y débito (Visa, Mastercard, AMEX), PayPal, transacciones OXXO y transferencias bancarias. Todos los pagos están protegidos con encriptación SSL de 256 bits. Puedes cancelar tu suscripción en cualquier momento.
+                        Aceptamos tarjetas de crédito y débito (Visa, Mastercard, American Express) y saldo PayPal. Todos los pagos están protegidos con encriptación SSL de 256 bits y el programa de protección de PayPal. Puedes gestionar o cancelar tu suscripción en cualquier momento.
                     </p>
                 </div>
             </div>

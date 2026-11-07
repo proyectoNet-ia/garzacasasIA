@@ -306,7 +306,9 @@ export default function PropertyDetailPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <PlusvaliaBadge
                                         municipio={property.location?.split(',')[0]?.trim() || 'Nacional'}
-                                        tipo={property.property_type?.toLowerCase().includes('depto') ? 'departamento' : 'casa'}
+                                        estado={property.location?.split(',')[1]?.trim()}
+                                        clave={property.municipio_clave}
+                                        tipo={property.property_type?.toLowerCase().includes('depto') ? 'departamento' : property.property_type?.toLowerCase().includes('terreno') ? 'terreno' : property.property_type?.toLowerCase().includes('local') ? 'local' : 'casa'}
                                         lat={property.latitude}
                                         lng={property.longitude}
                                     />

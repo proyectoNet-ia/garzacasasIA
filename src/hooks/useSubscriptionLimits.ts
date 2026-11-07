@@ -19,8 +19,8 @@ export interface UsageStats {
     remaining_properties: number
 }
 
-export function useSubscriptionLimits() {
-    const [limits, setLimits] = useState<PlanLimits>({
+const KNOWN_PLAN_LIMITS: Record<string, PlanLimits> = {
+    'Gratis': {
         properties_limit: 5,
         images_per_property: 3,
         priority_tier: 1,
@@ -28,14 +28,43 @@ export function useSubscriptionLimits() {
         has_advanced_stats: false,
         has_priority_support: false,
         has_featured_badge: false,
-    })
+    },
+    'Pro': {
+        properties_limit: 50,
+        images_per_property: 15,
+        priority_tier: 2,
+        has_ai_analysis: true,
+        has_advanced_stats: true,
+        has_priority_support: true,
+        has_featured_badge: true,
+    },
+    'Platino': {
+        properties_limit: 999999,
+        images_per_property: 999999,
+        priority_tier: 3,
+        has_ai_analysis: true,
+        has_advanced_stats: true,
+        has_priority_support: true,
+        has_featured_badge: true,
+    },
+    'Enterprise': {
+        properties_limit: 999999,
+        images_per_property: 999999,
+        priority_tier: 3,
+        has_ai_analysis: true,
+        has_advanced_stats: true,
+        has_priority_support: true,
+        has_featured_badge: true,
+    },
+}
 
+export function useSubscriptionLimits() {
+    const [limits, setLimits] = useState<PlanLimits>(KNOWN_PLAN_LIMITS['Gratis'])
     const [usage, setUsage] = useState<UsageStats>({
         properties_count: 0,
         can_create_property: true,
         remaining_properties: 5,
     })
-
     const [loading, setLoading] = useState(true)
     const [planName, setPlanName] = useState('Gratis')
     const [isUnlimited, setIsUnlimited] = useState(false)
@@ -54,18 +83,33 @@ export function useSubscriptionLimits() {
                 .rpc('get_agent_plan_limits', { p_agent_id: user.id })
                 .single()
 
+            let resolvedPropertiesLimit = 5
+
             if (!planError && planData) {
                 const plan = planData as any
-                setPlanName(plan.plan_name)
-                setIsUnlimited(plan.is_unlimited)
+                const currentPlanName = plan.plan_name || 'Gratis'
+                const defaults = KNOWN_PLAN_LIMITS[currentPlanName] || KNOWN_PLAN_LIMITS['Gratis']
+
+                setPlanName(currentPlanName)
+                setIsUnlimited(plan.is_unlimited || currentPlanName === 'Enterprise' || currentPlanName === 'Platino')
+
+                // Si el plan es Pro o superior pero la función SQL devolvió el fallback de 5, aplicar límites reales
+                resolvedPropertiesLimit = (currentPlanName === 'Pro' && (!plan.properties_limit || plan.properties_limit <= 5))
+                    ? defaults.properties_limit
+                    : (plan.properties_limit || defaults.properties_limit)
+
+                const resolvedImages = (currentPlanName === 'Pro' && (!plan.images_per_property || plan.images_per_property <= 3))
+                    ? defaults.images_per_property
+                    : (plan.images_per_property || defaults.images_per_property)
+
                 setLimits({
-                    properties_limit: plan.properties_limit,
-                    images_per_property: plan.images_per_property,
-                    priority_tier: plan.priority_tier,
-                    has_ai_analysis: plan.has_ai_analysis,
-                    has_advanced_stats: plan.has_advanced_stats,
-                    has_priority_support: plan.has_priority_support,
-                    has_featured_badge: plan.has_featured_badge,
+                    properties_limit: resolvedPropertiesLimit,
+                    images_per_property: resolvedImages,
+                    priority_tier: plan.priority_tier || defaults.priority_tier,
+                    has_ai_analysis: currentPlanName === 'Pro' ? true : (plan.has_ai_analysis || defaults.has_ai_analysis),
+                    has_advanced_stats: currentPlanName === 'Pro' ? true : (plan.has_advanced_stats || defaults.has_advanced_stats),
+                    has_priority_support: currentPlanName === 'Pro' ? true : (plan.has_priority_support || defaults.has_priority_support),
+                    has_featured_badge: currentPlanName === 'Pro' ? true : (plan.has_featured_badge || defaults.has_featured_badge),
                 })
             } else {
                 // Fallback si el RPC falla (e.g. función no existe aún)
@@ -81,10 +125,25 @@ export function useSubscriptionLimits() {
 
             if (!limitError && limitData) {
                 const check = limitData as any
+                const maxLimit = Math.max(check.max_limit || 0, resolvedPropertiesLimit)
                 setUsage({
                     properties_count: check.current_count,
-                    can_create_property: check.can_create,
-                    remaining_properties: Math.max(0, check.max_limit - check.current_count),
+                    can_create_property: check.current_count < maxLimit,
+                    remaining_properties: Math.max(0, maxLimit - check.current_count),
+                })
+            } else {
+                // Si el RPC check_property_limit falla, contar directamente
+                const { count } = await supabase
+                    .from('properties')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('agent_id', user.id)
+                    .in('status', ['active', 'draft'])
+
+                const currentCount = count || 0
+                setUsage({
+                    properties_count: currentCount,
+                    can_create_property: currentCount < resolvedPropertiesLimit,
+                    remaining_properties: Math.max(0, resolvedPropertiesLimit - currentCount),
                 })
             }
 
@@ -106,7 +165,7 @@ export function useSubscriptionLimits() {
 
             if (profile?.is_unlimited || profile?.role === 'admin') {
                 setIsUnlimited(true)
-                setLimits({ properties_limit: 999999, images_per_property: 999999, priority_tier: 3, has_ai_analysis: true, has_advanced_stats: true, has_priority_support: true, has_featured_badge: true })
+                setLimits(KNOWN_PLAN_LIMITS['Enterprise'])
                 setUsage({ properties_count: 0, can_create_property: true, remaining_properties: 999999 })
                 setPlanName('Ilimitado')
                 return
@@ -115,33 +174,36 @@ export function useSubscriptionLimits() {
             const planNameLocal = profile?.subscription_plan || 'Gratis'
             setPlanName(planNameLocal)
 
-            const { data: planConfig } = await supabase
+            const { data: dbPlan } = await supabase
                 .from('subscriptions_config')
-                .select('features')
+                .select('*')
                 .eq('name', planNameLocal)
                 .single()
 
-            if (planConfig?.features) {
-                const f = planConfig.features as any
-                setLimits({
-                    properties_limit: f.properties_limit || 5,
-                    images_per_property: f.images_per_property || 3,
-                    priority_tier: f.priority_tier || 1,
-                    has_ai_analysis: f.has_ai_analysis || false,
-                    has_advanced_stats: f.has_advanced_stats || false,
-                    has_priority_support: f.has_priority_support || false,
-                    has_featured_badge: f.has_featured_badge || false,
-                })
+            const planDefaults = KNOWN_PLAN_LIMITS[planNameLocal] || KNOWN_PLAN_LIMITS['Gratis']
+            const resolvedLimits: PlanLimits = {
+                properties_limit: Number(dbPlan?.properties_limit ?? planDefaults.properties_limit),
+                images_per_property: Number(dbPlan?.images_per_property ?? planDefaults.images_per_property),
+                priority_tier: Number(dbPlan?.priority ?? planDefaults.priority_tier),
+                has_ai_analysis: Boolean(dbPlan?.has_ai_analysis !== undefined ? dbPlan.has_ai_analysis : planDefaults.has_ai_analysis),
+                has_advanced_stats: Boolean(dbPlan?.has_ai_analysis !== undefined ? dbPlan.has_ai_analysis : planDefaults.has_advanced_stats),
+                has_priority_support: Boolean(dbPlan?.has_priority_support !== undefined ? dbPlan.has_priority_support : planDefaults.has_priority_support),
+                has_featured_badge: Boolean(dbPlan?.is_popular !== undefined ? dbPlan.is_popular : planDefaults.has_featured_badge),
             }
+            setLimits(resolvedLimits)
 
             const { count } = await supabase
                 .from('properties')
                 .select('*', { count: 'exact', head: true })
                 .eq('agent_id', userId)
+                .in('status', ['active', 'draft'])
 
             const currentCount = count || 0
-            const limit = (planConfig?.features as any)?.properties_limit || 5
-            setUsage({ properties_count: currentCount, can_create_property: currentCount < limit, remaining_properties: Math.max(0, limit - currentCount) })
+            setUsage({
+                properties_count: currentCount,
+                can_create_property: currentCount < resolvedLimits.properties_limit,
+                remaining_properties: Math.max(0, resolvedLimits.properties_limit - currentCount),
+            })
         } finally {
             setLoading(false)
         }

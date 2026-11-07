@@ -4,11 +4,12 @@ import { createClient } from '@supabase/supabase-js'
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://garzacasas.com'
 
 interface Props {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
+        const { id } = await params
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         const { data: property } = await supabase
             .from('properties')
             .select('title, description, location, price, property_type, listing_type, main_image_url, features')
-            .eq('id', params.id)
+            .eq('id', id)
             .single()
 
         if (!property) {
@@ -44,12 +45,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             title,
             description,
             alternates: {
-                canonical: `${siteUrl}/propiedades/${params.id}`,
+                canonical: `${siteUrl}/propiedades/${id}`,
             },
             openGraph: {
                 type: 'article',
                 locale: 'es_MX',
-                url: `${siteUrl}/propiedades/${params.id}`,
+                url: `${siteUrl}/propiedades/${id}`,
                 title,
                 description,
                 siteName: 'Garza Casas IA',

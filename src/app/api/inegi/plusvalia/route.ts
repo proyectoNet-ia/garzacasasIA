@@ -1,91 +1,44 @@
 import { NextResponse } from 'next/server'
-import { 
-    PRECIOS_MORELIA_2026, 
-    getPreciosVivienda, 
-    extraerDatosRecientes, 
-    MUNICIPIOS_MICHOACAN,
-    AREAS
-} from '@/lib/inegi/indicadores'
+import { obtenerMercadoInmobiliario } from '@/lib/inegi/mercadoNacional'
+import { getPreciosVivienda, extraerDatosRecientes, AREAS } from '@/lib/inegi/indicadores'
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url)
-        const municipioParam = searchParams.get('municipio')?.toUpperCase() || 'MORELIA'
-        const tipo = (searchParams.get('tipo') || 'casa') as 'casa' | 'departamento'
+        const municipioParam = searchParams.get('municipio') || ''
+        const estadoParam = searchParams.get('estado') || ''
+        const claveParam = searchParams.get('clave') || ''
+        const tipo = (searchParams.get('tipo') || 'casa') as 'casa' | 'departamento' | 'terreno' | 'local'
         const lat = parseFloat(searchParams.get('lat') || '0')
         const lng = parseFloat(searchParams.get('lng') || '0')
 
-        let municipio = municipioParam
-        let claveArea = (MUNICIPIOS_MICHOACAN as any)[municipio] || AREAS.NACIONAL
+        // 1. Obtener cálculo calibrado de inteligencia de mercado nacional para este municipio/estado
+        const mercado = obtenerMercadoInmobiliario({
+            municipio: municipioParam,
+            estado: estadoParam,
+            clave: claveParam,
+            tipo,
+            lat,
+            lng
+        })
 
-        // 1. Detección inteligente por coordenadas (si están disponibles)
-        if (lat !== 0 && lng !== 0) {
-            // Rango aproximado de Morelia, Michoacán
-            if (lat > 19.6 && lat < 19.8 && lng > -101.3 && lng < -101.1) {
-                claveArea = (MUNICIPIOS_MICHOACAN as any)['MORELIA']
-                municipio = 'Morelia'
-            }
-            // Rango general de Michoacán
-            else if (lat > 18.0 && lat < 21.0 && lng > -104.0 && lng < -100.0) {
-                claveArea = AREAS.MICHOACAN
-                municipio = 'Michoacán'
-            }
-            // Otros estados...
-            else if (lat > 20.0 && lat < 23.0 && lng > -106.0 && lng < -101.0) {
-                claveArea = AREAS.JALISCO
-                municipio = 'Jalisco'
-            }
-        }
-
-        // 2. Intentar obtener datos reales del INEGI
+        // 2. Intentar consultar INEGI en tiempo real si está disponible
         try {
-            const rawData = await getPreciosVivienda(claveArea, tipo)
+            const rawData = await getPreciosVivienda(AREAS.NACIONAL, tipo === 'departamento' ? 'departamento' : 'casa')
             const procesados = extraerDatosRecientes(rawData)
-
-            if (procesados) {
-                return NextResponse.json([{
-                    municipio: municipio.charAt(0) + municipio.slice(1).toLowerCase(),
-                    estado: claveArea.startsWith('16') ? 'Michoacán' : 'México',
-                    precio_m2: tipo === 'casa' ? 23233 : 20842, // Precio base estimado
-                    variacion_anual: procesados.variacion_anual_pct,
-                    tipo: tipo,
-                    periodo: procesados.periodo,
-                    fuente: 'INEGI Real-time'
-                }])
+            if (procesados && procesados.variacion_anual_pct) {
+                // Confirmamos período reciente si INEGI BIE responde
+                mercado.periodo = procesados.periodo
             }
-        } catch (apiError: any) {
-            console.warn('[API Plusvalía] Falló consulta real, usando fallback:', apiError.message)
+        } catch {
+            // Continúa con los datos calibrados SHF del mercado nacional
         }
 
-        // 3. Fallback a datos nacionales si la API falla o no hay datos del municipio
-        const datos = PRECIOS_MORELIA_2026.filter(
-            p => p.municipio.toUpperCase() === municipio
-        )
-
-        if (datos.length > 0) {
-            return NextResponse.json(datos)
-        }
-
-        // Si no es Morelia y no tenemos datos específicos, devolvemos un promedio nacional genérico
-        return NextResponse.json([{
-            municipio: municipio.charAt(0) + municipio.slice(1).toLowerCase(),
-            estado: 'México',
-            precio_m2: 21500, // Promedio nacional estimado
-            variacion_anual: 7.5,
-            tipo: tipo,
-            periodo: '2026-02',
-            fuente: 'Promedio Nacional (SHF)'
-        }])
+        return NextResponse.json([mercado])
     } catch (error: any) {
         console.error('[API Plusvalía] Error controlado:', error.message)
-        return NextResponse.json([{
-            municipio: 'Nacional',
-            estado: 'México',
-            precio_m2: 21500,
-            variacion_anual: 7.5,
-            tipo: 'casa',
-            periodo: '2026-02',
-            fuente: 'INEGI Fallback'
-        }])
+        const fallback = obtenerMercadoInmobiliario({ tipo: 'casa' })
+        return NextResponse.json([fallback])
     }
 }
+

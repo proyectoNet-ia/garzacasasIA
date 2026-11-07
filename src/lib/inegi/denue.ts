@@ -37,15 +37,27 @@ export async function getEstablecimientosCercanos(
     const condicion = codigoActividad === '0' ? 'todos' : codigoActividad
     const url = denueUrl(`buscar/${condicion}/${lat},${lng}/${radioMetros}`)
 
-    const respuesta = await fetchConCache<DenueRespuesta | DenueEstablecimiento[]>(
+    const respuesta = await fetchConCache<any>(
         url,
         cacheKey,
         CACHE_TTL_HORAS.denue
     )
 
-    // La API puede devolver el array directamente o en .datos
-    if (Array.isArray(respuesta)) return respuesta
-    if ('datos' in respuesta) return respuesta.datos
+    // La API puede devolver el array directamente o en .datos, o como string serializado
+    let parsed = respuesta
+    if (typeof parsed === 'string') {
+        try {
+            parsed = JSON.parse(parsed)
+        } catch {
+            console.error('[DENUE] No se pudo parsear respuesta como JSON:', parsed?.slice(0, 100))
+            return []
+        }
+    }
+
+    if (Array.isArray(parsed)) return parsed
+    if (parsed && typeof parsed === 'object' && 'datos' in parsed && Array.isArray(parsed.datos)) {
+        return parsed.datos
+    }
     return []
 }
 
@@ -56,7 +68,7 @@ export async function getEstablecimientosCercanos(
 export async function getServiciosCercanos(
     lat: number,
     lng: number,
-    radioMetros: number = 1000
+    radioMetros: number = 500
 ): Promise<ServiciosCercanos> {
     try {
         const establecimientos = await getEstablecimientosCercanos(lat, lng, radioMetros, 'todos')
@@ -78,20 +90,31 @@ export async function getServiciosCercanos(
             detalle: establecimientos
         }
 
-        // Clasificación ultra-flexible (busca cualquier coincidencia)
+        // Clasificación ultra-flexible (revisa código SCIAN, Nombre y Clase de actividad oficial del INEGI)
         establecimientos.forEach(est => {
             const scian = (est.codigo_act || (est as any).Codigo_scian || '').toString()
             const nombre = (est.nom_estab || (est as any).Nombre || '').toLowerCase()
+            const clase = ((est as any).Clase_actividad || (est as any).clase_act || '').toLowerCase()
             
-            if (scian.startsWith('611') || nombre.includes('escuela') || nombre.includes('colegio')) stats.escuelas++
-            else if (scian.startsWith('622') || nombre.includes('hospital')) stats.hospitales++
-            else if (scian.startsWith('621') || nombre.includes('clínica')) stats.clinicas++
-            else if (scian.startsWith('464112') || nombre.includes('farmacia')) stats.farmacias++
-            else if (scian.startsWith('522') || nombre.includes('banco') || nombre.includes('bbva') || nombre.includes('santander')) stats.bancos++
-            else if (scian.startsWith('464111') || nombre.includes('super') || nombre.includes('soriana') || nombre.includes('walmart')) stats.supermercados++
-            else if (scian.startsWith('722') || nombre.includes('restaurante') || nombre.includes('comida')) stats.restaurantes++
-            else if (scian.startsWith('447') || nombre.includes('gasolinera') || nombre.includes('pemex')) stats.gasolineras++
-            else if (scian.startsWith('71394') || nombre.includes('gym') || nombre.includes('gimnasio')) stats.gimnasios++
+            if (scian.startsWith('611') || nombre.includes('escuela') || nombre.includes('colegio') || clase.includes('educa') || clase.includes('escuela') || clase.includes('profesores particulares')) {
+                stats.escuelas++
+            } else if (scian.startsWith('622') || nombre.includes('hospital') || clase.includes('hospital')) {
+                stats.hospitales++
+            } else if (scian.startsWith('621') || nombre.includes('clínica') || nombre.includes('consultorio') || clase.includes('médic') || clase.includes('salud') || clase.includes('consultorio')) {
+                stats.clinicas++
+            } else if (scian.startsWith('464112') || nombre.includes('farmacia') || clase.includes('farmacia')) {
+                stats.farmacias++
+            } else if (scian.startsWith('522') || nombre.includes('banco') || nombre.includes('bbva') || nombre.includes('santander') || nombre.includes('banamex') || nombre.includes('banorte') || clase.includes('banc') || clase.includes('financier')) {
+                stats.bancos++
+            } else if (scian.startsWith('464111') || nombre.includes('super') || nombre.includes('soriana') || nombre.includes('walmart') || nombre.includes('bodega aurrera') || nombre.includes('oxxo') || nombre.includes('abarrotes') || clase.includes('autoservicio') || clase.includes('abarrotes') || clase.includes('supermercado')) {
+                stats.supermercados++
+            } else if (scian.startsWith('722') || nombre.includes('restaurante') || nombre.includes('comida') || nombre.includes('tacos') || nombre.includes('cafetería') || clase.includes('restaurante') || clase.includes('alimento') || clase.includes('cafetería')) {
+                stats.restaurantes++
+            } else if (scian.startsWith('447') || nombre.includes('gasolinera') || nombre.includes('pemex') || nombre.includes('gas') || clase.includes('combustible') || clase.includes('gasolinera')) {
+                stats.gasolineras++
+            } else if (scian.startsWith('71394') || nombre.includes('gym') || nombre.includes('gimnasio') || nombre.includes('fitness') || clase.includes('acondicionamiento físico') || clase.includes('deportiv') || clase.includes('gimnasio')) {
+                stats.gimnasios++
+            }
         })
 
         return stats

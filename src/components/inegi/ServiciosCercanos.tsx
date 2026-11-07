@@ -23,7 +23,7 @@ interface Props {
     className?: string
 }
 
-export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) {
+export function ServiciosCercanos({ lat, lng, radio = 500, className }: Props) {
     const [data, setData] = useState<ServiciosCercanosType | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -87,6 +87,7 @@ export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) 
         { label: 'Súper', value: data.supermercados, icon: ShoppingCart, color: 'text-amber-600', bg: 'bg-amber-50' },
         { label: 'Gimnasios', value: data.gimnasios, icon: Dumbbell, color: 'text-purple-600', bg: 'bg-indigo-50' },
         { label: 'Restaurantes', value: data.restaurantes, icon: Utensils, color: 'text-orange-600', bg: 'bg-orange-50' },
+        { label: 'Gasolineras', value: data.gasolineras, icon: Fuel, color: 'text-rose-600', bg: 'bg-rose-50' },
     ].filter(item => item.value > 0)
 
     if (items.length === 0) {
@@ -110,7 +111,7 @@ export function ServiciosCercanos({ lat, lng, radio = 1000, className }: Props) 
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                     </span>
-                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">INEGI 2026</span>
+                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{radio}m · INEGI 2026</span>
                 </div>
             </div>
 

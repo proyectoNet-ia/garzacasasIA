@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, Users, BarChart3, TrendingUp } from 'lucide-react'
+import { Building2, Users, BarChart3, TrendingUp, DollarSign } from 'lucide-react'
+import Link from 'next/link'
 
 export default async function AdminDashboard() {
     const supabase = await createClient()
@@ -20,34 +21,46 @@ export default async function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active')
 
+    // Fetch total revenue from approved payments
+    const { data: paymentsData } = await supabase
+        .from('payments')
+        .select('amount, status')
+        .in('status', ['approved', 'completed'])
+
+    const totalRevenue = (paymentsData || []).reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
+
     const stats = [
         {
             title: 'Total Propiedades',
-            value: totalProperties || 0,
+            value: (totalProperties || 0).toString(),
             icon: Building2,
-            color: 'blue',
-            description: 'En toda la plataforma'
+            color: 'text-blue-600',
+            description: 'En toda la plataforma',
+            href: '/admin/all-properties'
         },
         {
             title: 'Propiedades Activas',
-            value: activeProperties || 0,
+            value: (activeProperties || 0).toString(),
             icon: TrendingUp,
-            color: 'green',
-            description: 'Disponibles para venta'
+            color: 'text-green-600',
+            description: 'Disponibles para venta',
+            href: '/admin/all-properties'
         },
         {
             title: 'Agentes Registrados',
-            value: totalAgents || 0,
+            value: (totalAgents || 0).toString(),
             icon: Users,
-            color: 'purple',
-            description: 'Usuarios activos'
+            color: 'text-purple-600',
+            description: 'Usuarios activos',
+            href: '/admin/agents'
         },
         {
-            title: 'Tasa de Conversión',
-            value: '0%',
-            icon: BarChart3,
-            color: 'orange',
-            description: 'Próximamente'
+            title: 'Ingresos por Ventas',
+            value: `$${totalRevenue.toLocaleString('es-MX')} MXN`,
+            icon: DollarSign,
+            color: 'text-emerald-600',
+            description: 'Ver detalle de facturación',
+            href: '/admin/sales'
         },
     ]
 
@@ -64,18 +77,20 @@ export default async function AdminDashboard() {
                 {stats.map((stat) => {
                     const Icon = stat.icon
                     return (
-                        <Card key={stat.title} className="border-zinc-200 shadow-sm hover:shadow-md transition-shadow">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-zinc-600">
-                                    {stat.title}
-                                </CardTitle>
-                                <Icon className={`h-5 w-5 text-${stat.color}-600`} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-black text-zinc-900">{stat.value}</div>
-                                <p className="text-xs text-zinc-500 mt-1">{stat.description}</p>
-                            </CardContent>
-                        </Card>
+                        <Link key={stat.title} href={stat.href}>
+                            <Card className="border-zinc-200 shadow-sm hover:shadow-md hover:border-zinc-300 transition-all cursor-pointer h-full">
+                                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardTitle className="text-sm font-medium text-zinc-600">
+                                        {stat.title}
+                                    </CardTitle>
+                                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-black text-zinc-900 tracking-tight">{stat.value}</div>
+                                    <p className="text-xs text-zinc-500 mt-1">{stat.description}</p>
+                                </CardContent>
+                            </Card>
+                        </Link>
                     )
                 })}
             </div>
@@ -85,41 +100,39 @@ export default async function AdminDashboard() {
                 <CardHeader>
                     <CardTitle className="text-zinc-900">Acciones Rápidas</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <a
+                <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Link
+                        href="/admin/sales"
+                        className="p-4 rounded-xl border border-zinc-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all group"
+                    >
+                        <DollarSign className="h-8 w-8 text-emerald-600 mb-2" />
+                        <h3 className="font-bold text-zinc-900 group-hover:text-emerald-700">Ventas & Facturación</h3>
+                        <p className="text-sm text-zinc-500 mt-1">Suscripciones y cierres de venta</p>
+                    </Link>
+                    <Link
                         href="/admin/my-properties"
-                        className="p-4 rounded-xl border border-zinc-200 hover:border-blue-300 hover:bg-blue-50 transition-all group"
+                        className="p-4 rounded-xl border border-zinc-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
                     >
                         <Building2 className="h-8 w-8 text-blue-600 mb-2" />
                         <h3 className="font-bold text-zinc-900 group-hover:text-blue-600">Mis Propiedades</h3>
                         <p className="text-sm text-zinc-500 mt-1">Gestiona tus propiedades ilimitadas</p>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/admin/agents"
-                        className="p-4 rounded-xl border border-zinc-200 hover:border-purple-300 hover:bg-purple-50 transition-all group"
+                        className="p-4 rounded-xl border border-zinc-200 hover:border-purple-300 hover:bg-purple-50/50 transition-all group"
                     >
                         <Users className="h-8 w-8 text-purple-600 mb-2" />
                         <h3 className="font-bold text-zinc-900 group-hover:text-purple-600">Gestionar Agentes</h3>
                         <p className="text-sm text-zinc-500 mt-1">Administra usuarios y permisos</p>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/admin/settings"
-                        className="p-4 rounded-xl border border-zinc-200 hover:border-green-300 hover:bg-green-50 transition-all group"
+                        className="p-4 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 transition-all group"
                     >
-                        <BarChart3 className="h-8 w-8 text-green-600 mb-2" />
-                        <h3 className="font-bold text-zinc-900 group-hover:text-green-600">Configuración</h3>
+                        <BarChart3 className="h-8 w-8 text-zinc-600 mb-2" />
+                        <h3 className="font-bold text-zinc-900 group-hover:text-zinc-700">Configuración</h3>
                         <p className="text-sm text-zinc-500 mt-1">Hero, planes y ajustes del sitio</p>
-                    </a>
-                </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="border-zinc-200">
-                <CardHeader>
-                    <CardTitle className="text-zinc-900">Actividad Reciente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-zinc-500 text-sm">No hay actividad reciente para mostrar.</p>
+                    </Link>
                 </CardContent>
             </Card>
         </div>
