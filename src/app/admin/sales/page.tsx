@@ -579,7 +579,7 @@ export default function AdminSalesPage() {
                                                                     {p.agent?.full_name || 'Agente'}
                                                                 </p>
                                                                 <p className="text-[11px] text-zinc-400 font-normal">
-                                                                    {p.agent?.email || p.user_id.slice(0, 8)}
+                                                                    {p.agent?.email || (p.user_id ? p.user_id.slice(0, 8) : 'Baja')}
                                                                 </p>
                                                             </div>
                                                         </div>

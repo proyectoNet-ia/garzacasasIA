@@ -19,7 +19,8 @@ async function verifyAdminCaller(): Promise<
         return { error: NextResponse.json({ error: 'No autenticado.' }, { status: 401 }) }
     }
 
-    let { data: callerProfile, error: callerError } = await supabase
+    let callerProfile: { id: string; role?: string | null; status?: string | null } | null = null
+    const { data: primaryCaller, error: callerError } = await supabase
         .from('profiles')
         .select('id, role, status')
         .eq('id', user.id)
@@ -31,7 +32,9 @@ async function verifyAdminCaller(): Promise<
             .select('id, role')
             .eq('id', user.id)
             .single()
-        callerProfile = fallback.data ? { ...fallback.data, status: 'active' } : null
+        callerProfile = fallback.data ? { ...(fallback.data as any), status: 'active' } : null
+    } else {
+        callerProfile = primaryCaller as any
     }
 
     if (callerProfile?.role !== 'admin' || callerProfile?.status === 'suspended') {
@@ -69,7 +72,8 @@ export async function PATCH(
         }
 
         const serviceSupabase = createServiceClient()
-        let { data: targetProfile, error: targetError } = await serviceSupabase
+        let targetProfile: { id: string; role?: string | null; status?: string | null } | null = null
+        let { data: primaryTarget, error: targetError } = await serviceSupabase
             .from('profiles')
             .select('id, role, status')
             .eq('id', targetId)
@@ -81,8 +85,10 @@ export async function PATCH(
                 .select('id, role')
                 .eq('id', targetId)
                 .single()
-            targetProfile = fallbackTarget.data ? { ...fallbackTarget.data, status: 'active' } : null
+            targetProfile = fallbackTarget.data ? { ...(fallbackTarget.data as any), status: 'active' } : null
             targetError = fallbackTarget.error
+        } else {
+            targetProfile = primaryTarget as any
         }
 
         if (targetError || !targetProfile) {

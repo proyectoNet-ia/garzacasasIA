@@ -26,11 +26,11 @@ export default async function AdminAgents() {
         agents = (fallback.data as any) || []
     }
 
-    const agentsList = agents || []
+    const agentsList: any[] = agents || []
 
     // Compute summary stats
-    const totalAgents = agentsList.filter(a => a.role === 'agent').length
-    const totalAdmins = agentsList.filter(a => a.role === 'admin').length
+    const totalAgents = agentsList.filter((a: any) => a.role === 'agent').length
+    const totalAdmins = agentsList.filter((a: any) => a.role === 'admin').length
     const totalProperties = agentsList.reduce((sum, a: any) => sum + (a.properties?.[0]?.count || 0), 0)
     const activeUsersCount = agentsList.filter((a: any) => a.status !== 'suspended').length
     const suspendedUsersCount = agentsList.filter((a: any) => a.status === 'suspended').length

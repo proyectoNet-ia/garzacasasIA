@@ -81,7 +81,7 @@ export function Agents() {
 
                 const formattedAgents = (data || [])
                     .filter((p: any) => p.status !== 'suspended')
-                    .map(p => ({
+                    .map((p: any) => ({
                     id: p.id,
                     full_name: p.full_name || 'Agente Garza Casas',
                     role: p.company_name || 'Consultor Inmobiliario',
