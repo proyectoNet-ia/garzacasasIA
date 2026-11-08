@@ -221,11 +221,13 @@ export default function RegistroPage() {
                                     <div className="relative">
                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                                         <Input
+                                            name="name"
+                                            autoComplete="name"
                                             value={form.full_name}
                                             onChange={e => update('full_name', e.target.value)}
                                             placeholder="Ej. Carlos Garza"
                                             required
-                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                            className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                         />
                                     </div>
                                 </div>
@@ -235,11 +237,13 @@ export default function RegistroPage() {
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="email"
+                                            name="email"
+                                            autoComplete="email"
                                             value={form.email}
                                             onChange={e => update('email', e.target.value)}
                                             placeholder="tu@email.com"
                                             required
-                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                            className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                         />
                                     </div>
                                 </div>
@@ -249,12 +253,14 @@ export default function RegistroPage() {
                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="tel"
+                                            name="tel"
+                                            autoComplete="tel"
                                             value={form.phone}
                                             onChange={e => update('phone', formatPhone(e.target.value))}
                                             placeholder="(812) 000-0000"
                                             required
                                             maxLength={14}
-                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                            className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                         />
                                     </div>
                                 </div>
@@ -271,12 +277,14 @@ export default function RegistroPage() {
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="password"
+                                            name="new-password"
+                                            autoComplete="new-password"
                                             value={form.password}
                                             onChange={e => update('password', e.target.value)}
                                             placeholder="Mínimo 8 caracteres"
                                             required
                                             minLength={8}
-                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                            className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                         />
                                     </div>
                                 </div>
@@ -286,11 +294,13 @@ export default function RegistroPage() {
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                                         <Input
                                             type="password"
+                                            name="confirm-password"
+                                            autoComplete="new-password"
                                             value={form.confirm_password}
                                             onChange={e => update('confirm_password', e.target.value)}
                                             placeholder="Repite tu contraseña"
                                             required
-                                            className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
+                                            className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-400 focus:border-blue-500 rounded-xl"
                                         />
                                     </div>
                                 </div>
@@ -316,7 +326,7 @@ export default function RegistroPage() {
                                         type="button"
                                         variant="outline"
                                         onClick={() => setStep(1)}
-                                        className="flex-1 h-13 rounded-xl border-white/10 text-zinc-400 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-xs"
+                                        className="flex-1 h-13 rounded-xl border-white/15 bg-white/5 text-zinc-200 hover:text-white hover:bg-white/10 hover:border-white/25 font-black uppercase tracking-widest text-xs"
                                     >
                                         Atrás
                                     </Button>
@@ -335,7 +345,7 @@ export default function RegistroPage() {
                             </form>
                         )}
 
-                        <p className="text-center text-zinc-600 text-xs mt-8">
+                        <p className="text-center text-zinc-400 text-xs mt-8">
                             ¿Ya tienes cuenta?{' '}
                             <Link href="/login" className="text-blue-500 hover:text-blue-400 font-bold transition-colors">
                                 Inicia sesión

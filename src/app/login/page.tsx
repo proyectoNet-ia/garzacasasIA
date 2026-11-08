@@ -128,13 +128,15 @@ function LoginForm() {
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
+                                    autoComplete="email"
                                     placeholder="tu@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 rounded-xl"
+                                    className="auth-dark-input h-13 pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-blue-500 rounded-xl"
                                 />
                             </div>
                         </div>
@@ -156,13 +158,15 @@ function LoginForm() {
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                 <Input
                                     id="password"
+                                    name="password"
                                     type={showPassword ? 'text' : 'password'}
+                                    autoComplete="current-password"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     disabled={loading}
-                                    className="h-13 pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus:border-blue-500 rounded-xl"
+                                    className="auth-dark-input h-13 pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-blue-500 rounded-xl"
                                 />
                                 <button
                                     type="button"
@@ -196,14 +200,14 @@ function LoginForm() {
                             <div className="w-full border-t border-white/5" />
                         </div>
                         <div className="relative flex justify-center">
-                            <span className="bg-zinc-900 px-3 text-xs text-zinc-600">¿No tienes cuenta?</span>
+                            <span className="bg-zinc-900 px-3 text-xs text-zinc-400">¿No tienes cuenta?</span>
                         </div>
                     </div>
 
                     <Button
                         asChild
                         variant="outline"
-                        className="w-full h-12 rounded-xl border-white/10 text-zinc-300 hover:text-white hover:bg-white/5 font-bold text-sm transition-all"
+                        className="w-full h-12 rounded-xl border-white/15 bg-white/5 text-white hover:bg-white/10 hover:border-white/25 hover:text-white font-bold text-sm transition-all"
                     >
                         <Link href="/registro">
                             Crear cuenta gratis
@@ -211,8 +215,8 @@ function LoginForm() {
                     </Button>
                 </div>
 
-                <p className="text-center text-zinc-700 text-xs mt-6">
-                    © 2026 Garza Casas IA · <Link href="/" className="hover:text-zinc-500 transition-colors">Volver al inicio</Link>
+                <p className="text-center text-zinc-500 text-xs mt-6">
+                    © 2026 Garza Casas IA · <Link href="/" className="text-zinc-400 hover:text-white transition-colors">Volver al inicio</Link>
                 </p>
             </div>
         </div>

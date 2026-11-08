@@ -111,3 +111,12 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid color-mix(in srgb, white, transparent 90%);
 }
+
+.auth-dark-input:-webkit-autofill,
+.auth-dark-input:-webkit-autofill:hover,
+.auth-dark-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1f1f23 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+}
