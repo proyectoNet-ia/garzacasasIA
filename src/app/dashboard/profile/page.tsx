@@ -7,7 +7,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { User, Mail, Phone, Save, Upload, Loader2, Camera, MessageSquare } from 'lucide-react'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog'
+import {
+    User,
+    Mail,
+    Phone,
+    Save,
+    Loader2,
+    Camera,
+    MessageSquare,
+    Trash2,
+    AlertTriangle,
+    ShieldAlert,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { formatPhone } from '@/hooks/usePhoneFormat'
 
@@ -16,6 +35,9 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [profile, setProfile] = useState<any>(null)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [deleteConfirmInput, setDeleteConfirmInput] = useState('')
+    const [deletingAccount, setDeletingAccount] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
 
@@ -25,17 +47,19 @@ export default function ProfilePage() {
 
     async function fetchProfile() {
         try {
-            const { data: { user } } = await supabase.auth.getUser()
+            const {
+                data: { user },
+            } = await supabase.auth.getUser()
             if (!user) return
 
             const { data, error } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('id, full_name, email, role, avatar_url, phone, whatsapp, company_name, bio, created_at')
                 .eq('id', user.id)
                 .single()
 
             if (error) throw error
-            setProfile(data)
+            setProfile({ ...data, email: data.email || user.email })
         } catch (error: any) {
             console.error('Error fetching profile:', error)
             toast.error('No se pudo cargar el perfil')
@@ -55,7 +79,7 @@ export default function ProfilePage() {
                     whatsapp: profile.whatsapp,
                     bio: profile.bio,
                     company_name: profile.company_name,
-                    updated_at: new Date().toISOString()
+                    updated_at: new Date().toISOString(),
                 })
                 .eq('id', profile.id)
 
@@ -81,7 +105,9 @@ export default function ProfilePage() {
 
         setUploading(true)
         try {
-            const { data: { user } } = await supabase.auth.getUser()
+            const {
+                data: { user },
+            } = await supabase.auth.getUser()
             if (!user) throw new Error('No hay sesión activa')
 
             const fileExt = file.name.split('.').pop()
@@ -93,9 +119,9 @@ export default function ProfilePage() {
 
             if (uploadError) throw uploadError
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath)
+            const {
+                data: { publicUrl },
+            } = supabase.storage.from('avatars').getPublicUrl(filePath)
 
             // Update profile with new avatar URL
             const { error: updateError } = await supabase
@@ -114,6 +140,34 @@ export default function ProfilePage() {
         }
     }
 
+    async function handleDeleteMyAccount() {
+        if (deleteConfirmInput.trim() !== 'ELIMINAR') {
+            toast.error('Escribe ELIMINAR en mayúsculas para confirmar.')
+            return
+        }
+
+        setDeletingAccount(true)
+        try {
+            const res = await fetch('/api/account/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ confirmText: 'ELIMINAR' }),
+            })
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || 'No se pudo eliminar la cuenta.')
+            }
+
+            await supabase.auth.signOut()
+            toast.success('Tu cuenta y publicaciones han sido eliminadas permanentemente.')
+            window.location.href = '/'
+        } catch (error: any) {
+            toast.error(error?.message || 'Error al eliminar la cuenta')
+            setDeletingAccount(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="p-8 flex items-center justify-center min-h-[400px]">
@@ -123,6 +177,7 @@ export default function ProfilePage() {
     }
 
     const userInitial = profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || '?'
+    const isAdmin = profile?.role === 'admin'
 
     return (
         <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -173,7 +228,7 @@ export default function ProfilePage() {
                             <div className="flex justify-between items-center text-sm py-2 border-b border-zinc-50">
                                 <span className="text-zinc-500">Miembro desde</span>
                                 <span className="text-zinc-700 font-medium">
-                                    {new Date(profile?.created_at).toLocaleDateString()}
+                                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '—'}
                                 </span>
                             </div>
                         </div>
@@ -292,6 +347,123 @@ export default function ProfilePage() {
                     </CardFooter>
                 </Card>
             </div>
+
+            {/* Danger Zone / Derechos ARCO - Eliminar mi cuenta */}
+            <Card className="border-red-200/80 bg-red-50/20 shadow-sm overflow-hidden">
+                <CardHeader className="border-b border-red-100/80 bg-red-50/40">
+                    <CardTitle className="text-lg text-red-900 flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        Zona de Peligro · Baja de Cuenta
+                    </CardTitle>
+                    <CardDescription className="text-red-700/80">
+                        Cancela permanentemente tu cuenta de agente, perfil público e inventario de propiedades conforme a tus derechos ARCO.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {isAdmin ? (
+                        <div className="flex items-start gap-3 text-sm text-zinc-600">
+                            <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                            <p>
+                                Tu cuenta posee privilegios de <strong>Super Agente (Admin)</strong> y está protegida contra baja accidental desde este formulario. Si deseas darla de baja, transfiere o retira primero el rol de Administrador.
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="space-y-1 max-w-xl">
+                                <p className="text-sm font-bold text-zinc-900">
+                                    Eliminar mi cuenta permanentemente
+                                </p>
+                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                    Al confirmar, se eliminarán de forma irreversible tus credenciales de acceso, tu foto de perfil y todas tus propiedades e imágenes publicadas. Los comprobantes fiscales/contables de pagos previos se conservan de forma disociada conforme a la ley.
+                                </p>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={() => {
+                                    setDeleteConfirmInput('')
+                                    setDeleteDialogOpen(true)
+                                }}
+                                className="shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl gap-2"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Eliminar mi cuenta
+                            </Button>
+                        </>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Modal de Confirmación Explícita para Eliminar Cuenta */}
+            <Dialog
+                open={deleteDialogOpen}
+                onOpenChange={(open) => {
+                    if (!deletingAccount) setDeleteDialogOpen(open)
+                }}
+            >
+                <DialogContent className="sm:max-w-[440px] rounded-2xl border-zinc-200 p-0 overflow-hidden">
+                    <div className="bg-red-50 p-6 flex flex-col items-center text-center gap-3 border-b border-red-100">
+                        <div className="h-12 w-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                            <Trash2 className="h-6 w-6" />
+                        </div>
+                        <DialogHeader className="space-y-1">
+                            <DialogTitle className="text-lg font-black text-red-900 text-center">
+                                ¿Eliminar tu cuenta definitivamente?
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-red-700/90 text-center leading-relaxed">
+                                Esta acción no se puede deshacer. Se borrarán tus inmuebles publicados, fotografías en la nube y acceso a Garza Casas IA.
+                            </DialogDescription>
+                        </DialogHeader>
+                    </div>
+
+                    <div className="p-6 space-y-4 bg-white">
+                        <div className="space-y-2">
+                            <Label htmlFor="confirm-delete" className="text-xs font-bold text-zinc-700">
+                                Escribe <span className="font-mono text-red-600 bg-red-50 px-1.5 py-0.5 rounded">ELIMINAR</span> para confirmar:
+                            </Label>
+                            <Input
+                                id="confirm-delete"
+                                value={deleteConfirmInput}
+                                onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                placeholder="ELIMINAR"
+                                autoComplete="off"
+                                disabled={deletingAccount}
+                                className="font-mono tracking-widest border-zinc-200 focus:ring-red-500"
+                            />
+                        </div>
+
+                        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={deletingAccount}
+                                onClick={() => setDeleteDialogOpen(false)}
+                                className="w-full sm:w-auto rounded-xl font-bold"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="button"
+                                disabled={deletingAccount || deleteConfirmInput.trim() !== 'ELIMINAR'}
+                                onClick={handleDeleteMyAccount}
+                                className="w-full sm:flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold gap-2"
+                            >
+                                {deletingAccount ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Eliminando cuenta...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="h-4 w-4" />
+                                        Confirmar eliminación
+                                    </>
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

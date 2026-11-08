@@ -61,16 +61,27 @@ export function Agents() {
     useEffect(() => {
         async function fetchAgents() {
             try {
-                // Selección explícita de columnas necesarias (sin select=*)
-                const { data, error } = await supabase
+                // Selección explícita de columnas necesarias (ocultando cuentas suspendidas)
+                let { data, error } = await supabase
                     .from('profiles')
-                    .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, created_at')
+                    .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, status, created_at')
                     .eq('role', 'agent')
+                    .or('status.is.null,status.neq.suspended')
                     .limit(6)
 
-                if (error) throw error
+                if (error) {
+                    const fallback = await supabase
+                        .from('profiles')
+                        .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, created_at')
+                        .eq('role', 'agent')
+                        .limit(6)
+                    if (fallback.error) throw fallback.error
+                    data = fallback.data as any
+                }
 
-                const formattedAgents = (data || []).map(p => ({
+                const formattedAgents = (data || [])
+                    .filter((p: any) => p.status !== 'suspended')
+                    .map(p => ({
                     id: p.id,
                     full_name: p.full_name || 'Agente Garza Casas',
                     role: p.company_name || 'Consultor Inmobiliario',

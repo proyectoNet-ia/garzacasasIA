@@ -33,7 +33,7 @@ import Link from 'next/link'
 
 interface PaymentRecord {
     id: string
-    user_id: string
+    user_id: string | null
     plan_name: string
     amount: number
     currency: string
@@ -43,6 +43,8 @@ interface PaymentRecord {
     paypal_order_id: string | null
     mp_payment_id: string | null
     billing_period: string | null
+    agent_name_snapshot?: string | null
+    agent_email_snapshot?: string | null
     created_at: string
     agent?: {
         full_name: string | null
@@ -93,16 +95,29 @@ export default function AdminSalesPage() {
     async function fetchSalesData() {
         setLoading(true)
         try {
-            // 1. Obtener pagos de suscripciones
-            const { data: paymentsData, error: paymentsError } = await supabase
+            // 1. Obtener pagos de suscripciones (con respaldo si las columnas snapshot aún no se migran)
+            let { data: paymentsData, error: paymentsError } = await supabase
                 .from('payments')
-                .select('*')
+                .select(
+                    'id, user_id, plan_name, amount, currency, status, payment_method, gateway, paypal_order_id, mp_payment_id, billing_period, agent_name_snapshot, agent_email_snapshot, created_at'
+                )
                 .order('created_at', { ascending: false })
 
-            if (paymentsError) throw paymentsError
+            if (paymentsError) {
+                const fallbackPayments = await supabase
+                    .from('payments')
+                    .select(
+                        'id, user_id, plan_name, amount, currency, status, payment_method, gateway, paypal_order_id, mp_payment_id, billing_period, created_at'
+                    )
+                    .order('created_at', { ascending: false })
+                if (fallbackPayments.error) throw fallbackPayments.error
+                paymentsData = fallbackPayments.data as any
+            }
 
-            // Obtener datos de los agentes asociados a los pagos
-            const userIds = Array.from(new Set(paymentsData?.map(p => p.user_id) || []))
+            // Obtener datos de los agentes activos asociados a los pagos (filtrando user_id nulos de bajas)
+            const userIds = Array.from(
+                new Set((paymentsData?.map((p: any) => p.user_id) || []).filter((id): id is string => Boolean(id)))
+            )
             let profilesMap = new Map()
 
             if (userIds.length > 0) {
@@ -114,9 +129,14 @@ export default function AdminSalesPage() {
                 profilesMap = new Map(profilesData?.map(p => [p.id, p]) || [])
             }
 
-            const enrichedPayments: PaymentRecord[] = (paymentsData || []).map(p => ({
+            const enrichedPayments: PaymentRecord[] = (paymentsData || []).map((p: any) => ({
                 ...p,
-                agent: profilesMap.get(p.user_id) || { full_name: 'Agente', email: 'Desconocido' }
+                agent: (p.user_id ? profilesMap.get(p.user_id) : null) || {
+                    full_name: p.agent_name_snapshot || 'Agente Eliminado',
+                    email: p.agent_email_snapshot || 'Cuenta dada de baja',
+                    avatar_url: null,
+                    company_name: null,
+                },
             }))
             setPayments(enrichedPayments)
 
@@ -180,7 +200,9 @@ export default function AdminSalesPage() {
             })
             .reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
 
-        const uniqueSubscribers = new Set(approvedPayments.map(p => p.user_id)).size
+        const uniqueSubscribers = new Set(
+            approvedPayments.map(p => p.user_id || p.agent_email_snapshot || p.id)
+        ).size
         const averageTicket = approvedPayments.length > 0 ? totalRevenue / approvedPayments.length : 0
 
         return {

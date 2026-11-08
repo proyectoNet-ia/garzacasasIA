@@ -1,25 +1,39 @@
 import { createClient } from '@/lib/supabase-server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, Crown, Building2, UserCheck, Shield } from 'lucide-react'
+import { Users, Crown, Building2, UserCheck, Shield, Ban } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AgentActions } from '@/components/admin/AgentActions'
 
 export default async function AdminAgents() {
     const supabase = await createClient()
+    const {
+        data: { user: currentUser },
+    } = await supabase.auth.getUser()
 
-    // Fetch all profiles (agents & admins)
-    const { data: agents, count } = await supabase
+    // Selección explícita de columnas necesarias (con respaldo si la migración de `status` aún no se ejecuta)
+    let { data: agents, error: agentsQueryError } = await supabase
         .from('profiles')
-        .select('*, properties(count)', { count: 'exact' })
+        .select('id, full_name, email, role, status, subscription_plan, created_at, properties(count)')
         .in('role', ['agent', 'admin'])
         .order('created_at', { ascending: false })
+
+    if (agentsQueryError) {
+        const fallback = await supabase
+            .from('profiles')
+            .select('id, full_name, email, role, subscription_plan, created_at, properties(count)')
+            .in('role', ['agent', 'admin'])
+            .order('created_at', { ascending: false })
+        agents = (fallback.data as any) || []
+    }
 
     const agentsList = agents || []
 
     // Compute summary stats
     const totalAgents = agentsList.filter(a => a.role === 'agent').length
     const totalAdmins = agentsList.filter(a => a.role === 'admin').length
-    const totalProperties = agentsList.reduce((sum, a) => sum + (a.properties?.[0]?.count || 0), 0)
+    const totalProperties = agentsList.reduce((sum, a: any) => sum + (a.properties?.[0]?.count || 0), 0)
+    const activeUsersCount = agentsList.filter((a: any) => a.status !== 'suspended').length
+    const suspendedUsersCount = agentsList.filter((a: any) => a.status === 'suspended').length
 
     const summaryCards = [
         {
@@ -27,28 +41,28 @@ export default async function AdminAgents() {
             value: totalAgents,
             icon: Users,
             color: 'text-blue-600',
-            bg: 'bg-blue-50'
+            bg: 'bg-blue-50',
         },
         {
             title: 'Super Agentes',
             value: totalAdmins,
             icon: Crown,
             color: 'text-amber-600',
-            bg: 'bg-amber-50'
+            bg: 'bg-amber-50',
         },
         {
             title: 'Total Propiedades',
             value: totalProperties,
             icon: Building2,
             color: 'text-green-600',
-            bg: 'bg-green-50'
+            bg: 'bg-green-50',
         },
         {
-            title: 'Usuarios Activos',
-            value: agentsList.length,
+            title: suspendedUsersCount > 0 ? `Activos (${suspendedUsersCount} susp.)` : 'Usuarios Activos',
+            value: activeUsersCount,
             icon: UserCheck,
             color: 'text-purple-600',
-            bg: 'bg-purple-50'
+            bg: 'bg-purple-50',
         },
     ]
 
@@ -62,7 +76,7 @@ export default async function AdminAgents() {
                         Gestión de Usuarios
                     </h1>
                     <p className="text-zinc-500 mt-1">
-                        Administra agentes, permisos y roles de la plataforma
+                        Administra agentes, permisos, suspensiones y bajas definitivas de la plataforma
                     </p>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-zinc-500 bg-zinc-100 px-4 py-2 rounded-xl">
@@ -123,7 +137,7 @@ export default async function AdminAgents() {
                                             Email
                                         </th>
                                         <th className="text-left py-3.5 px-6 text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                                            Rol
+                                            Rol / Plan
                                         </th>
                                         <th className="text-left py-3.5 px-6 text-xs font-bold text-zinc-500 uppercase tracking-wider">
                                             Propiedades
@@ -137,84 +151,140 @@ export default async function AdminAgents() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-100">
-                                    {agentsList.map((agent: any) => (
-                                        <tr
-                                            key={agent.id}
-                                            className={`hover:bg-zinc-50 transition-colors ${agent.role === 'admin' ? 'bg-amber-50/40' : ''}`}
-                                        >
-                                            {/* Agent Info */}
-                                            <td className="py-4 px-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${agent.role === 'admin' ? 'bg-amber-500' : 'bg-blue-600'}`}>
-                                                        {agent.full_name?.charAt(0)?.toUpperCase() || agent.email?.charAt(0)?.toUpperCase() || '?'}
+                                    {agentsList.map((agent: any) => {
+                                        const isSuspended = agent.status === 'suspended'
+                                        const isSelf = currentUser?.id === agent.id
+                                        const propertiesCount = agent.properties?.[0]?.count || 0
+
+                                        return (
+                                            <tr
+                                                key={agent.id}
+                                                className={`hover:bg-zinc-50 transition-colors ${
+                                                    isSuspended
+                                                        ? 'bg-red-50/30 opacity-80'
+                                                        : agent.role === 'admin'
+                                                        ? 'bg-amber-50/40'
+                                                        : ''
+                                                }`}
+                                            >
+                                                {/* Agent Info */}
+                                                <td className="py-4 px-6">
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${
+                                                                isSuspended
+                                                                    ? 'bg-zinc-400'
+                                                                    : agent.role === 'admin'
+                                                                    ? 'bg-amber-500'
+                                                                    : 'bg-blue-600'
+                                                            }`}
+                                                        >
+                                                            {agent.full_name?.charAt(0)?.toUpperCase() ||
+                                                                agent.email?.charAt(0)?.toUpperCase() ||
+                                                                '?'}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-zinc-900 flex items-center gap-1.5 text-sm">
+                                                                {agent.full_name || 'Sin nombre'}
+                                                                {agent.role === 'admin' && (
+                                                                    <Crown className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                                                )}
+                                                                {isSelf && (
+                                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-700">
+                                                                        Tú
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                            <p className="text-xs text-zinc-400 font-mono">
+                                                                {agent.id.slice(0, 12)}…
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-semibold text-zinc-900 flex items-center gap-1.5 text-sm">
-                                                            {agent.full_name || 'Sin nombre'}
-                                                            {agent.role === 'admin' && (
-                                                                <Crown className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                                </td>
+
+                                                {/* Email */}
+                                                <td className="py-4 px-6 text-sm text-zinc-600">
+                                                    {agent.email || 'N/A'}
+                                                </td>
+
+                                                {/* Role Badge */}
+                                                <td className="py-4 px-6">
+                                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                                        <Badge
+                                                            variant={agent.role === 'admin' ? 'default' : 'outline'}
+                                                            className={`gap-1 text-xs ${
+                                                                agent.role === 'admin'
+                                                                    ? 'bg-amber-500 hover:bg-amber-600 border-0'
+                                                                    : 'border-zinc-300 text-zinc-600'
+                                                            }`}
+                                                        >
+                                                            {agent.role === 'admin' ? (
+                                                                <>
+                                                                    <Crown className="h-3 w-3" /> Super Agente
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Users className="h-3 w-3" /> Agente
+                                                                </>
                                                             )}
-                                                        </p>
-                                                        <p className="text-xs text-zinc-400 font-mono">
-                                                            {agent.id.slice(0, 12)}…
-                                                        </p>
+                                                        </Badge>
+                                                        {agent.role !== 'admin' && agent.subscription_plan && (
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100"
+                                                            >
+                                                                {agent.subscription_plan}
+                                                            </Badge>
+                                                        )}
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            {/* Email */}
-                                            <td className="py-4 px-6 text-sm text-zinc-600">
-                                                {agent.email || 'N/A'}
-                                            </td>
+                                                {/* Properties Count */}
+                                                <td className="py-4 px-6">
+                                                    <div className="flex items-center gap-2 text-sm">
+                                                        <Building2 className="h-4 w-4 text-zinc-400" />
+                                                        <span className="font-bold text-zinc-900">
+                                                            {propertiesCount}
+                                                        </span>
+                                                        <span className="text-zinc-400 text-xs">propiedades</span>
+                                                    </div>
+                                                </td>
 
-                                            {/* Role Badge */}
-                                            <td className="py-4 px-6">
-                                                <Badge
-                                                    variant={agent.role === 'admin' ? 'default' : 'outline'}
-                                                    className={`gap-1 text-xs ${agent.role === 'admin'
-                                                        ? 'bg-amber-500 hover:bg-amber-600 border-0'
-                                                        : 'border-zinc-300 text-zinc-600'
-                                                        }`}
-                                                >
-                                                    {agent.role === 'admin'
-                                                        ? <><Crown className="h-3 w-3" /> Super Agente</>
-                                                        : <><Users className="h-3 w-3" /> Agente</>
-                                                    }
-                                                </Badge>
-                                            </td>
+                                                {/* Status */}
+                                                <td className="py-4 px-6">
+                                                    {isSuspended ? (
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="bg-red-100 text-red-700 border-red-200 text-xs gap-1"
+                                                        >
+                                                            <Ban className="h-3 w-3" />
+                                                            Suspendido
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="bg-green-100 text-green-700 border-green-200 text-xs gap-1"
+                                                        >
+                                                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                            Activo
+                                                        </Badge>
+                                                    )}
+                                                </td>
 
-                                            {/* Properties Count */}
-                                            <td className="py-4 px-6">
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Building2 className="h-4 w-4 text-zinc-400" />
-                                                    <span className="font-bold text-zinc-900">
-                                                        {agent.properties?.[0]?.count || 0}
-                                                    </span>
-                                                    <span className="text-zinc-400 text-xs">propiedades</span>
-                                                </div>
-                                            </td>
-
-                                            {/* Status */}
-                                            <td className="py-4 px-6">
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="bg-green-100 text-green-700 border-green-200 text-xs gap-1"
-                                                >
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                    Activo
-                                                </Badge>
-                                            </td>
-
-                                            {/* Actions */}
-                                            <td className="py-4 px-6 text-right">
-                                                <AgentActions
-                                                    agentId={agent.id}
-                                                    agentName={agent.full_name || agent.email}
-                                                    currentRole={agent.role}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                {/* Actions */}
+                                                <td className="py-4 px-6 text-right">
+                                                    <AgentActions
+                                                        agentId={agent.id}
+                                                        agentName={agent.full_name || agent.email || 'Agente'}
+                                                        currentRole={agent.role}
+                                                        currentStatus={agent.status}
+                                                        propertiesCount={propertiesCount}
+                                                        isSelf={isSelf}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
                                 </tbody>
                             </table>
                         </div>

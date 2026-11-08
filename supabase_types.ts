@@ -15,6 +15,7 @@ export interface Database {
           full_name: string | null
           email: string | null
           role: 'admin' | 'agent' | 'user' | null
+          status: 'active' | 'suspended' | 'pending' | null
           avatar_url: string | null
           bio: string | null
           company_name: string | null
@@ -85,7 +86,7 @@ export interface Database {
       payments: {
         Row: {
           id: string
-          user_id: string
+          user_id: string | null
           plan_id: string | null
           plan_name: string
           amount: number
@@ -99,12 +100,13 @@ export interface Database {
           mp_preference_id: string | null
           mp_external_reference: string | null
           billing_period: 'monthly' | 'yearly'
+          agent_name_snapshot: string | null
+          agent_email_snapshot: string | null
           metadata: Json
           created_at: string
           updated_at: string
         }
         Insert: Partial<Database['public']['Tables']['payments']['Row']> & {
-          user_id: string
           plan_name: string
           amount: number
         }
