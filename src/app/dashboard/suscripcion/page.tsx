@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
+import { isUnlimitedLimit, normalizePlanFeatures, syncFeatureBulletsWithLimits } from '@/lib/plans'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -53,7 +54,7 @@ export default function SuscripcionPage() {
             try {
                 const { data: plansData } = await supabase
                     .from('subscriptions_config')
-                    .select('*')
+                    .select('id, name, monthly_price, yearly_price, description, priority, features, properties_limit, images_per_property, is_popular, cta_type, cta_label, cta_url')
                     .order('priority', { ascending: true })
 
                 const { data: { user } } = await supabase.auth.getUser()
@@ -68,7 +69,7 @@ export default function SuscripcionPage() {
 
                     const { data: paymentsData } = await supabase
                         .from('payments')
-                        .select('*')
+                        .select('id, status, plan_name, billing_period, created_at, amount, currency')
                         .eq('user_id', user.id)
                         .order('created_at', { ascending: false })
                         .limit(5)
@@ -87,7 +88,9 @@ export default function SuscripcionPage() {
     }, [])
 
     const currentPlan = profile?.subscription_plan || 'Gratis'
-    const isAdminOrUnlimited = profile?.is_unlimited || profile?.role === 'admin'
+    const isAccountUnlimited = Boolean(profile?.is_unlimited || profile?.role === 'admin')
+    const isPropertiesUnlimited = isAccountUnlimited || isUnlimited || isUnlimitedLimit(limits?.properties_limit)
+    const isImagesUnlimited = isAccountUnlimited || isUnlimitedLimit(limits?.images_per_property)
 
     if (loading || limitsLoading) {
         return (
@@ -113,13 +116,9 @@ export default function SuscripcionPage() {
         )
     }
 
-    const propertiesUsedPct = isUnlimited || !limits?.properties_limit
+    const propertiesUsedPct = isPropertiesUnlimited || !limits?.properties_limit
         ? 0
         : Math.min(100, Math.round((usage?.properties_count || 0) / limits.properties_limit * 100))
-
-    const imagesUsedPct = isUnlimited || !limits?.images_per_property
-        ? 0
-        : Math.min(100, 40)  // approximation for display
 
     return (
         <div className="space-y-8 max-w-6xl">
@@ -144,7 +143,7 @@ export default function SuscripcionPage() {
                     <div className="absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-white/5" />
 
                     <div className="relative">
-                        {isAdminOrUnlimited && (
+                        {isAccountUnlimited && (
                             <Badge className="bg-white/20 text-white border-none mb-3 text-[10px] font-bold uppercase tracking-widest">
                                 Acceso ilimitado
                             </Badge>
@@ -158,7 +157,7 @@ export default function SuscripcionPage() {
                         <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Plan activo</p>
                         <h2 className="text-3xl font-black">{currentPlan}</h2>
 
-                        {profile?.subscription_expires_at && !isAdminOrUnlimited && (
+                        {profile?.subscription_expires_at && !isAccountUnlimited && (
                             <div className="flex items-center gap-2 mt-4 bg-white/10 rounded-xl px-3 py-2">
                                 <Clock className="h-4 w-4 text-white/70" />
                                 <span className="text-sm font-medium text-white/80">
@@ -184,10 +183,10 @@ export default function SuscripcionPage() {
                 <div className="lg:col-span-2 bg-white rounded-3xl border border-zinc-200 p-6 shadow-sm space-y-5">
                     <div className="flex items-center justify-between">
                         <h3 className="font-black text-zinc-900 text-lg">Uso de tu Plan</h3>
-                        {isAdminOrUnlimited && (
+                        {isPropertiesUnlimited && (
                             <Badge className="bg-blue-50 text-blue-600 border-blue-200 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
                                 <Infinity className="h-3 w-3" />
-                                Sin límites
+                                {isImagesUnlimited ? 'Sin límites' : 'Propiedades ilimitadas'}
                             </Badge>
                         )}
                     </div>
@@ -200,7 +199,7 @@ export default function SuscripcionPage() {
                                 Propiedades publicadas
                             </div>
                             <span className="font-black text-zinc-900">
-                                {isAdminOrUnlimited ? (
+                                {isPropertiesUnlimited ? (
                                     <span className="flex items-center gap-1">
                                         {usage?.properties_count || 0}
                                         <span className="text-zinc-400 font-normal">/ ∞</span>
@@ -210,7 +209,7 @@ export default function SuscripcionPage() {
                                 )}
                             </span>
                         </div>
-                        {!isAdminOrUnlimited && (
+                        {!isPropertiesUnlimited && (
                             <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
                                 <div
                                     className={cn(
@@ -222,7 +221,7 @@ export default function SuscripcionPage() {
                                 />
                             </div>
                         )}
-                        {!isAdminOrUnlimited && propertiesUsedPct >= 80 && (
+                        {!isPropertiesUnlimited && propertiesUsedPct >= 80 && (
                             <p className="text-xs text-amber-600 font-bold flex items-center gap-1">
                                 <AlertCircle className="h-3 w-3" />
                                 Estás cerca de tu límite — considera mejorar tu plan
@@ -238,14 +237,14 @@ export default function SuscripcionPage() {
                                 Imágenes por propiedad
                             </div>
                             <span className="font-black text-zinc-900">
-                                {isAdminOrUnlimited ? '∞ ilimitadas' : `hasta ${limits?.images_per_property || 0} fotos`}
+                                {isImagesUnlimited ? '∞ ilimitadas' : `hasta ${limits?.images_per_property || 0} fotos`}
                             </span>
                         </div>
-                        {!isAdminOrUnlimited && (
+                        {!isImagesUnlimited && (
                             <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
                                 <div
                                     className="h-full rounded-full bg-indigo-500 transition-all duration-700"
-                                    style={{ width: isAdminOrUnlimited ? '100%' : `${Math.min(100, ((limits?.images_per_property || 3) / 20) * 100)}%` }}
+                                    style={{ width: `${Math.min(100, ((limits?.images_per_property || 3) / 20) * 100)}%` }}
                                 />
                             </div>
                         )}
@@ -256,14 +255,14 @@ export default function SuscripcionPage() {
                         {[
                             {
                                 label: 'Propiedades disponibles',
-                                value: isAdminOrUnlimited ? '∞' : (usage?.remaining_properties ?? 0).toString(),
+                                value: isPropertiesUnlimited ? '∞' : (usage?.remaining_properties ?? 0).toString(),
                                 icon: TrendingUp,
                                 color: 'text-green-600',
                                 bg: 'bg-green-50',
                             },
                             {
                                 label: 'Imágenes por propiedad',
-                                value: isAdminOrUnlimited ? '∞' : (limits?.images_per_property || 0).toString(),
+                                value: isImagesUnlimited ? '∞' : (limits?.images_per_property || 0).toString(),
                                 icon: Image,
                                 color: 'text-indigo-600',
                                 bg: 'bg-indigo-50',
@@ -378,15 +377,21 @@ export default function SuscripcionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {plans.map((plan) => {
                         const Icon = PLAN_ICONS[plan.name] || Building2
-                        const features = Array.isArray(plan.features) ? plan.features : []
-                        const isPopular = Boolean(plan.is_popular !== undefined ? plan.is_popular : plan.name === 'Pro')
-                        const isFree = !plan.monthly_price || plan.monthly_price === 0
-                        const isContact = plan.cta_type === 'contact' || plan.name === 'Enterprise'
+                        const monthlyPrice = Number(plan.monthly_price ?? 0)
+                        const rawFeatures = normalizePlanFeatures(plan.features)
+                        const propertiesLimit = plan.properties_limit !== null && plan.properties_limit !== undefined ? Number(plan.properties_limit) : null
+                        const imagesLimit = plan.images_per_property !== null && plan.images_per_property !== undefined ? Number(plan.images_per_property) : null
+                        const features = syncFeatureBulletsWithLimits(rawFeatures, propertiesLimit, imagesLimit, {
+                            ensureBullets: rawFeatures.length === 0,
+                        })
+                        const isPopular = Boolean(plan.is_popular ?? (plan.name === 'Pro'))
+                        const isFree = monthlyPrice === 0
+                        const isContact = plan.cta_type ? plan.cta_type === 'contact' : plan.name === 'Enterprise'
                         const isCurrentPlanCard = plan.name === currentPlan
 
                         const displayAmount = billingPeriod === 'yearly'
-                            ? (plan.yearly_price ?? plan.monthly_price * 10)
-                            : plan.monthly_price
+                            ? (plan.yearly_price !== null && plan.yearly_price !== undefined ? Number(plan.yearly_price) : monthlyPrice * 10)
+                            : monthlyPrice
 
                         return (
                             <div
@@ -455,8 +460,8 @@ export default function SuscripcionPage() {
 
                                 <div className="p-7 flex-1 flex flex-col">
                                     <ul className="mb-8 space-y-3 flex-1">
-                                        {features.map((feature: string) => (
-                                            <li key={feature} className="flex items-start gap-2.5 text-sm text-zinc-600 font-medium">
+                                        {features.map((feature: string, featureIdx: number) => (
+                                            <li key={`${plan.id}-feat-${featureIdx}`} className="flex items-start gap-2.5 text-sm text-zinc-600 font-medium">
                                                 <div className={cn(
                                                     "flex h-4 w-4 mt-0.5 shrink-0 items-center justify-center rounded-full",
                                                     isCurrentPlanCard

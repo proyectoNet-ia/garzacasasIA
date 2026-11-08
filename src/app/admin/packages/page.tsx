@@ -31,6 +31,13 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import {
+    UNLIMITED_LIMIT,
+    isUnlimitedLimit,
+    normalizePlanFeatures,
+    syncFeatureBulletsWithLimits,
+    hasPlanBulletMismatch
+} from '@/lib/plans'
 
 const supabase = createClient()
 
@@ -102,36 +109,36 @@ export default function AdminPackagesPage() {
         try {
             const { data, error } = await supabase
                 .from('subscriptions_config')
-                .select('*')
+                .select('id, name, monthly_price, yearly_price, description, priority, features, properties_limit, images_per_property, is_popular, has_ai_analysis, has_priority_support, cta_type, cta_label, cta_url')
                 .order('priority', { ascending: true })
 
             if (error) throw error
 
             if (data && data.length > 0) {
                 const normalizedPlans: PlanConfig[] = data.map((item: any) => {
-                    // Normalizar features a array de strings
-                    let featuresArr: string[] = []
-                    if (Array.isArray(item.features)) {
-                        featuresArr = item.features
-                    } else if (item.features && typeof item.features === 'object') {
-                        featuresArr = Object.values(item.features).filter((v): v is string => typeof v === 'string')
-                    }
+                    const featuresArr = normalizePlanFeatures(item.features)
+                    const fallbackProps = item.name === 'Enterprise' ? UNLIMITED_LIMIT : item.name === 'Pro' ? 20 : 3
+                    const fallbackImgs = item.name === 'Enterprise' ? 15 : item.name === 'Pro' ? 5 : 3
 
                     return {
                         id: item.id,
                         name: item.name || 'Sin Nombre',
-                        monthly_price: Number(item.monthly_price || 0),
-                        yearly_price: Number(item.yearly_price || 0),
+                        monthly_price: Number(item.monthly_price ?? 0),
+                        yearly_price: Number(item.yearly_price ?? 0),
                         description: item.description || '',
-                        priority: Number(item.priority || 1),
+                        priority: Number(item.priority ?? 1),
                         features: featuresArr,
-                        properties_limit: item.properties_limit !== undefined ? Number(item.properties_limit) : (item.name === 'Enterprise' ? 999999 : item.name === 'Pro' ? 50 : 5),
-                        images_per_property: item.images_per_property !== undefined ? Number(item.images_per_property) : (item.name === 'Enterprise' ? 999999 : item.name === 'Pro' ? 15 : 3),
-                        is_popular: Boolean(item.is_popular !== undefined ? item.is_popular : item.name === 'Pro'),
-                        has_ai_analysis: Boolean(item.has_ai_analysis !== undefined ? item.has_ai_analysis : item.name !== 'Gratis'),
-                        has_priority_support: Boolean(item.has_priority_support !== undefined ? item.has_priority_support : item.name !== 'Gratis'),
-                        cta_type: item.cta_type || (item.name === 'Enterprise' ? 'contact' : Number(item.monthly_price) === 0 ? 'register' : 'checkout'),
-                        cta_label: item.cta_label || (item.name === 'Enterprise' ? 'Contactar' : Number(item.monthly_price) === 0 ? 'Empezar gratis' : 'Empezar ahora'),
+                        properties_limit: item.properties_limit !== null && item.properties_limit !== undefined
+                            ? Number(item.properties_limit)
+                            : fallbackProps,
+                        images_per_property: item.images_per_property !== null && item.images_per_property !== undefined
+                            ? Number(item.images_per_property)
+                            : fallbackImgs,
+                        is_popular: Boolean(item.is_popular ?? (item.name === 'Pro')),
+                        has_ai_analysis: Boolean(item.has_ai_analysis ?? (item.name !== 'Gratis')),
+                        has_priority_support: Boolean(item.has_priority_support ?? (item.name !== 'Gratis')),
+                        cta_type: item.cta_type || (item.name === 'Enterprise' ? 'contact' : Number(item.monthly_price ?? 0) === 0 ? 'register' : 'checkout'),
+                        cta_label: item.cta_label || (item.name === 'Enterprise' ? 'Contactar' : Number(item.monthly_price ?? 0) === 0 ? 'Empezar gratis' : 'Empezar ahora'),
                         cta_url: item.cta_url || null
                     }
                 })
@@ -154,6 +161,34 @@ export default function AdminPackagesPage() {
     function updateCurrentPlan(updates: Partial<PlanConfig>) {
         if (!currentPlan) return
         setPlans(plans.map(p => p.id === currentPlan.id ? { ...p, ...updates } : p))
+    }
+
+    function updatePlanLimitsAndSyncBullets(updates: { properties_limit?: number; images_per_property?: number }) {
+        if (!currentPlan) return
+        const nextPropsLimit = updates.properties_limit ?? currentPlan.properties_limit
+        const nextImgsLimit = updates.images_per_property ?? currentPlan.images_per_property
+        const syncedFeatures = syncFeatureBulletsWithLimits(
+            currentPlan.features,
+            nextPropsLimit,
+            nextImgsLimit,
+            { ensureBullets: true }
+        )
+        updateCurrentPlan({
+            ...updates,
+            features: syncedFeatures,
+        })
+    }
+
+    function handleSyncCurrentPlanBullets() {
+        if (!currentPlan) return
+        const syncedFeatures = syncFeatureBulletsWithLimits(
+            currentPlan.features,
+            currentPlan.properties_limit,
+            currentPlan.images_per_property,
+            { ensureBullets: true }
+        )
+        updateCurrentPlan({ features: syncedFeatures })
+        toast.success('Viñetas sincronizadas con los límites técnicos del plan')
     }
 
     // --- Manejadores de Viñetas (Features) ---
@@ -222,6 +257,18 @@ export default function AdminPackagesPage() {
         setSaving(true)
         const toastId = toast.loading(`Guardando cambios para ${currentPlan.name}...`)
 
+        const hadMismatch = hasPlanBulletMismatch(
+            currentPlan.features,
+            currentPlan.properties_limit,
+            currentPlan.images_per_property
+        )
+        const syncedFeatures = syncFeatureBulletsWithLimits(
+            currentPlan.features,
+            currentPlan.properties_limit,
+            currentPlan.images_per_property,
+            { ensureBullets: currentPlan.features.length === 0 }
+        )
+
         try {
             // Intentar actualizar con todas las columnas
             const payload: any = {
@@ -230,7 +277,7 @@ export default function AdminPackagesPage() {
                 yearly_price: Number(currentPlan.yearly_price),
                 description: currentPlan.description.trim(),
                 priority: Number(currentPlan.priority),
-                features: currentPlan.features,
+                features: syncedFeatures,
                 properties_limit: currentPlan.properties_limit,
                 images_per_property: currentPlan.images_per_property,
                 is_popular: currentPlan.is_popular,
@@ -256,7 +303,7 @@ export default function AdminPackagesPage() {
                     yearly_price: Number(currentPlan.yearly_price),
                     description: currentPlan.description.trim(),
                     priority: Number(currentPlan.priority),
-                    features: currentPlan.features
+                    features: syncedFeatures
                 }
 
                 const { error: safeError } = await supabase
@@ -266,9 +313,16 @@ export default function AdminPackagesPage() {
 
                 if (safeError) throw safeError
 
+                updateCurrentPlan({ features: syncedFeatures })
                 toast.success('¡Plan guardado con éxito! (Aplica la migración SQL para habilitar límites avanzados en Supabase)', { id: toastId })
             } else {
-                toast.success(`¡Plan "${currentPlan.name}" actualizado correctamente!`, { id: toastId })
+                updateCurrentPlan({ features: syncedFeatures })
+                toast.success(
+                    hadMismatch
+                        ? `¡Plan "${currentPlan.name}" guardado con viñetas sincronizadas!`
+                        : `¡Plan "${currentPlan.name}" actualizado correctamente!`,
+                    { id: toastId }
+                )
             }
         } catch (err: any) {
             console.error('Error guardando plan:', err)
@@ -294,7 +348,7 @@ export default function AdminPackagesPage() {
             const { data, error } = await supabase
                 .from('subscriptions_config')
                 .insert(payload)
-                .select()
+                .select('id')
                 .single()
 
             if (error) {
@@ -311,7 +365,7 @@ export default function AdminPackagesPage() {
                 const { data: safeData, error: safeError } = await supabase
                     .from('subscriptions_config')
                     .insert(safePayload)
-                    .select()
+                    .select('id')
                     .single()
 
                 if (safeError) throw safeError
@@ -430,7 +484,18 @@ export default function AdminPackagesPage() {
                         const isSelected = plan.id === currentPlan?.id
                         const isPopular = plan.is_popular
                         const isFree = plan.monthly_price === 0
-                        const isEnterprise = plan.name === 'Enterprise' || plan.cta_type === 'contact'
+                        const isEnterprise = plan.cta_type ? plan.cta_type === 'contact' : plan.name === 'Enterprise'
+                        const previewFeatures = syncFeatureBulletsWithLimits(
+                            plan.features,
+                            plan.properties_limit,
+                            plan.images_per_property,
+                            { ensureBullets: plan.features.length === 0 }
+                        )
+                        const hasMismatch = hasPlanBulletMismatch(
+                            plan.features,
+                            plan.properties_limit,
+                            plan.images_per_property
+                        )
 
                         return (
                             <div
@@ -452,11 +517,18 @@ export default function AdminPackagesPage() {
                                     </div>
                                 )}
 
-                                {isSelected && (
-                                    <div className="absolute top-4 right-4">
-                                        <Badge className="bg-blue-600 text-white border-none text-[9px] px-2 py-0.5">
-                                            Editando
-                                        </Badge>
+                                {(isSelected || hasMismatch) && (
+                                    <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                                        {hasMismatch && (
+                                            <Badge className="bg-amber-100 text-amber-800 border border-amber-300 text-[9px] px-2 py-0.5 font-bold">
+                                                Desfase viñetas
+                                            </Badge>
+                                        )}
+                                        {isSelected && (
+                                            <Badge className="bg-blue-600 text-white border-none text-[9px] px-2 py-0.5">
+                                                Editando
+                                            </Badge>
+                                        )}
                                     </div>
                                 )}
 
@@ -495,7 +567,7 @@ export default function AdminPackagesPage() {
 
                                 <div className="border-t border-zinc-100 pt-4 flex-1 flex flex-col justify-between">
                                     <ul className="space-y-2.5 mb-6">
-                                        {plan.features.map((feature, i) => (
+                                        {previewFeatures.map((feature, i) => (
                                             <li key={i} className="flex items-start gap-2.5 text-xs text-zinc-600 font-medium">
                                                 <div className={cn(
                                                     "flex h-4 w-4 mt-0.5 shrink-0 items-center justify-center rounded-full",
@@ -744,13 +816,36 @@ export default function AdminPackagesPage() {
                                         <h3 className="text-lg font-black text-zinc-900">2. Viñetas de Beneficios (Texto en la Tarjeta)</h3>
                                     </div>
                                     <p className="text-xs text-zinc-500">
-                                        Edita directamente lo que leerá el usuario en la lista de características de este plan.
+                                        Se sincronizan automáticamente con los límites técnicos de la Sección 3 al editar límites o guardar.
                                     </p>
                                 </div>
                                 <Badge variant="outline" className="text-xs font-bold border-zinc-200">
                                     {currentPlan.features.length} Viñetas
                                 </Badge>
                             </div>
+
+                            {hasPlanBulletMismatch(
+                                currentPlan.features,
+                                currentPlan.properties_limit,
+                                currentPlan.images_per_property
+                            ) && (
+                                <div className="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-2.5">
+                                        <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                                        <p className="text-xs text-amber-900 font-medium">
+                                            Las viñetas guardadas muestran un número distinto a los límites reales de la Sección 3 (<strong>{isUnlimitedLimit(currentPlan.properties_limit) ? 'Propiedades ilimitadas' : `${currentPlan.properties_limit} propiedades`}</strong> · <strong>{isUnlimitedLimit(currentPlan.images_per_property) ? 'Imágenes ilimitadas' : `${currentPlan.images_per_property} imágenes`}</strong>).
+                                        </p>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleSyncCurrentPlanBullets}
+                                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shrink-0"
+                                    >
+                                        Sincronizar viñetas
+                                    </Button>
+                                </div>
+                            )}
 
                             {/* Lista de viñetas con controles de orden y edición */}
                             <div className="space-y-2 mb-4">
@@ -871,8 +966,10 @@ export default function AdminPackagesPage() {
                                         <div className="flex items-center gap-2">
                                             <Checkbox
                                                 id="unlimited_properties"
-                                                checked={currentPlan.properties_limit >= 999999}
-                                                onCheckedChange={(checked) => updateCurrentPlan({ properties_limit: checked ? 999999 : 50 })}
+                                                checked={isUnlimitedLimit(currentPlan.properties_limit)}
+                                                onCheckedChange={(checked) => updatePlanLimitsAndSyncBullets({
+                                                    properties_limit: checked ? UNLIMITED_LIMIT : (currentPlan.name === 'Gratis' ? 3 : 20)
+                                                })}
                                             />
                                             <Label htmlFor="unlimited_properties" className="text-xs font-bold text-zinc-600 cursor-pointer">
                                                 Ilimitadas
@@ -882,13 +979,17 @@ export default function AdminPackagesPage() {
                                     <Input
                                         type="number"
                                         min="1"
-                                        disabled={currentPlan.properties_limit >= 999999}
-                                        value={currentPlan.properties_limit >= 999999 ? 999999 : currentPlan.properties_limit}
-                                        onChange={(e) => updateCurrentPlan({ properties_limit: parseInt(e.target.value) || 5 })}
+                                        disabled={isUnlimitedLimit(currentPlan.properties_limit)}
+                                        value={isUnlimitedLimit(currentPlan.properties_limit) ? UNLIMITED_LIMIT : currentPlan.properties_limit}
+                                        onChange={(e) => {
+                                            const raw = parseInt(e.target.value, 10)
+                                            const safeVal = Number.isNaN(raw) ? 1 : Math.max(1, raw)
+                                            updatePlanLimitsAndSyncBullets({ properties_limit: safeVal })
+                                        }}
                                         className="h-11 rounded-xl bg-white border-zinc-200 font-bold"
                                     />
                                     <p className="text-[11px] text-zinc-400">
-                                        Si el agente intenta publicar una propiedad adicional, se le solicitará mejorar su plan.
+                                        Al modificar este valor, las viñetas de la Sección 2, `/registro`, `/planes` y el dashboard se actualizan automáticamente.
                                     </p>
                                 </div>
 
@@ -898,8 +999,10 @@ export default function AdminPackagesPage() {
                                         <div className="flex items-center gap-2">
                                             <Checkbox
                                                 id="unlimited_images"
-                                                checked={currentPlan.images_per_property >= 999999}
-                                                onCheckedChange={(checked) => updateCurrentPlan({ images_per_property: checked ? 999999 : 15 })}
+                                                checked={isUnlimitedLimit(currentPlan.images_per_property)}
+                                                onCheckedChange={(checked) => updatePlanLimitsAndSyncBullets({
+                                                    images_per_property: checked ? UNLIMITED_LIMIT : (currentPlan.name === 'Gratis' ? 3 : 15)
+                                                })}
                                             />
                                             <Label htmlFor="unlimited_images" className="text-xs font-bold text-zinc-600 cursor-pointer">
                                                 Ilimitadas
@@ -909,9 +1012,13 @@ export default function AdminPackagesPage() {
                                     <Input
                                         type="number"
                                         min="1"
-                                        disabled={currentPlan.images_per_property >= 999999}
-                                        value={currentPlan.images_per_property >= 999999 ? 999999 : currentPlan.images_per_property}
-                                        onChange={(e) => updateCurrentPlan({ images_per_property: parseInt(e.target.value) || 3 })}
+                                        disabled={isUnlimitedLimit(currentPlan.images_per_property)}
+                                        value={isUnlimitedLimit(currentPlan.images_per_property) ? UNLIMITED_LIMIT : currentPlan.images_per_property}
+                                        onChange={(e) => {
+                                            const raw = parseInt(e.target.value, 10)
+                                            const safeVal = Number.isNaN(raw) ? 1 : Math.max(1, raw)
+                                            updatePlanLimitsAndSyncBullets({ images_per_property: safeVal })
+                                        }}
                                         className="h-11 rounded-xl bg-white border-zinc-200 font-bold"
                                     />
                                     <p className="text-[11px] text-zinc-400">

@@ -15,6 +15,7 @@ import { Loader2, Upload, X, Check, Image as ImageIcon, Plus, MapPin, Info, Exte
 import { cn } from '@/lib/utils'
 import { optimizeImage } from '@/lib/image-optimizer'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
+import { isUnlimitedLimit } from '@/lib/plans'
 import { toast } from 'sonner'
 import { ESTADOS, getMunicipiosPorEstado, type Estado, type Municipio } from '@/lib/inegi/geografia'
 import { MapPicker } from './MapPicker'
@@ -32,6 +33,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
     const [uploading, setUploading] = useState(false)
     const [activeTab, setActiveTab] = useState('general')
     const { limits, checkCanUploadImages, planName } = useSubscriptionLimits()
+    const imagesUnlimited = isUnlimitedLimit(limits.images_per_property)
 
     const [formData, setFormData] = useState<{
         title: string
@@ -323,11 +325,22 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
         const files = e.target.files
         if (!files || files.length === 0) return
 
+        const selectedFiles = Array.from(files)
+        let filesToProcess = selectedFiles
+
         if (!isMain) {
             const check = checkCanUploadImages(formData.images.length)
             if (!check.allowed) {
                 toast.error(check.message)
+                if (galleryInputRef.current) galleryInputRef.current.value = ''
                 return
+            }
+            if (!imagesUnlimited) {
+                const remainingSlots = Math.max(0, limits.images_per_property - formData.images.length)
+                if (selectedFiles.length > remainingSlots) {
+                    toast.info(`Tu plan ${planName} permite ${limits.images_per_property} imágenes por propiedad. Se subirán ${remainingSlots}.`)
+                    filesToProcess = selectedFiles.slice(0, remainingSlots)
+                }
             }
         }
 
@@ -342,7 +355,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
             const userFolder = `${user.id}/`
             const uploadedUrls: string[] = []
 
-            for (const file of Array.from(files)) {
+            for (const file of filesToProcess) {
                 // Apply Image Optimization
                 const optimizedFile = await optimizeImage(file, {
                     maxWidth: 1600,
@@ -940,7 +953,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                             <div className="md:col-span-2 space-y-2 flex flex-col">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">
-                                        Galería de Fotos ({formData.images.length}/{limits.images_per_property})
+                                        Galería de Fotos ({formData.images.length}/{imagesUnlimited ? '∞' : limits.images_per_property})
                                     </Label>
                                     <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2.5 py-0.5 rounded-full uppercase">
                                         Plan {planName}
@@ -959,7 +972,7 @@ export function PropertyForm({ initialData, onSuccess, onCancel }: PropertyFormP
                                             </button>
                                         </div>
                                     ))}
-                                    {formData.images.length < limits.images_per_property && (
+                                    {(imagesUnlimited || formData.images.length < limits.images_per_property) && (
                                         <button
                                             type="button"
                                             onClick={() => galleryInputRef.current?.click()}

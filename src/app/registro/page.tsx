@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -10,20 +10,82 @@ import { Building2, Loader2, User, Mail, Phone, Lock, ArrowRight, CheckCircle2, 
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { formatPhone } from '@/hooks/usePhoneFormat'
+import { normalizePlanFeatures, syncFeatureBulletsWithLimits } from '@/lib/plans'
 
-const PLAN_FEATURES = [
-    'Hasta 5 propiedades activas',
-    'Dashboard con métricas básicas',
-    'Perfil público de agente',
-    'Leads directos de compradores',
-    'Soporte por email',
+interface RegistroPlan {
+    id: string
+    name: string
+    monthly_price: number
+    description: string | null
+    features: string[]
+    properties_limit: number
+    images_per_property: number
+}
+
+const OFFLINE_FALLBACK_FEATURES = [
+    'Hasta 3 propiedades',
+    '3 imágenes por propiedad',
+    'Dashboard básico',
+    'Soporte vía email',
 ]
 
 export default function RegistroPage() {
     const [step, setStep] = useState<1 | 2>(1)
     const [loading, setLoading] = useState(false)
+    const [planInfo, setPlanInfo] = useState<RegistroPlan | null>(null)
+    const [loadingPlan, setLoadingPlan] = useState(true)
     const router = useRouter()
     const supabase = createClient()
+
+    useEffect(() => {
+        let isMounted = true
+
+        async function loadRegistrationPlan() {
+            try {
+                const { data, error } = await supabase
+                    .from('subscriptions_config')
+                    .select('id, name, monthly_price, description, features, properties_limit, images_per_property, cta_type')
+                    .order('priority', { ascending: true })
+
+                if (!error && data && data.length > 0 && isMounted) {
+                    const selected =
+                        data.find((p: any) => p.cta_type === 'register') ||
+                        data.find((p: any) => p.name === 'Gratis') ||
+                        data.find((p: any) => Number(p.monthly_price ?? 0) === 0) ||
+                        data[0]
+
+                    const propsLimit = selected.properties_limit !== null && selected.properties_limit !== undefined
+                        ? Number(selected.properties_limit)
+                        : 3
+                    const imgsLimit = selected.images_per_property !== null && selected.images_per_property !== undefined
+                        ? Number(selected.images_per_property)
+                        : 3
+                    const rawFeatures = normalizePlanFeatures(selected.features)
+
+                    setPlanInfo({
+                        id: selected.id,
+                        name: selected.name || 'Gratis',
+                        monthly_price: Number(selected.monthly_price ?? 0),
+                        description: selected.description || null,
+                        features: syncFeatureBulletsWithLimits(rawFeatures, propsLimit, imgsLimit, {
+                            ensureBullets: rawFeatures.length === 0,
+                        }),
+                        properties_limit: propsLimit,
+                        images_per_property: imgsLimit,
+                    })
+                }
+            } catch (err) {
+                console.error('Error cargando plan inicial en registro:', err)
+            } finally {
+                if (isMounted) setLoadingPlan(false)
+            }
+        }
+
+        loadRegistrationPlan()
+        return () => {
+            isMounted = false
+        }
+    }, [supabase])
 
     const [form, setForm] = useState({
         full_name: '',
@@ -112,6 +174,7 @@ export default function RegistroPage() {
                     phone: form.phone,
                     whatsapp: form.phone,
                     role: 'agent',
+                    subscription_plan: planInfo && planInfo.monthly_price === 0 ? planInfo.name : 'Gratis',
                     updated_at: new Date().toISOString(),
                 })
 
@@ -157,32 +220,58 @@ export default function RegistroPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl">
-                    {/* LEFT: Plan Info */}
+                    {/* LEFT: Plan Info (sincronizado con /admin/packages) */}
                     <div className="bg-zinc-900 p-10 lg:p-14 flex flex-col justify-between gap-10 border-r border-white/5">
-                        <div className="space-y-6">
-                            <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-blue-400 border border-blue-600/20">
-                                <Sparkles className="h-3 w-3" />
-                                Plan Gratuito
-                            </div>
-                            <div>
-                                <div className="flex items-end gap-2 mb-2">
-                                    <span className="text-6xl font-black text-white">$0</span>
-                                    <span className="text-zinc-500 font-bold mb-3">/mes</span>
+                        {loadingPlan ? (
+                            <div className="space-y-6 animate-pulse">
+                                <div className="h-7 w-32 rounded-full bg-white/10" />
+                                <div className="space-y-3">
+                                    <div className="h-14 w-36 rounded-2xl bg-white/10" />
+                                    <div className="h-4 w-full rounded bg-white/10" />
+                                    <div className="h-4 w-4/5 rounded bg-white/10" />
                                 </div>
-                                <p className="text-zinc-400 text-sm leading-relaxed">
-                                    Comienza sin costo y crece con las herramientas más avanzadas del mercado inmobiliario.
-                                </p>
+                                <div className="space-y-4 pt-2">
+                                    {[1, 2, 3, 4].map((idx) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <div className="h-4 w-4 rounded-full bg-white/10 shrink-0" />
+                                            <div className="h-4 w-48 rounded bg-white/10" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <ul className="space-y-4">
-                                {PLAN_FEATURES.map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm text-zinc-300 font-medium">
-                                        <CheckCircle2 className="h-4 w-4 text-blue-500 shrink-0" />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <p className="text-xs text-zinc-600 font-medium">
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-blue-400 border border-blue-600/20">
+                                    <Sparkles className="h-3 w-3" />
+                                    Plan {planInfo?.name || 'Gratis'}
+                                </div>
+                                <div>
+                                    <div className="flex items-end gap-2 mb-2">
+                                        <span className="text-6xl font-black text-white">
+                                            {planInfo && planInfo.monthly_price > 0
+                                                ? `$${Math.floor(planInfo.monthly_price).toLocaleString('es-MX')}`
+                                                : '$0'}
+                                        </span>
+                                        <span className="text-zinc-500 font-bold mb-3">/mes</span>
+                                    </div>
+                                    <p className="text-zinc-400 text-sm leading-relaxed">
+                                        {planInfo?.description || 'Comienza sin costo y crece con las herramientas más avanzadas del mercado inmobiliario.'}
+                                    </p>
+                                </div>
+                                <ul className="space-y-4">
+                                    {(planInfo?.features && planInfo.features.length > 0
+                                        ? planInfo.features
+                                        : OFFLINE_FALLBACK_FEATURES
+                                    ).map((feature, i) => (
+                                        <li key={`${i}-${feature}`} className="flex items-center gap-3 text-sm text-zinc-300 font-medium">
+                                            <CheckCircle2 className="h-4 w-4 text-blue-500 shrink-0" />
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        <p className="text-xs text-zinc-400 font-medium">
                             Sin tarjeta de crédito • Sin compromisos • Cancela cuando quieras
                         </p>
                     </div>

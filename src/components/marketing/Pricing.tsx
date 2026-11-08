@@ -3,6 +3,7 @@ import { Check, Zap, Crown, Building2, Brain, Search, BarChart3, ShieldCheck, Ho
 import { Badge } from '@/components/ui/badge'
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
 import Link from "next/link"
+import { normalizePlanFeatures, syncFeatureBulletsWithLimits } from "@/lib/plans"
 
 const iconMap: any = {
     'Gratis': Building2,
@@ -60,7 +61,7 @@ export async function Pricing() {
     const supabase = await createClient()
     const { data: plans, error } = await supabase
         .from('subscriptions_config')
-        .select('*')
+        .select('id, name, monthly_price, yearly_price, description, priority, features, properties_limit, images_per_property, is_popular, cta_type, cta_label, cta_url')
         .order('priority', { ascending: true })
 
     // Verificar si hay sesión activa
@@ -92,15 +93,22 @@ export async function Pricing() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {plans.map((plan, index) => {
                         const Icon = iconMap[plan.name] || Building2
-                        const features = Array.isArray(plan.features) ? plan.features : []
-                        const isPopular = Boolean(plan.is_popular !== undefined ? plan.is_popular : plan.name === 'Pro')
-                        const isFree = !plan.monthly_price || plan.monthly_price === 0
-                        const isContact = plan.cta_type === 'contact' || plan.name === 'Enterprise'
+                        const monthlyPrice = Number(plan.monthly_price ?? 0)
+                        const rawFeatures = normalizePlanFeatures(plan.features)
+                        const propertiesLimit = plan.properties_limit !== null && plan.properties_limit !== undefined ? Number(plan.properties_limit) : null
+                        const imagesLimit = plan.images_per_property !== null && plan.images_per_property !== undefined ? Number(plan.images_per_property) : null
+                        const features = syncFeatureBulletsWithLimits(rawFeatures, propertiesLimit, imagesLimit, {
+                            ensureBullets: rawFeatures.length === 0,
+                        })
+                        const isPopular = Boolean(plan.is_popular ?? (plan.name === 'Pro'))
+                        const isFree = monthlyPrice === 0
+                        const isContact = plan.cta_type ? plan.cta_type === 'contact' : plan.name === 'Enterprise'
+                        const isRegister = plan.cta_type ? plan.cta_type === 'register' : isFree
 
                         const ctaHref = plan.cta_url || (
                             isContact
                                 ? '/contacto'
-                                : isFree
+                                : isRegister
                                     ? '/registro'
                                     : user
                                         ? '/dashboard/suscripcion'
@@ -110,7 +118,7 @@ export async function Pricing() {
                         const ctaLabel = plan.cta_label || (
                             isContact
                                 ? 'Contactar'
-                                : isFree
+                                : isRegister
                                     ? 'Empezar gratis'
                                     : 'Empezar ahora'
                         )
@@ -140,15 +148,15 @@ export async function Pricing() {
                                         </div>
                                         <h3 className="text-2xl font-black text-zinc-700">{plan.name}</h3>
                                         <div className="mt-4 flex items-baseline text-zinc-700">
-                                            {typeof plan.monthly_price === 'number' && plan.monthly_price > 0 ? (
+                                            {monthlyPrice > 0 ? (
                                                 <>
                                                     <span className="text-4xl font-black tracking-tight">$</span>
-                                                    <span className="text-5xl font-black tracking-tight leading-none">{Math.floor(plan.monthly_price)}</span>
+                                                    <span className="text-5xl font-black tracking-tight leading-none">{Math.floor(monthlyPrice).toLocaleString('es-MX')}</span>
                                                     <span className="ml-1 text-sm font-bold text-zinc-400">/mes</span>
                                                 </>
                                             ) : (
                                                 <span className="text-5xl font-black tracking-tight leading-none">
-                                                    {plan.monthly_price === 0 ? 'Gratis' : (plan.monthly_price || 'Custom')}
+                                                    {monthlyPrice === 0 ? 'Gratis' : (plan.monthly_price || 'Custom')}
                                                 </span>
                                             )}
                                         </div>
@@ -159,8 +167,8 @@ export async function Pricing() {
 
                                     <div className="p-8 flex-1 flex flex-col">
                                         <ul className="mb-10 space-y-4 flex-1">
-                                            {features.map((feature: string) => (
-                                                <li key={feature} className="flex items-center gap-3 text-sm text-zinc-600 font-medium text-left">
+                                            {features.map((feature: string, featureIdx: number) => (
+                                                <li key={`${plan.id}-feat-${featureIdx}`} className="flex items-center gap-3 text-sm text-zinc-600 font-medium text-left">
                                                     <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${isPopular ? 'bg-blue-600/10 text-blue-600' : 'bg-black/5 text-zinc-400'}`}>
                                                         <Check className="h-3 w-3" />
                                                     </div>
