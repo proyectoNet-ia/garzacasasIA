@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Phone, Mail } from "lucide-react"
 import { IconInstagram, IconFacebook, IconWhatsApp, IconLinkedIn } from "@/components/ui/SocialIcons"
+import { BrandLogo } from "@/components/brand/BrandLogo"
 
 interface FooterProps {
     contactConfig?: {
@@ -20,9 +21,17 @@ export function Footer({ contactConfig }: FooterProps) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-12">
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-1 space-y-4">
-                        <div className="text-xl font-black text-zinc-900 px-4 py-1.5 border border-zinc-200 rounded-xl bg-zinc-50 inline-block">
-                            Garza Casas <span className="text-blue-600">IA</span>
-                        </div>
+                        <BrandLogo
+                            initialSurface="light"
+                            imgClassName="h-11 max-w-[220px]"
+                            fallback={
+                                <>
+                                <div className="text-xl font-black text-zinc-900 px-4 py-1.5 border border-zinc-200 rounded-xl bg-zinc-50 inline-block">
+                                    Garza Casas <span className="text-blue-600">IA</span>
+                                </div>
+                                </>
+                            }
+                        />
                         <p className="text-sm text-zinc-500 leading-relaxed">
                             Revolucionando el mercado inmobiliario con inteligencia artificial y un servicio de primera clase.
                         </p>

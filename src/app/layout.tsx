@@ -8,6 +8,8 @@ import { DynamicFavicon } from "@/components/DynamicFavicon";
 import { Toaster } from "sonner";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
+import { BrandProvider } from "@/providers/BrandProvider";
+import { getSiteSettings } from "@/lib/settings";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://garzacasas.com'
 
@@ -57,24 +59,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const brandLogos = await getSiteSettings('brand_config')
+
   return (
     <html lang="es">
       <body className={`${montserrat.variable} font-montserrat antialiased bg-white text-zinc-950 transition-colors duration-300`}>
         <DynamicFavicon />
         <ScrollToTop />
-        <InteractionsProvider>
-          <SearchProvider>
-            {children}
-            <ComparisonTray />
-            <CookieConsentBanner />
-            <Toaster position="top-right" richColors />
-          </SearchProvider>
-        </InteractionsProvider>
+        <BrandProvider initialLogos={brandLogos}>
+          <InteractionsProvider>
+            <SearchProvider>
+              {children}
+              <ComparisonTray />
+              <CookieConsentBanner />
+              <Toaster position="top-right" richColors />
+            </SearchProvider>
+          </InteractionsProvider>
+        </BrandProvider>
       </body>
 
     </html>

@@ -6,6 +6,7 @@ import { Menu, User, GitCompare, Heart } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { useInteractions } from "@/providers/InteractionsProvider"
 import { NAVIGATION_LINKS } from "@/constants/navigation"
+import { BrandLogo } from "@/components/brand/BrandLogo"
 import { cn } from "@/lib/utils"
 
 interface MobileMenuProps {
@@ -27,11 +28,19 @@ export function MobileMenu({ className, triggerColor }: MobileMenuProps) {
                 <SheetContent side="left" className="bg-zinc-950 border-zinc-800 text-white w-[300px] z-[100]">
                     <SheetHeader className="mb-8">
                         <SheetTitle className="text-left text-white flex items-center gap-2">
-                            <div className="border border-white/10 px-3 py-1 rounded-xl bg-white/5">
-                                <span className="text-xl font-black tracking-tighter">
-                                    Garza Casas <span className="text-blue-500">IA</span>
-                                </span>
-                            </div>
+                            <BrandLogo
+                                initialSurface="dark"
+                                imgClassName="h-9 max-w-[180px]"
+                                fallback={
+                                    <>
+                                    <div className="border border-white/10 px-3 py-1 rounded-xl bg-white/5">
+                                        <span className="text-xl font-black tracking-tighter">
+                                            Garza Casas <span className="text-blue-500">IA</span>
+                                        </span>
+                                    </div>
+                                    </>
+                                }
+                            />
                         </SheetTitle>
                     </SheetHeader>
                     <div className="flex flex-col gap-4">

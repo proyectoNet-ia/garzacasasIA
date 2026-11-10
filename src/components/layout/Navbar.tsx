@@ -9,6 +9,7 @@ import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
 import { MobileMenu } from "./MobileMenu"
 import { NAVIGATION_LINKS } from "@/constants/navigation"
+import { BrandLogo } from "@/components/brand/BrandLogo"
 
 interface ContactConfig {
     phone: string;
@@ -84,12 +85,20 @@ export function Navbar({ contactConfig }: NavbarProps) {
                 }`}>
                 <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
                     <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
-                        <div className={`${isScrolled ? "bg-blue-600 shadow-blue-500/20" : "bg-white/10 border-white/10 border"} flex items-center justify-center w-10 h-10 rounded-xl transition-all`}>
-                            <Building2 className={`h-5 w-5 ${isScrolled ? "text-white" : "text-white"}`} />
-                        </div>
-                        <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? "text-zinc-900" : "text-white"}`}>
-                            Garza Casas <span className="text-blue-500">IA</span>
-                        </span>
+                        <BrandLogo
+                            initialSurface="dark"
+                            imgClassName="h-10 max-w-[200px]"
+                            fallback={
+                                <>
+                                <div className={`${isScrolled ? "bg-blue-600 shadow-blue-500/20" : "bg-white/10 border-white/10 border"} flex items-center justify-center w-10 h-10 rounded-xl transition-all`}>
+                                    <Building2 className={`h-5 w-5 ${isScrolled ? "text-white" : "text-white"}`} />
+                                </div>
+                                <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? "text-zinc-900" : "text-white"}`}>
+                                    Garza Casas <span className="text-blue-500">IA</span>
+                                </span>
+                                </>
+                            }
+                        />
                     </Link>
                     {/* Navigation Menu */}
                     <nav className="hidden lg:flex items-center gap-1 bg-black/5 backdrop-blur-sm p-1 rounded-full border border-white/5">

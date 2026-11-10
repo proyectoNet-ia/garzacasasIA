@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Mail, Loader2, Building2, CheckCircle2, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { BrandLogo } from '@/components/brand/BrandLogo'
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('')
@@ -48,12 +49,20 @@ export default function ForgotPasswordPage() {
                 {/* Logo */}
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center gap-3">
-                        <div className="h-12 w-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-                            <Building2 className="h-6 w-6 text-white" />
-                        </div>
-                        <span className="text-2xl font-black text-white tracking-tighter">
-                            GARZA CASAS <span className="text-blue-500">IA</span>
-                        </span>
+                        <BrandLogo
+                            initialSurface="dark"
+                            imgClassName="h-14 max-w-[260px]"
+                            fallback={
+                                <>
+                                <div className="h-12 w-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                                    <Building2 className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-2xl font-black text-white tracking-tighter">
+                                    GARZA CASAS <span className="text-blue-500">IA</span>
+                                </span>
+                                </>
+                            }
+                        />
                     </Link>
                 </div>
 

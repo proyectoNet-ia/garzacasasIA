@@ -9,6 +9,7 @@ import { useInteractions } from "@/providers/InteractionsProvider"
 import { cn } from "@/lib/utils"
 import { MobileMenu } from "./MobileMenu"
 import { NAVIGATION_LINKS } from "@/constants/navigation"
+import { BrandLogo } from "@/components/brand/BrandLogo"
 
 interface ContactConfig {
     phone: string;
@@ -93,11 +94,19 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
                 }`}>
                 <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
                     <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
-                        <div className="bg-zinc-100 border border-zinc-200 px-3 py-1 rounded-xl transition-colors hover:bg-zinc-50 w-fit">
-                            <span className="text-xl font-black tracking-tighter text-zinc-700">
-                                Garza Casas <span className="text-blue-500">IA</span>
-                            </span>
-                        </div>
+                        <BrandLogo
+                            initialSurface="light"
+                            imgClassName="h-10 max-w-[200px]"
+                            fallback={
+                                <>
+                                <div className="bg-zinc-100 border border-zinc-200 px-3 py-1 rounded-xl transition-colors hover:bg-zinc-50 w-fit">
+                                    <span className="text-xl font-black tracking-tighter text-zinc-700">
+                                        Garza Casas <span className="text-blue-500">IA</span>
+                                    </span>
+                                </div>
+                                </>
+                            }
+                        />
                     </Link>
 
                     {/* Navigation Menu */}

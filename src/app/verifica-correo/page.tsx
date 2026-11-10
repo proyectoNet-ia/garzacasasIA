@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrandLogo } from '@/components/brand/BrandLogo'
 import { Building2, Mail, ArrowRight, RefreshCw } from 'lucide-react'
 
 export default function VerificaCorreoPage({
@@ -18,12 +19,20 @@ export default function VerificaCorreoPage({
             <div className="relative z-10 w-full max-w-md text-center space-y-8">
                 {/* Logo */}
                 <Link href="/" className="inline-flex items-center gap-3 justify-center">
-                    <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-                        <Building2 className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-xl font-black text-white tracking-tighter">
-                        GARZA CASAS <span className="text-blue-500">IA</span>
-                    </span>
+                    <BrandLogo
+                        initialSurface="dark"
+                        imgClassName="h-12 max-w-[240px]"
+                        fallback={
+                            <>
+                            <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                                <Building2 className="h-5 w-5 text-white" />
+                            </div>
+                            <span className="text-xl font-black text-white tracking-tighter">
+                                GARZA CASAS <span className="text-blue-500">IA</span>
+                            </span>
+                            </>
+                        }
+                    />
                 </Link>
 
                 {/* Card */}

@@ -10,6 +10,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react'
 import { CMSSkeleton } from '@/components/admin/AdminSkeletons'
 import { toast } from 'sonner'
+import { analyzeLogoFileLuminance } from '@/lib/brand'
+
+type LogoSlot = 'onDark' | 'onLight'
+const MAX_LOGO_BYTES = 2 * 1024 * 1024
 
 const supabase = createClient()
 
@@ -38,6 +42,13 @@ export default function AdminCMS() {
     // Site Icon
     const [siteIconUrl, setSiteIconUrl] = useState('')
     const iconFileRef = useRef<HTMLInputElement>(null)
+
+    // Logotipos de marca (fondo oscuro / fondo claro)
+    const [logoOnDarkUrl, setLogoOnDarkUrl] = useState('')
+    const [logoOnLightUrl, setLogoOnLightUrl] = useState('')
+    const [uploadingLogo, setUploadingLogo] = useState<LogoSlot | null>(null)
+    const logoOnDarkFileRef = useRef<HTMLInputElement>(null)
+    const logoOnLightFileRef = useRef<HTMLInputElement>(null)
 
     // Social Media
     const [socialMedia, setSocialMedia] = useState({
@@ -73,16 +84,26 @@ export default function AdminCMS() {
 
     const fetchSettings = async () => {
         try {
-            const { data } = await supabase
+            const baseColumns = 'hero_title, hero_subtitle, hero_image_url, site_icon_url, social_facebook, social_instagram, social_linkedin, social_twitter, social_youtube, seo_title, seo_description, seo_keywords'
+            let { data, error: fetchError }: { data: any; error: any } = await supabase
                 .from('site_settings')
-                .select('*')
+                .select(`${baseColumns}, logo_on_dark_url, logo_on_light_url`)
                 .single()
+
+            // Compatibilidad: si aún no se aplicó la migración de logotipos, cargar el resto del CMS
+            if (fetchError) {
+                const retry = await supabase.from('site_settings').select(baseColumns).single()
+                data = retry.data
+                fetchError = retry.error
+            }
 
             if (data) {
                 setHeroTitle(data.hero_title || '')
                 setHeroSubtitle(data.hero_subtitle || '')
                 setHeroImageUrl(data.hero_image_url || DEFAULT_HERO_IMAGE)
                 setSiteIconUrl(data.site_icon_url || '')
+                setLogoOnDarkUrl(data.logo_on_dark_url || '')
+                setLogoOnLightUrl(data.logo_on_light_url || '')
                 setSocialMedia({
                     facebook: data.social_facebook || '',
                     instagram: data.social_instagram || '',
@@ -224,6 +245,53 @@ export default function AdminCMS() {
         }
     }
 
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: LogoSlot) => {
+        const file = e.target.files?.[0]
+        e.target.value = ''
+        if (!file) return
+
+        if (file.size > MAX_LOGO_BYTES) {
+            toast.error('El logotipo no debe superar 2 MB')
+            return
+        }
+
+        // Análisis inteligente de contraste antes de subir
+        const luminance = await analyzeLogoFileLuminance(file)
+        if (luminance !== null) {
+            if (slot === 'onDark' && luminance < 0.35) {
+                toast.warning('Este logotipo parece oscuro: podría verse poco sobre fondos oscuros. Se recomienda una versión blanca o clara.')
+            } else if (slot === 'onLight' && luminance > 0.75) {
+                toast.warning('Este logotipo parece muy claro: podría perderse sobre fondos blancos. Se recomienda una versión oscura o a color.')
+            }
+        }
+
+        setUploadingLogo(slot)
+        try {
+            const fileExt = file.name.split('.').pop()
+            const fileName = `logo-${slot === 'onDark' ? 'dark-bg' : 'light-bg'}-${Date.now()}.${fileExt}`
+            const filePath = `cms/${fileName}`
+
+            const { error: uploadError } = await supabase.storage
+                .from('site-assets')
+                .upload(filePath, file, { upsert: true, contentType: file.type || undefined })
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('site-assets')
+                .getPublicUrl(filePath)
+
+            if (slot === 'onDark') setLogoOnDarkUrl(publicUrl)
+            else setLogoOnLightUrl(publicUrl)
+
+            toast.success('Logotipo cargado. Presiona "Guardar Todo" para publicarlo.')
+        } catch (error: any) {
+            toast.error('Error al cargar logotipo: ' + error.message)
+        } finally {
+            setUploadingLogo(null)
+        }
+    }
+
     const handleSaveSettings = async () => {
         setSaving(true)
 
@@ -236,6 +304,8 @@ export default function AdminCMS() {
                     hero_subtitle: heroSubtitle,
                     hero_image_url: heroImageUrl,
                     site_icon_url: siteIconUrl,
+                    logo_on_dark_url: logoOnDarkUrl || null,
+                    logo_on_light_url: logoOnLightUrl || null,
                     social_facebook: socialMedia.facebook,
                     social_instagram: socialMedia.instagram,
                     social_linkedin: socialMedia.linkedin,
@@ -344,6 +414,99 @@ export default function AdminCMS() {
                                 <Input id="hero-subtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400" />
                             </div>
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Logotipos de marca: fondo oscuro y fondo claro */}
+                <Card className="border-zinc-200 lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-zinc-900 font-black">
+                            <ImageIcon className="h-5 w-5" />
+                            Logotipo de Garza Casas (Fondo Oscuro y Claro)
+                        </CardTitle>
+                        <p className="text-sm text-zinc-500 font-medium">
+                            El sitio detecta automáticamente el fondo detrás del logotipo (navbar transparente, hero, menús, footer, login) y muestra la versión correcta. Si solo cargas una versión, se usará en ambos fondos.
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {([
+                                {
+                                    slot: 'onDark' as LogoSlot,
+                                    title: 'Para fondos OSCUROS',
+                                    hint: 'Versión blanca o clara del logotipo',
+                                    url: logoOnDarkUrl,
+                                    setUrl: setLogoOnDarkUrl,
+                                    ref: logoOnDarkFileRef,
+                                    previewClass: 'bg-zinc-950 border-zinc-800',
+                                    emptyText: 'text-zinc-500',
+                                },
+                                {
+                                    slot: 'onLight' as LogoSlot,
+                                    title: 'Para fondos CLAROS',
+                                    hint: 'Versión oscura o a color del logotipo',
+                                    url: logoOnLightUrl,
+                                    setUrl: setLogoOnLightUrl,
+                                    ref: logoOnLightFileRef,
+                                    previewClass: 'bg-white border-zinc-200',
+                                    emptyText: 'text-zinc-400',
+                                },
+                            ]).map((item) => (
+                                <div key={item.slot} className="space-y-3">
+                                    <div>
+                                        <p className="text-sm font-black text-zinc-900">{item.title}</p>
+                                        <p className="text-xs text-zinc-500">{item.hint} · PNG/SVG/WebP transparente · máx. 2 MB</p>
+                                    </div>
+                                    <div className={`h-32 rounded-2xl border flex items-center justify-center p-6 ${item.previewClass}`}>
+                                        {item.url ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={item.url} alt={item.title} className="max-h-full max-w-full object-contain" />
+                                        ) : (
+                                            <span className={`text-xs font-bold uppercase tracking-widest ${item.emptyText}`}>Sin logotipo</span>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => item.ref.current?.click()}
+                                            disabled={uploadingLogo !== null}
+                                            className="flex-1 gap-2"
+                                        >
+                                            {uploadingLogo === item.slot ? (
+                                                <><Loader2 className="h-4 w-4 animate-spin" /> Subiendo...</>
+                                            ) : (
+                                                <><Upload className="h-4 w-4" /> {item.url ? 'Cambiar logotipo' : 'Subir logotipo'}</>
+                                            )}
+                                        </Button>
+                                        {item.url && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => item.setUrl('')}
+                                                disabled={uploadingLogo !== null}
+                                                className="text-zinc-500 hover:text-red-600 hover:bg-red-50"
+                                            >
+                                                Quitar
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <input
+                                        ref={item.ref}
+                                        type="file"
+                                        accept="image/png,image/svg+xml,image/webp,image/jpeg"
+                                        onChange={(e) => handleLogoUpload(e, item.slot)}
+                                        className="hidden"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        {(logoOnDarkUrl || logoOnLightUrl) && !(logoOnDarkUrl && logoOnLightUrl) && (
+                            <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 font-medium">
+                                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                                Solo hay una versión cargada; se usará en ambos fondos. Para máximo contraste carga también la versión {logoOnDarkUrl ? 'para fondos claros' : 'para fondos oscuros'}.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

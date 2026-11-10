@@ -5,7 +5,8 @@ import { createClient as createBrowserClient } from '@/lib/supabase-client'
 const COLUMN_MAP: Record<string, string> = {
     hero_config: 'hero_title, hero_subtitle, hero_image_url',
     contact_config: 'contact_phone, contact_email, contact_whatsapp, social_instagram, social_facebook, social_linkedin, social_twitter, social_youtube',
-    seo_config: 'seo_title, seo_description, seo_keywords'
+    seo_config: 'seo_title, seo_description, seo_keywords',
+    brand_config: 'logo_on_dark_url, logo_on_light_url'
 }
 
 export async function getSiteSettings(key: string): Promise<any> {
@@ -45,6 +46,13 @@ export async function getSiteSettings(key: string): Promise<any> {
                 linkedin: settings.social_linkedin || '',
                 twitter: settings.social_twitter || '',
                 youtube: settings.social_youtube || ''
+            }
+        }
+
+        if (key === 'brand_config') {
+            return {
+                onDark: settings.logo_on_dark_url || null,
+                onLight: settings.logo_on_light_url || null
             }
         }
 
