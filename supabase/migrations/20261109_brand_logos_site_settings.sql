@@ -22,26 +22,52 @@ ON CONFLICT (id) DO UPDATE SET
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- 3. Políticas de acceso para el bucket 'site-assets'
--- Lectura pública para cualquier usuario/visitante
 DROP POLICY IF EXISTS "Public read access for site assets" ON storage.objects;
 CREATE POLICY "Public read access for site assets"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'site-assets');
 
--- Subida permitida para usuarios autenticados (administradores)
 DROP POLICY IF EXISTS "Admin upload access for site assets" ON storage.objects;
 CREATE POLICY "Admin upload access for site assets"
 ON storage.objects FOR INSERT
 WITH CHECK (bucket_id = 'site-assets');
 
--- Modificación permitida para usuarios autenticados (administradores)
 DROP POLICY IF EXISTS "Admin update access for site assets" ON storage.objects;
 CREATE POLICY "Admin update access for site assets"
 ON storage.objects FOR UPDATE
 USING (bucket_id = 'site-assets');
 
--- Eliminación permitida para usuarios autenticados (administradores)
 DROP POLICY IF EXISTS "Admin delete access for site assets" ON storage.objects;
 CREATE POLICY "Admin delete access for site assets"
 ON storage.objects FOR DELETE
 USING (bucket_id = 'site-assets');
+
+-- 4. Políticas de acceso para la tabla site_settings (incluyendo INSERT para permitir upsert)
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read access for site settings" ON public.site_settings;
+CREATE POLICY "Public read access for site settings"
+ON public.site_settings FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "Admin update access for site settings" ON public.site_settings;
+CREATE POLICY "Admin update access for site settings"
+ON public.site_settings FOR UPDATE
+USING (
+    EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = auth.uid()
+        AND role = 'admin'
+    )
+);
+
+DROP POLICY IF EXISTS "Admin insert access for site settings" ON public.site_settings;
+CREATE POLICY "Admin insert access for site settings"
+ON public.site_settings FOR INSERT
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = auth.uid()
+        AND role = 'admin'
+    )
+);

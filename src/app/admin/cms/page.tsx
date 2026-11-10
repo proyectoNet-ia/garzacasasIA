@@ -281,28 +281,33 @@ export default function AdminCMS() {
         setSaving(true)
 
         try {
-            const { error } = await supabase
-                .from('site_settings')
-                .upsert({
-                    id: 1,
-                    hero_title: heroTitle,
-                    hero_subtitle: heroSubtitle,
-                    hero_image_url: heroImageUrl,
-                    site_icon_url: siteIconUrl,
-                    logo_on_dark_url: logoOnDarkUrl || null,
-                    logo_on_light_url: logoOnLightUrl || null,
-                    social_facebook: socialMedia.facebook,
-                    social_instagram: socialMedia.instagram,
-                    social_linkedin: socialMedia.linkedin,
-                    social_twitter: socialMedia.twitter,
-                    social_youtube: socialMedia.youtube,
-                    seo_title: seoTitle,
-                    seo_description: seoDescription,
-                    seo_keywords: seoKeywords,
-                    updated_at: new Date().toISOString()
-                })
+            const payload = {
+                hero_title: heroTitle,
+                hero_subtitle: heroSubtitle,
+                hero_image_url: heroImageUrl,
+                site_icon_url: siteIconUrl,
+                logo_on_dark_url: logoOnDarkUrl || null,
+                logo_on_light_url: logoOnLightUrl || null,
+                social_facebook: socialMedia.facebook,
+                social_instagram: socialMedia.instagram,
+                social_linkedin: socialMedia.linkedin,
+                social_twitter: socialMedia.twitter,
+                social_youtube: socialMedia.youtube,
+                seo_title: seoTitle,
+                seo_description: seoDescription,
+                seo_keywords: seoKeywords,
+            }
 
-            if (error) throw error
+            const res = await fetch('/api/admin/cms/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || `Error ${res.status} al guardar configuración`)
+            }
 
             toast.success('Configuración guardada exitosamente')
         } catch (error: any) {
