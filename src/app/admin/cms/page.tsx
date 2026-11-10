@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react'
+import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle, Sparkles, RefreshCw, Bot } from 'lucide-react'
 import { CMSSkeleton } from '@/components/admin/AdminSkeletons'
 import { toast } from 'sonner'
 import { analyzeLogoFileLuminance } from '@/lib/brand'
+import { cn } from '@/lib/utils'
 
 type LogoSlot = 'onDark' | 'onLight'
 const MAX_LOGO_BYTES = 2 * 1024 * 1024
@@ -63,6 +64,8 @@ export default function AdminCMS() {
     const [seoTitle, setSeoTitle] = useState('')
     const [seoDescription, setSeoDescription] = useState('')
     const [seoKeywords, setSeoKeywords] = useState('')
+    const [generatingSeo, setGeneratingSeo] = useState(false)
+    const [detectedServices, setDetectedServices] = useState<string[] | null>(null)
 
     useEffect(() => {
         fetchSettings()
@@ -274,6 +277,33 @@ export default function AdminCMS() {
             toast.error('Error al cargar logotipo: ' + error.message)
         } finally {
             setUploadingLogo(null)
+        }
+    }
+
+    const handleGenerateSeo = async () => {
+        setGeneratingSeo(true)
+        try {
+            const res = await fetch('/api/admin/cms/ai-seo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            })
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || `Error ${res.status} al consultar al Agente SEO`)
+            }
+
+            const data = await res.json()
+            if (data.meta_title) setSeoTitle(data.meta_title)
+            if (data.meta_description) setSeoDescription(data.meta_description)
+            if (data.keywords) setSeoKeywords(data.keywords)
+            if (data.detected_services) setDetectedServices(data.detected_services)
+
+            toast.success('¡SEO optimizado por el Agente Experto con los servicios actuales!')
+        } catch (error: any) {
+            toast.error('Error al generar SEO: ' + error.message)
+        } finally {
+            setGeneratingSeo(false)
         }
     }
 
@@ -556,14 +586,108 @@ export default function AdminCMS() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-200 lg:col-span-2">
-                    <CardHeader><CardTitle className="text-zinc-900 font-black">Configuración SEO</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1"><Label className="text-zinc-700 font-bold">Meta Title</Label><Input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
-                            <div className="space-y-1"><Label className="text-zinc-700 font-bold">Keywords</Label><Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                <Card className="border-zinc-200 lg:col-span-2 shadow-sm">
+                    <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 pb-4">
+                        <div>
+                            <CardTitle className="text-zinc-900 font-black flex items-center gap-2">
+                                <Sparkles className="h-5 w-5 text-blue-600" />
+                                Configuración SEO Inmobiliario
+                            </CardTitle>
+                            <p className="text-xs text-zinc-500 font-medium mt-1">
+                                Optimizado para posicionamiento orgánico en Google Search y rich snippets en México.
+                            </p>
                         </div>
-                        <div className="space-y-1"><Label className="text-zinc-700 font-bold">Meta Description</Label><Textarea rows={3} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                        <Button
+                            type="button"
+                            onClick={handleGenerateSeo}
+                            disabled={generatingSeo || saving}
+                            className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-md shadow-blue-500/20 shrink-0 font-bold text-xs"
+                        >
+                            {generatingSeo ? (
+                                <><Loader2 className="h-4 w-4 animate-spin" /> Analizando servicios...</>
+                            ) : (
+                                <><Sparkles className="h-4 w-4 text-blue-200" /> Optimizar con Agente SEO IA</>
+                            )}
+                        </Button>
+                    </CardHeader>
+                    <CardContent className="space-y-5 pt-5">
+                        {detectedServices && detectedServices.length > 0 && (
+                            <div className="bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 text-xs text-blue-900 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 font-bold">
+                                        <Bot className="h-4 w-4 text-blue-600" />
+                                        <span>Servicios y paquetes detectados y sincronizados por el Agente IA:</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGenerateSeo}
+                                        disabled={generatingSeo}
+                                        className="text-[11px] text-blue-700 hover:underline flex items-center gap-1 font-semibold"
+                                    >
+                                        <RefreshCw className={cn("h-3 w-3", generatingSeo && "animate-spin")} /> Re-analizar
+                                    </button>
+                                </div>
+                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-blue-800 list-disc list-inside">
+                                    {detectedServices.map((service, idx) => (
+                                        <li key={idx} className="truncate">{service}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-zinc-700 font-bold text-xs">Meta Title (Google SERP)</Label>
+                                    <span className={cn(
+                                        "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                        seoTitle.length >= 45 && seoTitle.length <= 65 ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                    )}>
+                                        {seoTitle.length} / 60 caracteres
+                                    </span>
+                                </div>
+                                <Input
+                                    value={seoTitle}
+                                    onChange={(e) => setSeoTitle(e.target.value)}
+                                    placeholder="Garza Casas IA | Bienes Raíces y Casas en Monterrey con IA"
+                                    className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-zinc-700 font-bold text-xs">Keywords (Separadas por coma)</Label>
+                                    <span className="text-[10px] text-zinc-400 font-medium">
+                                        {seoKeywords ? seoKeywords.split(',').filter(Boolean).length : 0} términos
+                                    </span>
+                                </div>
+                                <Input
+                                    value={seoKeywords}
+                                    onChange={(e) => setSeoKeywords(e.target.value)}
+                                    placeholder="casas en monterrey, bienes raices san pedro, avaluo IA..."
+                                    className="bg-zinc-50 border-zinc-200 text-zinc-900"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-zinc-700 font-bold text-xs">Meta Description (Snippet de resultados)</Label>
+                                <span className={cn(
+                                    "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                    seoDescription.length >= 135 && seoDescription.length <= 165 ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                )}>
+                                    {seoDescription.length} / 155 caracteres
+                                </span>
+                            </div>
+                            <Textarea
+                                rows={3}
+                                value={seoDescription}
+                                onChange={(e) => setSeoDescription(e.target.value)}
+                                placeholder="Encuentra casas y departamentos en Monterrey con valuación e inteligencia artificial..."
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 leading-relaxed"
+                            />
+                        </div>
                     </CardContent>
                 </Card>
             </div>
