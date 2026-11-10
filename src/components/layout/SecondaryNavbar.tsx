@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { MobileMenu } from "./MobileMenu"
 import { NAVIGATION_LINKS } from "@/constants/navigation"
 import { BrandLogo } from "@/components/brand/BrandLogo"
+import { DEFAULT_CONTACT_CONFIG } from "@/lib/settings"
 
 interface ContactConfig {
     phone: string;
