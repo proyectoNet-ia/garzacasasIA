@@ -37,15 +37,28 @@ function LoginForm() {
 
     // Redirect si ya está loggeado
     useEffect(() => {
+        let isMounted = true
         async function checkUser() {
             const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                router.push(nextPath)
+            if (user && isMounted) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .maybeSingle()
+
+                const target = searchParams.get('next')
+                    || (profile?.role === 'admin' ? '/admin' : '/dashboard')
+
+                window.location.assign(target)
             }
         }
         checkUser()
+        return () => {
+            isMounted = false
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []) // solo al montar — evita loop si nextPath cambia
+    }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -53,25 +66,35 @@ function LoginForm() {
 
         try {
             const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                email,
+                email: email.trim().toLowerCase(),
                 password,
             })
 
             if (authError) throw authError
             if (!authData.user) throw new Error('No se pudo autenticar el usuario')
 
-            // Obtener perfil para mensaje de bienvenida
+            // Obtener perfil para mensaje de bienvenida y rol
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('full_name, role')
                 .eq('id', authData.user.id)
-                .single()
+                .maybeSingle()
 
             toast.success(`¡Bienvenido${profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!`)
 
-            // Navegar al destino — NO llamar router.refresh() aquí:
-            // refresh() + push() simultáneos se contrarrestan y congelan el form
-            router.push(nextPath)
+            // Destino inteligente:
+            // 1) Si viene parámetro ?next=... se respeta (ej. /admin/cms)
+            // 2) Si es admin sin next explícito -> /admin
+            // 3) Si es agente / usuario regular -> /dashboard
+            const nextParam = searchParams.get('next')
+            const destination = nextParam || (profile?.role === 'admin' ? '/admin' : '/dashboard')
+
+            // Usar window.location.assign para garantizar que las cookies de sesión
+            // de Supabase Auth se sincronicen de inmediato con el servidor Next.js
+            // y el middleware no rebote de regreso al login.
+            window.location.assign(destination)
+            // Mantener loading=true activo mientras el navegador transiciona
+            return
 
         } catch (error: any) {
             console.error('Login error:', error)
@@ -82,7 +105,6 @@ function LoginForm() {
             } else {
                 toast.error(error.message || 'Error al iniciar sesión')
             }
-        } finally {
             setLoading(false)
         }
     }
