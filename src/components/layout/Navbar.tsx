@@ -27,6 +27,14 @@ export function Navbar({ contactConfig }: NavbarProps) {
     const [isScrolled, setIsScrolled] = useState(false)
     const { favorites } = useInteractions()
 
+    const contact = {
+        phone: contactConfig?.phone || DEFAULT_CONTACT_CONFIG.phone,
+        email: contactConfig?.email || DEFAULT_CONTACT_CONFIG.email,
+        whatsapp: contactConfig?.whatsapp || DEFAULT_CONTACT_CONFIG.whatsapp,
+        instagram: contactConfig?.instagram || DEFAULT_CONTACT_CONFIG.instagram,
+        facebook: contactConfig?.facebook || DEFAULT_CONTACT_CONFIG.facebook,
+    }
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
@@ -44,32 +52,32 @@ export function Navbar({ contactConfig }: NavbarProps) {
                 }`}>
                 <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-6">
                     <div className="flex items-center gap-6">
-                        {contactConfig?.phone && (
-                            <a href={`tel:${contactConfig.phone}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest">
+                        {contact.phone && (
+                            <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest">
                                 <Phone className="h-3 w-3 text-blue-500" />
-                                {contactConfig.phone}
+                                {contact.phone}
                             </a>
                         )}
-                        {contactConfig?.email && (
-                            <a href={`mailto:${contactConfig.email}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest hidden sm:flex">
+                        {contact.email && (
+                            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest hidden sm:flex">
                                 <Mail className="h-3 w-3 text-blue-500" />
-                                {contactConfig.email}
+                                {contact.email}
                             </a>
                         )}
                     </div>
                     <div className="flex items-center gap-4">
-                        {contactConfig?.instagram && (
-                            <a href={contactConfig.instagram} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
+                        {contact.instagram && (
+                            <a href={contact.instagram} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
                                 <IconInstagram className="h-3.5 w-3.5" />
                             </a>
                         )}
-                        {contactConfig?.facebook && (
-                            <a href={contactConfig.facebook} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
+                        {contact.facebook && (
+                            <a href={contact.facebook} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
                                 <IconFacebook className="h-3.5 w-3.5" />
                             </a>
                         )}
-                        {contactConfig?.whatsapp && (
-                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold text-green-400 hover:text-green-300 transition-colors uppercase tracking-widest">
+                        {contact.whatsapp && (
+                            <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold text-green-400 hover:text-green-300 transition-colors uppercase tracking-widest">
                                 <IconWhatsApp className="h-3.5 w-3.5" />
                                 WhatsApp
                             </a>

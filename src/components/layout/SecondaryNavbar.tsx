@@ -27,6 +27,14 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
     const [isScrolled, setIsScrolled] = useState(false)
     const { favorites } = useInteractions()
 
+    const contact = {
+        phone: contactConfig?.phone || DEFAULT_CONTACT_CONFIG.phone,
+        email: contactConfig?.email || DEFAULT_CONTACT_CONFIG.email,
+        whatsapp: contactConfig?.whatsapp || DEFAULT_CONTACT_CONFIG.whatsapp,
+        instagram: contactConfig?.instagram || DEFAULT_CONTACT_CONFIG.instagram,
+        facebook: contactConfig?.facebook || DEFAULT_CONTACT_CONFIG.facebook,
+    }
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
@@ -37,49 +45,46 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
 
     return (
         <header className="fixed top-0 z-50 w-full transition-all duration-500">
-            {/* Top Bar - Light Theme */}
             {/* Top Bar - Premium Dark */}
-            <div className={`w-full transition-all duration-500 overflow-hidden bg-slate-950 text-white ${isScrolled
+            <div className={`w-full transition-all duration-500 overflow-hidden bg-slate-950 text-white border-b border-white/5 ${isScrolled
                 ? "h-0 opacity-0"
-                : "h-12 opacity-100"
+                : "h-10 opacity-100"
                 }`}>
-                <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-6 text-xs font-medium">
+                <div className="container mx-auto h-full flex items-center justify-between px-4 md:px-6">
                     <div className="flex items-center gap-6">
-                        {contactConfig?.email && (
-                            <a href={`mailto:${contactConfig.email}`} className="flex items-center gap-2 hover:text-white transition-colors group">
-                                <div className="p-1.5 rounded-full bg-slate-900 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                    <Mail className="h-3 w-3" />
-                                </div>
-                                <span className="hidden sm:inline">{contactConfig.email}</span>
+                        {contact.phone && (
+                            <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest">
+                                <Phone className="h-3 w-3 text-blue-500" />
+                                {contact.phone}
                             </a>
                         )}
-                        <div className="h-4 w-px bg-slate-800 hidden sm:block" />
-                        {contactConfig?.phone && (
-                            <a href={`tel:${contactConfig.phone}`} className="flex items-center gap-2 hover:text-white transition-colors group">
-                                <div className="p-1.5 rounded-full bg-slate-900 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                    <Phone className="h-3 w-3" />
-                                </div>
-                                {contactConfig.phone}
+                        {contact.phone && contact.email && (
+                            <div className="h-3.5 w-px bg-slate-800 hidden sm:block" />
+                        )}
+                        {contact.email && (
+                            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-widest hidden sm:flex">
+                                <Mail className="h-3 w-3 text-blue-500" />
+                                {contact.email}
                             </a>
                         )}
                     </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-3 pr-4 border-r border-slate-800">
-                            {contactConfig?.instagram && (
-                                <a href={contactConfig.instagram} target="_blank" rel="noreferrer" className="hover:text-pink-500 transition-colors">
-                                    <IconInstagram className="h-4 w-4" />
+                            {contact.instagram && (
+                                <a href={contact.instagram} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-pink-500 transition-colors">
+                                    <IconInstagram className="h-3.5 w-3.5" />
                                 </a>
                             )}
-                            {contactConfig?.facebook && (
-                                <a href={contactConfig.facebook} target="_blank" rel="noreferrer" className="hover:text-blue-500 transition-colors">
-                                    <IconFacebook className="h-4 w-4" />
+                            {contact.facebook && (
+                                <a href={contact.facebook} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-blue-500 transition-colors">
+                                    <IconFacebook className="h-3.5 w-3.5" />
                                 </a>
                             )}
                         </div>
-                        {contactConfig?.whatsapp && (
-                            <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-green-500/10 text-green-400 px-4 py-1.5 rounded-full hover:bg-green-500 hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider">
-                                <IconWhatsApp className="h-4 w-4" />
+                        {contact.whatsapp && (
+                            <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-bold text-green-400 hover:text-green-300 transition-colors uppercase tracking-widest">
+                                <IconWhatsApp className="h-3.5 w-3.5" />
                                 WhatsApp
                             </a>
                         )}
