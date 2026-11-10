@@ -186,20 +186,7 @@ export default function AdminCMS() {
 
         setUploadingHero(true)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `hero-${Date.now()}.${fileExt}`
-            const filePath = `cms/${fileName}`
-
-            const { error: uploadError } = await supabase.storage
-                .from('site-assets')
-                .upload(filePath, file, { upsert: true })
-
-            if (uploadError) throw uploadError
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('site-assets')
-                .getPublicUrl(filePath)
-
+            const publicUrl = await uploadAssetViaApi(file, 'hero')
             setHeroImageUrl(publicUrl)
             toast.success(`Imagen del Hero cargada exitosamente (${validation.width}x${validation.height}px)`)
         } catch (error: any) {
@@ -207,6 +194,28 @@ export default function AdminCMS() {
         } finally {
             setUploadingHero(false)
         }
+    }
+
+    const uploadAssetViaApi = async (file: File, prefix: string): Promise<string> => {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('prefix', prefix)
+
+        const res = await fetch('/api/admin/cms/upload', {
+            method: 'POST',
+            body: formData,
+        })
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}))
+            throw new Error(errData.error || `Error ${res.status} al subir archivo`)
+        }
+
+        const data = await res.json()
+        if (!data.publicUrl) {
+            throw new Error('No se recibió la URL pública del archivo.')
+        }
+        return data.publicUrl
     }
 
     const handleRestoreDefaultHero = () => {
@@ -222,24 +231,11 @@ export default function AdminCMS() {
 
         setUploadingIcon(true)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `icon-${Date.now()}.${fileExt}`
-            const filePath = `cms/${fileName}`
-
-            const { error: uploadError } = await supabase.storage
-                .from('site-assets')
-                .upload(filePath, file, { upsert: true })
-
-            if (uploadError) throw uploadError
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('site-assets')
-                .getPublicUrl(filePath)
-
+            const publicUrl = await uploadAssetViaApi(file, 'icon')
             setSiteIconUrl(publicUrl)
-            toast.success('Icono del sitio cargado exitosamente')
+            toast.success('Favicon / Isotipo cargado exitosamente')
         } catch (error: any) {
-            toast.error('Error al cargar icono: ' + error.message)
+            toast.error('Error al cargar favicon: ' + error.message)
         } finally {
             setUploadingIcon(false)
         }
@@ -267,19 +263,8 @@ export default function AdminCMS() {
 
         setUploadingLogo(slot)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `logo-${slot === 'onDark' ? 'dark-bg' : 'light-bg'}-${Date.now()}.${fileExt}`
-            const filePath = `cms/${fileName}`
-
-            const { error: uploadError } = await supabase.storage
-                .from('site-assets')
-                .upload(filePath, file, { upsert: true, contentType: file.type || undefined })
-
-            if (uploadError) throw uploadError
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('site-assets')
-                .getPublicUrl(filePath)
+            const prefix = slot === 'onDark' ? 'logo-dark-bg' : 'logo-light-bg'
+            const publicUrl = await uploadAssetViaApi(file, prefix)
 
             if (slot === 'onDark') setLogoOnDarkUrl(publicUrl)
             else setLogoOnLightUrl(publicUrl)
