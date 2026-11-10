@@ -57,6 +57,16 @@ export const metadata: Metadata = {
   alternates: {
     canonical: siteUrl,
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/site-icon-default.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/site-icon-default.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default async function RootLayout({
@@ -64,12 +74,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const brandLogos = await getSiteSettings('brand_config')
+  const [brandLogos, iconConfig] = await Promise.all([
+    getSiteSettings('brand_config'),
+    getSiteSettings('icon_config')
+  ])
+  const siteIconUrl = iconConfig?.site_icon_url || null
 
   return (
     <html lang="es">
+      <head>
+        <link rel="icon" href={siteIconUrl || "/favicon.ico"} sizes="any" />
+        <link rel="apple-touch-icon" href={siteIconUrl || "/site-icon-default.png"} />
+      </head>
       <body className={`${montserrat.variable} font-montserrat antialiased bg-white text-zinc-950 transition-colors duration-300`}>
-        <DynamicFavicon />
+        <DynamicFavicon initialFaviconUrl={siteIconUrl} />
         <ScrollToTop />
         <BrandProvider initialLogos={brandLogos}>
           <InteractionsProvider>

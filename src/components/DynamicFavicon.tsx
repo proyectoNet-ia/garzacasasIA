@@ -5,8 +5,18 @@ import { createClient } from '@/lib/supabase'
 
 const supabase = createClient()
 
-export function DynamicFavicon() {
-    const [faviconUrl, setFaviconUrl] = useState<string | null>(null)
+interface DynamicFaviconProps {
+    initialFaviconUrl?: string | null
+}
+
+export function DynamicFavicon({ initialFaviconUrl }: DynamicFaviconProps) {
+    const [faviconUrl, setFaviconUrl] = useState<string | null>(initialFaviconUrl || null)
+
+    useEffect(() => {
+        if (initialFaviconUrl && initialFaviconUrl !== faviconUrl) {
+            setFaviconUrl(initialFaviconUrl)
+        }
+    }, [initialFaviconUrl])
 
     useEffect(() => {
         const fetchFavicon = async () => {
@@ -14,7 +24,8 @@ export function DynamicFavicon() {
                 const { data } = await supabase
                     .from('site_settings')
                     .select('site_icon_url')
-                    .single()
+                    .eq('id', 1)
+                    .maybeSingle()
 
                 if (data?.site_icon_url) {
                     setFaviconUrl(data.site_icon_url)
@@ -24,21 +35,24 @@ export function DynamicFavicon() {
             }
         }
 
-        fetchFavicon()
+        if (!faviconUrl) {
+            fetchFavicon()
+        }
 
-        // Subscribe to changes in site_settings
+        // Suscribirse a cambios en tiempo real
         const channel = supabase
-            .channel('site_settings_changes')
+            .channel('site_settings_favicon')
             .on(
                 'postgres_changes',
                 {
                     event: 'UPDATE',
                     schema: 'public',
-                    table: 'site_settings'
+                    table: 'site_settings',
                 },
                 (payload) => {
                     if (payload.new && 'site_icon_url' in payload.new) {
-                        setFaviconUrl(payload.new.site_icon_url as string)
+                        const newUrl = payload.new.site_icon_url as string | null
+                        if (newUrl) setFaviconUrl(newUrl)
                     }
                 }
             )
@@ -52,26 +66,37 @@ export function DynamicFavicon() {
     useEffect(() => {
         if (!faviconUrl) return
 
-        // Update all favicon links
-        const updateFavicon = (rel: string, sizes?: string) => {
-            let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement
+        const applyFavicon = () => {
+            const existingLinks = document.querySelectorAll<HTMLLinkElement>(
+                'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+            )
 
-            if (!link) {
-                link = document.createElement('link')
-                link.rel = rel
-                if (sizes) link.setAttribute('sizes', sizes)
+            if (existingLinks.length > 0) {
+                existingLinks.forEach((link) => {
+                    link.href = faviconUrl
+                })
+            } else {
+                const link = document.createElement('link')
+                link.rel = 'icon'
+                link.href = faviconUrl
                 document.head.appendChild(link)
             }
 
-            link.href = faviconUrl
+            let shortcut = document.querySelector<HTMLLinkElement>('link[rel="shortcut icon"]')
+            if (!shortcut) {
+                shortcut = document.createElement('link')
+                shortcut.rel = 'shortcut icon'
+                document.head.appendChild(shortcut)
+            }
+            shortcut.href = faviconUrl
         }
 
-        // Update different favicon sizes
-        updateFavicon('icon')
-        updateFavicon('apple-touch-icon', '180x180')
-        updateFavicon('icon', '32x32')
-        updateFavicon('icon', '16x16')
-
+        applyFavicon()
+        const handleFocus = () => applyFavicon()
+        window.addEventListener('focus', handleFocus)
+        return () => {
+            window.removeEventListener('focus', handleFocus)
+        }
     }, [faviconUrl])
 
     return null
