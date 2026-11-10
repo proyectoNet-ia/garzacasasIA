@@ -67,19 +67,23 @@ export default function AdminSettings() {
     const handleSaveContact = async () => {
         setSaving(true)
         try {
-            const { error } = await supabase
-                .from('site_settings')
-                .upsert({
-                    id: 1,
+            const res = await fetch('/api/admin/cms/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     contact_phone: contactConfig.phone,
                     contact_email: contactConfig.email,
                     contact_whatsapp: contactConfig.whatsapp,
                     social_instagram: contactConfig.instagram,
                     social_facebook: contactConfig.facebook,
-                    updated_at: new Date().toISOString()
-                })
+                }),
+            })
 
-            if (error) throw error
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || `Error ${res.status}`)
+            }
+
             toast.success('¡Información de contacto actualizada correctamente!')
         } catch (error: any) {
             toast.error('Error guardando contacto: ' + error.message)

@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
             site_icon_url,
             logo_on_dark_url,
             logo_on_light_url,
+            contact_phone,
+            contact_email,
+            contact_whatsapp,
             social_facebook,
             social_instagram,
             social_linkedin,
@@ -50,29 +53,60 @@ export async function POST(req: NextRequest) {
 
         const payload: Record<string, any> = {
             id: 1,
-            hero_title: hero_title ?? '',
-            hero_subtitle: hero_subtitle ?? '',
-            hero_image_url: hero_image_url ?? '',
-            site_icon_url: site_icon_url ?? null,
-            logo_on_dark_url: logo_on_dark_url ?? null,
-            logo_on_light_url: logo_on_light_url ?? null,
-            social_facebook: social_facebook ?? '',
-            social_instagram: social_instagram ?? '',
-            social_linkedin: social_linkedin ?? '',
-            social_twitter: social_twitter ?? '',
-            social_youtube: social_youtube ?? '',
-            seo_title: seo_title ?? '',
-            seo_description: seo_description ?? '',
-            seo_keywords: seo_keywords ?? '',
             updated_at: new Date().toISOString(),
         }
 
+        const assignIfDefined = (key: string, val: any) => {
+            if (val !== undefined) {
+                payload[key] = val
+            }
+        }
+
+        assignIfDefined('hero_title', hero_title)
+        assignIfDefined('hero_subtitle', hero_subtitle)
+        assignIfDefined('hero_image_url', hero_image_url)
+        assignIfDefined('site_icon_url', site_icon_url)
+        assignIfDefined('logo_on_dark_url', logo_on_dark_url)
+        assignIfDefined('logo_on_light_url', logo_on_light_url)
+        assignIfDefined('contact_phone', contact_phone)
+        assignIfDefined('contact_email', contact_email)
+        assignIfDefined('contact_whatsapp', contact_whatsapp)
+        assignIfDefined('social_facebook', social_facebook)
+        assignIfDefined('social_instagram', social_instagram)
+        assignIfDefined('social_linkedin', social_linkedin)
+        assignIfDefined('social_twitter', social_twitter)
+        assignIfDefined('social_youtube', social_youtube)
+        assignIfDefined('seo_title', seo_title)
+        assignIfDefined('seo_description', seo_description)
+        assignIfDefined('seo_keywords', seo_keywords)
+
         // Intentar primero UPDATE en id = 1
-        const { data: updateData, error: updateError } = await serviceSupabase
+        let { data: updateData, error: updateError } = await serviceSupabase
             .from('site_settings')
             .update(payload)
             .eq('id', 1)
             .select('id')
+
+        // Resiliencia: Si falla por columnas que aún no existen en DB (p. ej. contact_phone o logos)
+        if (updateError && (updateError.code === '42703' || updateError.message?.includes('does not exist'))) {
+            console.warn('Columnas ausentes detectadas en site_settings, reintentando con payload base:', updateError.message)
+            const fallbackPayload = { ...payload }
+            delete fallbackPayload.contact_phone
+            delete fallbackPayload.contact_email
+            delete fallbackPayload.contact_whatsapp
+            delete fallbackPayload.logo_on_dark_url
+            delete fallbackPayload.logo_on_light_url
+            delete fallbackPayload.site_icon_url
+
+            const fallbackRes = await serviceSupabase
+                .from('site_settings')
+                .update(fallbackPayload)
+                .eq('id', 1)
+                .select('id')
+
+            updateData = fallbackRes.data
+            updateError = fallbackRes.error
+        }
 
         if (updateError) {
             console.error('Error en update site_settings:', updateError)

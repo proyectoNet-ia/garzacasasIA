@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle, Sparkles, RefreshCw, Bot } from 'lucide-react'
+import { FileText, Save, Image as ImageIcon, Upload, Loader2, Facebook, Instagram, Linkedin, Twitter, Youtube, RotateCcw, AlertCircle, CheckCircle, Sparkles, RefreshCw, Bot, Phone, Mail, MessageSquare } from 'lucide-react'
+import { DEFAULT_CONTACT_CONFIG } from '@/lib/settings'
 import { CMSSkeleton } from '@/components/admin/AdminSkeletons'
 import { toast } from 'sonner'
 import { analyzeLogoFileLuminance } from '@/lib/brand'
@@ -51,6 +52,11 @@ export default function AdminCMS() {
     const logoOnDarkFileRef = useRef<HTMLInputElement>(null)
     const logoOnLightFileRef = useRef<HTMLInputElement>(null)
 
+    // Contact Info (Barra Superior y Footer)
+    const [contactPhone, setContactPhone] = useState('')
+    const [contactEmail, setContactEmail] = useState('')
+    const [contactWhatsapp, setContactWhatsapp] = useState('')
+
     // Social Media
     const [socialMedia, setSocialMedia] = useState({
         facebook: '',
@@ -87,15 +93,16 @@ export default function AdminCMS() {
 
     const fetchSettings = async () => {
         try {
-            const baseColumns = 'hero_title, hero_subtitle, hero_image_url, site_icon_url, social_facebook, social_instagram, social_linkedin, social_twitter, social_youtube, seo_title, seo_description, seo_keywords'
+            const baseColumns = 'hero_title, hero_subtitle, hero_image_url, site_icon_url, contact_phone, contact_email, contact_whatsapp, social_facebook, social_instagram, social_linkedin, social_twitter, social_youtube, seo_title, seo_description, seo_keywords'
             let { data, error: fetchError }: { data: any; error: any } = await supabase
                 .from('site_settings')
                 .select(`${baseColumns}, logo_on_dark_url, logo_on_light_url`)
                 .single()
 
-            // Compatibilidad: si aún no se aplicó la migración de logotipos, cargar el resto del CMS
+            // Compatibilidad: si aún no se aplicaron migraciones recientes, reintentar con columnas base
             if (fetchError) {
-                const retry = await supabase.from('site_settings').select(baseColumns).single()
+                const fallbackColumns = 'hero_title, hero_subtitle, hero_image_url, site_icon_url, social_facebook, social_instagram, social_linkedin, social_twitter, social_youtube, seo_title, seo_description, seo_keywords'
+                const retry = await supabase.from('site_settings').select(fallbackColumns).single()
                 data = retry.data
                 fetchError = retry.error
             }
@@ -107,6 +114,9 @@ export default function AdminCMS() {
                 setSiteIconUrl(data.site_icon_url || '')
                 setLogoOnDarkUrl(data.logo_on_dark_url || '')
                 setLogoOnLightUrl(data.logo_on_light_url || '')
+                setContactPhone(data.contact_phone || DEFAULT_CONTACT_CONFIG.phone)
+                setContactEmail(data.contact_email || DEFAULT_CONTACT_CONFIG.email)
+                setContactWhatsapp(data.contact_whatsapp || DEFAULT_CONTACT_CONFIG.whatsapp)
                 setSocialMedia({
                     facebook: data.social_facebook || '',
                     instagram: data.social_instagram || '',
@@ -318,6 +328,9 @@ export default function AdminCMS() {
                 site_icon_url: siteIconUrl,
                 logo_on_dark_url: logoOnDarkUrl || null,
                 logo_on_light_url: logoOnLightUrl || null,
+                contact_phone: contactPhone,
+                contact_email: contactEmail,
+                contact_whatsapp: contactWhatsapp,
                 social_facebook: socialMedia.facebook,
                 social_instagram: socialMedia.instagram,
                 social_linkedin: socialMedia.linkedin,
@@ -583,6 +596,64 @@ export default function AdminCMS() {
                         <div className="space-y-1"><Label className="text-zinc-700 font-bold">Facebook</Label><Input value={socialMedia.facebook} onChange={(e) => setSocialMedia({ ...socialMedia, facebook: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
                         <div className="space-y-1"><Label className="text-zinc-700 font-bold">Instagram</Label><Input value={socialMedia.instagram} onChange={(e) => setSocialMedia({ ...socialMedia, instagram: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
                         <div className="space-y-1"><Label className="text-zinc-700 font-bold">LinkedIn</Label><Input value={socialMedia.linkedin} onChange={(e) => setSocialMedia({ ...socialMedia, linkedin: e.target.value })} className="bg-zinc-50 border-zinc-200 text-zinc-900" /></div>
+                    </CardContent>
+                </Card>
+
+                {/* Datos de Contacto (Barra Superior y Footer) */}
+                <Card className="border-zinc-200 lg:col-span-2 shadow-sm">
+                    <CardHeader className="border-b border-zinc-100 pb-4">
+                        <div>
+                            <CardTitle className="text-zinc-900 font-black flex items-center gap-2">
+                                <Phone className="h-5 w-5 text-blue-600" />
+                                Datos de Contacto (Barra Superior y Footer)
+                            </CardTitle>
+                            <p className="text-xs text-zinc-500 font-medium mt-1">
+                                Esta información se actualiza automáticamente en la barra superior y en el pie de página de todas las secciones del sitio (Inicio, Propiedades, Agentes, Planes, etc.).
+                            </p>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-5">
+                        <div className="space-y-1.5">
+                            <Label className="text-zinc-700 font-bold flex items-center gap-1.5 text-xs">
+                                <Phone className="h-3.5 w-3.5 text-blue-500" />
+                                Teléfono Principal
+                            </Label>
+                            <Input
+                                value={contactPhone}
+                                onChange={(e) => setContactPhone(e.target.value)}
+                                placeholder="+52 (81) 1234-5678"
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 font-medium"
+                            />
+                            <p className="text-[11px] text-zinc-400">Permite llamadas directas al hacer clic en la barra superior.</p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-zinc-700 font-bold flex items-center gap-1.5 text-xs">
+                                <Mail className="h-3.5 w-3.5 text-blue-500" />
+                                Correo Electrónico
+                            </Label>
+                            <Input
+                                value={contactEmail}
+                                onChange={(e) => setContactEmail(e.target.value)}
+                                placeholder="contacto@garzacasas.com"
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 font-medium"
+                            />
+                            <p className="text-[11px] text-zinc-400">Abre el cliente de correo al hacer clic en la barra superior.</p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-zinc-700 font-bold flex items-center gap-1.5 text-xs">
+                                <MessageSquare className="h-3.5 w-3.5 text-emerald-500" />
+                                WhatsApp de Contacto
+                            </Label>
+                            <Input
+                                value={contactWhatsapp}
+                                onChange={(e) => setContactWhatsapp(e.target.value)}
+                                placeholder="https://wa.me/528112345678"
+                                className="bg-zinc-50 border-zinc-200 text-zinc-900 font-medium"
+                            />
+                            <p className="text-[11px] text-zinc-400">Enlace directo al chat de WhatsApp o número internacional.</p>
+                        </div>
                     </CardContent>
                 </Card>
 
