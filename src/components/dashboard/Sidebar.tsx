@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase'
 import { LogoutButton } from '@/components/auth/LogoutButton'
+import { BrandLogo } from '@/components/brand/BrandLogo'
 
 export function DashboardSidebar() {
     const pathname = usePathname()
@@ -166,22 +167,27 @@ export function DashboardSidebar() {
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
             `}} />
 
-            {/* Logo Area */}
-            <div className={cn(
-                "p-6 flex items-center shrink-0",
-                collapsed && !isMobile ? "justify-center px-0" : "justify-between"
-            )}>
-                <Link href="/" className="flex items-center gap-3 overflow-hidden">
-                    <div className="bg-blue-600 w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                        <Building2 className="h-5 w-5 text-white" />
-                    </div>
-                    {(!collapsed || isMobile) && (
-                        <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase truncate">
-                            Garza <span className="text-blue-600">IA</span>
-                        </span>
-                    )}
-                </Link>
-            </div>
+            {/* Logo Area (visible solo en drawer móvil; en desktop ya existe en DashboardHeader) */}
+            {isMobile && (
+                <div className="p-6 flex items-center justify-between shrink-0 border-b border-zinc-100">
+                    <Link href="/" className="flex items-center gap-2 overflow-hidden">
+                        <BrandLogo
+                            initialSurface="light"
+                            imgClassName="h-9 max-w-[190px]"
+                            fallback={
+                                <>
+                                <div className="bg-blue-600 shadow-blue-500/20 flex items-center justify-center w-9 h-9 rounded-xl transition-all shrink-0">
+                                    <Building2 className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="text-xl font-black tracking-tighter text-zinc-900 truncate">
+                                    Garza Casas <span className="text-blue-500">IA</span>
+                                </span>
+                                </>
+                            }
+                        />
+                    </Link>
+                </div>
+            )}
 
             {/* Scrollable Navigation Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 scrollbar-hide flex flex-col">

@@ -14,14 +14,14 @@ export function DashboardHeader() {
             <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
                 <BrandLogo
                     initialSurface="light"
-                    imgClassName="h-8 max-w-[170px]"
+                    imgClassName="h-9 max-w-[200px]"
                     fallback={
                         <>
-                        <div className="bg-blue-600 shadow-blue-500/20 flex items-center justify-center w-8 h-8 rounded-lg transition-all">
-                            <Building2 className="h-4 w-4 text-white" />
+                        <div className="bg-blue-600 shadow-blue-500/20 flex items-center justify-center w-9 h-9 rounded-xl transition-all">
+                            <Building2 className="h-5 w-5 text-white" />
                         </div>
-                        <span className="text-lg font-black tracking-tighter text-zinc-900 uppercase">
-                            Garza Casas <span className="text-blue-600">IA</span>
+                        <span className="text-xl font-black tracking-tighter text-zinc-900">
+                            Garza Casas <span className="text-blue-500">IA</span>
                         </span>
                         </>
                     }
