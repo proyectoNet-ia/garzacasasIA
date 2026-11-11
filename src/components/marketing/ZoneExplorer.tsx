@@ -41,6 +41,15 @@ export function ZoneExplorer() {
                     tag: 'ALTA DEMANDA'
                 },
                 {
+                    id: 'monterrey',
+                    name: 'Monterrey',
+                    searchKey: 'Monterrey',
+                    appreciation: '+11.2%', // Oficial SHF / INEGI
+                    image_url: '/images/zones/monterrey.jpg',
+                    description: 'Potencia industrial, corporativa y de inversión inmobiliaria del norte.',
+                    tag: 'ALTA DEMANDA'
+                },
+                {
                     id: 'guadalajara',
                     name: 'Guadalajara',
                     searchKey: 'Guadalajara',
@@ -112,16 +121,16 @@ export function ZoneExplorer() {
                     </ScrollReveal>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
                     {zones.map((zone, index) => (
                         <ScrollReveal
                             key={zone.id}
-                            delay={index * 0.1}
+                            delay={index * 0.08}
                             className="h-full"
                         >
                             <button
                                 onClick={() => handleZoneSelect(zone.name)}
-                                className="group relative w-full h-[500px] rounded-[2.5rem] overflow-hidden bg-white border border-black/5 shadow-sm transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/20"
+                                className="group relative w-full h-[480px] rounded-[2rem] overflow-hidden bg-white border border-black/5 shadow-sm transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/20"
                             >
                                 <img
                                     src={zone.image_url}
@@ -130,38 +139,38 @@ export function ZoneExplorer() {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent transition-opacity duration-700 group-hover:opacity-90" />
 
-                                <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
-                                    <div className="bg-zinc-950/60 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2 text-white shadow-lg">
+                                <div className="absolute top-5 left-5 flex flex-col gap-1.5 z-20">
+                                    <div className="bg-zinc-950/60 backdrop-blur-md border border-white/20 px-2.5 py-1 rounded-full flex items-center gap-1.5 text-white shadow-lg">
                                         <TrendingUp className="h-3 w-3 text-emerald-400" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{zone.appreciation} Plusvalía SHF</span>
+                                        <span className="text-[9px] font-black uppercase tracking-wider">{zone.appreciation} SHF</span>
                                     </div>
                                     {zone.tag && (
-                                        <div className="bg-blue-600/90 backdrop-blur-md border border-blue-400/30 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-white shadow-lg">
+                                        <div className="bg-blue-600/90 backdrop-blur-md border border-blue-400/30 px-2.5 py-1 rounded-full flex items-center gap-1.5 text-white shadow-lg">
                                             <Zap className="h-3 w-3 fill-white" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">{zone.tag}</span>
+                                            <span className="text-[9px] font-black uppercase tracking-wider">{zone.tag}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="absolute bottom-10 left-8 right-8 z-20 space-y-3 text-left">
-                                    <h4 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                                <div className="absolute bottom-8 left-5 right-5 z-20 space-y-2.5 text-left">
+                                    <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter uppercase leading-none">
                                         {zone.name}
                                     </h4>
-                                    <p className="text-zinc-300 text-xs font-medium leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                                    <p className="text-zinc-300 text-xs font-medium leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-3 group-hover:translate-y-0 line-clamp-2">
                                         {zone.description}
                                     </p>
 
-                                    <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-4 opacity-0 group-hover:opacity-100 transition-all duration-700">
-                                        <div className="flex items-center gap-2 text-white">
+                                    <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-3 opacity-0 group-hover:opacity-100 transition-all duration-700">
+                                        <div className="flex items-center gap-1.5 text-white">
                                             <Home className="h-3.5 w-3.5 text-blue-400" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-[10px] font-black uppercase tracking-wider">
                                                 {zone.real_count > 0 
                                                     ? `${zone.real_count} ${zone.real_count === 1 ? 'Propiedad' : 'Propiedades'}` 
                                                     : 'Ver Catálogo'}
                                             </span>
                                         </div>
-                                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center transition-transform group-hover:scale-110">
-                                            <ArrowUpRight className="h-5 w-5" />
+                                        <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center transition-transform group-hover:scale-110">
+                                            <ArrowUpRight className="h-4 w-4" />
                                         </div>
                                     </div>
                                 </div>
