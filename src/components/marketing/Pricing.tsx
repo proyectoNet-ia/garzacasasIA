@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase-server"
-import { Check, Zap, Crown, Building2, Brain, Search, BarChart3, ShieldCheck, Home } from 'lucide-react'
+import { Check, Zap, Crown, Building2, BarChart3, ShieldCheck, Database, MessageSquare, UserCheck, Sparkles, TrendingUp } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ScrollReveal } from "@/components/ui/ScrollReveal"
 import Link from "next/link"
@@ -14,46 +14,46 @@ const iconMap: any = {
 
 const services = [
     {
-        title: "Valuación por IA",
-        description: "Algoritmos avanzados que analizan el mercado en tiempo real para darte el precio exacto de venta o renta.",
-        icon: Brain,
+        title: "Entorno Urbano INEGI",
+        description: "Mapeo automático de escuelas, hospitales, bancos y comercios en 500m con datos oficiales del DENUE.",
+        icon: Database,
         color: "text-blue-500",
         bg: "bg-blue-500/5"
     },
     {
-        title: "Búsqueda Predictiva",
-        description: "Encontramos propiedades que aún no salen al mercado basándonos en tus preferencias y comportamiento.",
-        icon: Search,
-        color: "text-purple-500",
-        bg: "bg-purple-500/5"
-    },
-    {
-        title: "Análisis de Inversión",
-        description: "Proyecciones de plusvalía y ROI detalladas para que cada centavo invertido tenga un propósito.",
-        icon: BarChart3,
+        title: "Contacto Directo 100%",
+        description: "Sin intermediarios ni comisiones de plataforma: los compradores te contactan directo a tu WhatsApp y llamada.",
+        icon: MessageSquare,
         color: "text-emerald-500",
         bg: "bg-emerald-500/5"
     },
     {
-        title: "Gestión Patrimonial",
-        description: "Asesoría legal y fiscal integrada para blindar tus transacciones inmobiliarias de principio a fin.",
-        icon: ShieldCheck,
+        title: "Analítica en Tiempo Real",
+        description: "Métricas transparentes de visitas reales a tu ficha, clics en WhatsApp, llamadas y propiedades en favoritos.",
+        icon: BarChart3,
+        color: "text-indigo-500",
+        bg: "bg-indigo-500/5"
+    },
+    {
+        title: "Perfil Digital Verificado",
+        description: "Tu propio micrositio con insignia de verificación, catálogo activo de propiedades y contacto centralizado.",
+        icon: UserCheck,
         color: "text-amber-500",
         bg: "bg-amber-500/5"
     },
     {
-        title: "Marketing Exponencial",
-        description: "Exposición masiva de tu propiedad en redes y portales premium con fotografía de alta gama.",
-        icon: Zap,
+        title: "Optimización SEO con IA",
+        description: "Generación inteligente de metadatos y descriptores para posicionar tus propiedades en los primeros lugares de Google.",
+        icon: Sparkles,
         color: "text-rose-500",
         bg: "bg-rose-500/5"
     },
     {
-        title: "Concierge Inmobiliario",
-        description: "Atención personalizada 24/7 para coordinar visitas, trámites y mudanzas sin que muevas un dedo.",
-        icon: Home,
-        color: "text-indigo-500",
-        bg: "bg-indigo-500/5"
+        title: "Plusvalía por Municipio",
+        description: "Indicadores oficiales de crecimiento inmobiliario en los 32 estados de México para respaldar tus precios.",
+        icon: TrendingUp,
+        color: "text-purple-500",
+        bg: "bg-purple-500/5"
     }
 ]
 
@@ -192,26 +192,26 @@ export async function Pricing() {
 
                 <div className="h-px bg-zinc-100 w-full my-32" />
 
-                {/* --- PARTE INFERIOR: INFORMACIÓN DE SERVICIOS INTELIGENTES --- */}
+                {/* --- PARTE INFERIOR: INFORMACIÓN DE VENTAJAS REALES --- */}
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <ScrollReveal className="space-y-8 max-w-xl text-left">
                         <Badge variant="outline" className="border-blue-500/20 bg-blue-500/5 text-blue-600 rounded-full px-4 py-1 uppercase tracking-widest text-[10px] font-bold">
                             Nuestras Capacidades
                         </Badge>
                         <h2 className="text-4xl font-black tracking-tighter text-zinc-900 sm:text-7xl font-heading leading-[0.9]">
-                            Servicios <span className="text-blue-500 italic block">Premium</span>
+                            Ventajas <span className="text-blue-500 italic block">Reales</span>
                         </h2>
                         <p className="text-zinc-500 text-lg md:text-xl font-medium leading-relaxed">
-                            No solo vendemos casas, orquestamos transacciones inteligentes respaldadas por la tecnología más avanzada del sector.
+                            Tecnología inmobiliaria honesta y transparente para agentes y desarrolladores en todo México. Sin promesas vacías, con herramientas que sí impulsan tus ventas.
                         </p>
                         <div className="grid grid-cols-2 gap-6 pt-4">
                             <div className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-100">
-                                <div className="text-3xl font-black text-blue-600 mb-1">98%</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Precisión en Valuación</div>
+                                <div className="text-3xl font-black text-blue-600 mb-1">0%</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Comisión por Venta</div>
                             </div>
                             <div className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-100">
-                                <div className="text-3xl font-black text-blue-600 mb-1">-30%</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Tiempo de Cierre</div>
+                                <div className="text-3xl font-black text-blue-600 mb-1">32</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estados con Cobertura</div>
                             </div>
                         </div>
                     </ScrollReveal>
