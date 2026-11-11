@@ -27,27 +27,27 @@ interface Agent {
 
 function AgentCardSkeleton() {
     return (
-        <div className="h-full bg-white rounded-[3rem] p-4 border border-zinc-200">
-            <Skeleton className="aspect-[4/5] w-full rounded-[2.5rem] mb-6" />
-            <div className="px-4 pb-4 space-y-4">
-                <div className="flex justify-between items-start gap-3">
-                    <div className="space-y-2 flex-1">
-                        <Skeleton className="h-6 w-3/4 rounded-lg" />
+        <div className="h-full bg-white rounded-[2.5rem] p-3.5 border border-zinc-200">
+            <Skeleton className="aspect-[4/5] w-full rounded-[2rem] mb-4" />
+            <div className="px-2 pb-2 space-y-3">
+                <div className="flex justify-between items-start gap-2">
+                    <div className="space-y-1.5 flex-1">
+                        <Skeleton className="h-5 w-3/4 rounded-lg" />
                         <Skeleton className="h-3 w-1/2 rounded-md" />
                     </div>
-                    <Skeleton className="h-6 w-14 rounded-full shrink-0" />
+                    <Skeleton className="h-5 w-12 rounded-full shrink-0" />
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-100">
-                    <div className="space-y-2">
-                        <Skeleton className="h-3 w-16 rounded-md" />
-                        <Skeleton className="h-5 w-20 rounded-md" />
-                    </div>
-                    <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100">
+                    <div className="space-y-1.5">
                         <Skeleton className="h-3 w-14 rounded-md" />
-                        <Skeleton className="h-5 w-16 rounded-md" />
+                        <Skeleton className="h-4 w-16 rounded-md" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Skeleton className="h-3 w-12 rounded-md" />
+                        <Skeleton className="h-4 w-14 rounded-md" />
                     </div>
                 </div>
-                <Skeleton className="h-12 w-full rounded-2xl" />
+                <Skeleton className="h-11 w-full rounded-xl" />
             </div>
         </div>
     )
@@ -67,14 +67,14 @@ export function Agents() {
                     .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, status, created_at')
                     .eq('role', 'agent')
                     .or('status.is.null,status.neq.suspended')
-                    .limit(6)
+                    .limit(8)
 
                 if (error) {
                     const fallback = await supabase
                         .from('profiles')
                         .select('id, full_name, company_name, avatar_url, bio, phone, whatsapp, created_at')
                         .eq('role', 'agent')
-                        .limit(6)
+                        .limit(8)
                     if (fallback.error) throw fallback.error
                     data = fallback.data as any
                 }
@@ -126,75 +126,79 @@ export function Agents() {
                 </ScrollReveal>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {Array.from({ length: 3 }).map((_, idx) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {Array.from({ length: 4 }).map((_, idx) => (
                             <AgentCardSkeleton key={`agent-skeleton-${idx}`} />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {agents.map((agent, i) => (
                             <ScrollReveal
                                 key={agent.id}
-                                delay={i * 0.1}
+                                delay={i * 0.08}
                                 className="h-full"
                             >
-                                <div className="group relative h-full bg-white rounded-[3rem] p-4 border border-zinc-200 transition-all duration-500 hover:border-blue-500/30 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.08)]">
-                                    {/* Clickable image area → goes to agent profile */}
-                                    <Link href={`/agentes/${agent.id}`} className="block">
-                                        <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-6">
-                                            <img
-                                                src={agent.avatar_url || ''}
-                                                alt={agent.full_name || ''}
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                            {/* View Profile Overlay */}
-                                            <div className="absolute inset-0 flex items-end justify-center pb-8 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                                <span className="bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-full flex items-center gap-2">
-                                                    Ver perfil <ArrowUpRight className="h-3.5 w-3.5" />
-                                                </span>
+                                <div className="group relative h-full bg-white rounded-[2.5rem] p-3.5 border border-zinc-200 transition-all duration-500 hover:border-blue-500/30 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.08)] flex flex-col justify-between">
+                                    <div>
+                                        {/* Clickable image area → goes to agent profile */}
+                                        <Link href={`/agentes/${agent.id}`} className="block">
+                                            <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-4 bg-zinc-100">
+                                                <img
+                                                    src={agent.avatar_url || ''}
+                                                    alt={agent.full_name || ''}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                                {/* View Profile Overlay */}
+                                                <div className="absolute inset-0 flex items-end justify-center pb-6 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                                    <span className="bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold text-[11px] uppercase tracking-wider px-4 py-2 rounded-full flex items-center gap-1.5">
+                                                        Ver perfil <ArrowUpRight className="h-3 w-3" />
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </Link>
+
+                                        <div className="px-2 pb-2 space-y-3">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <Link href={`/agentes/${agent.id}`} className="hover:text-blue-600 transition-colors flex-1 min-w-0">
+                                                    <h3 className="text-base font-bold text-zinc-700 group-hover:text-blue-600 transition-colors truncate">{agent.full_name}</h3>
+                                                    <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400 truncate">{agent.role}</p>
+                                                </Link>
+                                                <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0">
+                                                    <Star className="h-3 w-3 fill-amber-600" />
+                                                    {agent.stats?.rating}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100">
+                                                <div>
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Experiencia</p>
+                                                    <p className="text-sm font-bold text-zinc-700">{agent.stats?.experience}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Rating</p>
+                                                    <p className="text-sm font-bold text-zinc-700">{agent.stats?.rating} ★</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
 
-                                    <div className="px-4 pb-4 space-y-4">
-                                        <div className="flex justify-between items-start">
-                                            <Link href={`/agentes/${agent.id}`} className="hover:text-blue-600 transition-colors">
-                                                <h3 className="text-xl font-bold text-zinc-700 group-hover:text-blue-600 transition-colors">{agent.full_name}</h3>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{agent.role}</p>
-                                            </Link>
-                                            <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 px-3 py-1 rounded-full text-xs font-bold shrink-0">
-                                                <Star className="h-3 w-3 fill-amber-600" />
-                                                {agent.stats?.rating}
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-100">
-                                            <div>
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Experiencia</p>
-                                                <p className="text-lg font-bold text-zinc-700">{agent.stats?.experience}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Rating</p>
-                                                <p className="text-lg font-bold text-zinc-700">{agent.stats?.rating} ★</p>
-                                            </div>
-                                        </div>
-
+                                    <div className="px-2 pt-2">
                                         {/* Contact or View Profile */}
                                         {agent.whatsapp ? (
                                             <a
                                                 href={`https://wa.me/${agent.whatsapp.replace(/\D/g, '')}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex w-full h-12 rounded-2xl bg-green-600 hover:bg-green-700 transition-all text-white font-bold items-center justify-center gap-2 shadow-sm"
+                                                className="flex w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 transition-all text-white font-bold items-center justify-center gap-2 shadow-sm text-xs"
                                             >
-                                                <IconWhatsApp className="h-5 w-5" />
+                                                <IconWhatsApp className="h-4 w-4" />
                                                 Contactar por WhatsApp
                                             </a>
                                         ) : (
                                             <Link href={`/agentes/${agent.id}`}>
-                                                <Button className="w-full h-12 rounded-2xl bg-zinc-950 text-white hover:bg-blue-600 transition-all font-bold gap-2">
+                                                <Button className="w-full h-11 rounded-xl bg-zinc-950 text-white hover:bg-blue-600 transition-all font-bold gap-2 text-xs">
                                                     <MessageSquare className="h-4 w-4" />
                                                     Ver perfil completo
                                                 </Button>
