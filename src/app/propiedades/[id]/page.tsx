@@ -12,7 +12,7 @@ import {
     MapPin, BedDouble, Bath, Square, ChevronLeft, ChevronRight,
     Share2, Heart, MessageSquare, Phone, User,
     Building2, Calendar, ShieldCheck, Zap, Crown,
-    ArrowRight, Loader2, X
+    ArrowRight, Loader2, X, Maximize2
 } from 'lucide-react'
 import { IconWhatsApp } from '@/components/ui/SocialIcons'
 import { toast } from 'sonner'
@@ -132,8 +132,15 @@ export default function PropertyDetailPage() {
     ].filter(Boolean)
 
     const openLightbox = (index: number) => {
-        setCurrentImageIndex(index)
+        setCurrentImageIndex(index >= 0 ? index : 0)
         setIsLightboxOpen(true)
+    }
+
+    const closeLightbox = () => {
+        if (allImages[currentImageIndex]) {
+            setActiveImage(allImages[currentImageIndex])
+        }
+        setIsLightboxOpen(false)
     }
 
     const nextImage = () => {
@@ -142,6 +149,22 @@ export default function PropertyDetailPage() {
 
     const prevImage = () => {
         setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)
+    }
+
+    const handleNextMainImage = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (allImages.length <= 1) return
+        const currentIndex = Math.max(0, allImages.indexOf(activeImage || ''))
+        const nextIdx = (currentIndex + 1) % allImages.length
+        setActiveImage(allImages[nextIdx])
+    }
+
+    const handlePrevMainImage = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (allImages.length <= 1) return
+        const currentIndex = Math.max(0, allImages.indexOf(activeImage || ''))
+        const prevIdx = (currentIndex - 1 + allImages.length) % allImages.length
+        setActiveImage(allImages[prevIdx])
     }
 
     const features = property.features as any || {}
@@ -196,16 +219,18 @@ export default function PropertyDetailPage() {
                             <div className="space-y-4">
                                 <motion.div
                                     layoutId="main-image"
-                                    onClick={() => openLightbox(allImages.indexOf(activeImage || ''))}
+                                    onClick={() => openLightbox(Math.max(0, allImages.indexOf(activeImage || '')))}
                                     className="relative aspect-[16/9] w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl bg-zinc-200 group cursor-zoom-in"
                                 >
                                     <img
                                         src={activeImage || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200"}
                                         alt={property.title}
-                                        className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                        className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                     />
-                                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                                    <div className="absolute top-8 left-8 flex flex-col gap-3">
+                                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors pointer-events-none" />
+
+                                    {/* Badges */}
+                                    <div className="absolute top-6 left-6 md:top-8 md:left-8 flex flex-col gap-3 pointer-events-none z-10">
                                         <Badge className="bg-white/90 backdrop-blur-xl text-zinc-900 border-none rounded-full px-5 py-2 font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl">
                                             {property.property_type}
                                         </Badge>
@@ -216,11 +241,49 @@ export default function PropertyDetailPage() {
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="bg-white/90 backdrop-blur-xl p-4 rounded-2xl shadow-2xl">
-                                            <ArrowRight className="h-6 w-6 text-blue-600" />
-                                        </div>
+
+                                    {/* Botón de Zoom / Pantalla completa */}
+                                    <div className="absolute top-6 right-6 md:top-8 md:right-8 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                openLightbox(Math.max(0, allImages.indexOf(activeImage || '')))
+                                            }}
+                                            className="bg-black/60 hover:bg-black/80 backdrop-blur-xl text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold tracking-wider cursor-pointer transition-all active:scale-95"
+                                        >
+                                            <Maximize2 className="h-4 w-4" />
+                                            <span>AMPLIAR</span>
+                                        </button>
                                     </div>
+
+                                    {/* Flechas de navegación prev/next */}
+                                    {allImages.length > 1 && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                aria-label="Foto anterior"
+                                                onClick={handlePrevMainImage}
+                                                className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 bg-white/95 hover:bg-white text-zinc-900 p-3 md:p-3.5 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer opacity-90 group-hover:opacity-100"
+                                            >
+                                                <ChevronLeft className="h-6 w-6 text-zinc-900" />
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                aria-label="Siguiente foto"
+                                                onClick={handleNextMainImage}
+                                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 bg-white/95 hover:bg-white text-zinc-900 p-3 md:p-3.5 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer opacity-90 group-hover:opacity-100"
+                                            >
+                                                <ChevronRight className="h-6 w-6 text-zinc-900" />
+                                            </button>
+
+                                            {/* Contador de fotos */}
+                                            <div className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-10 bg-black/60 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-xs font-black tracking-widest pointer-events-none shadow-xl">
+                                                {Math.max(0, allImages.indexOf(activeImage || '')) + 1} / {allImages.length}
+                                            </div>
+                                        </>
+                                    )}
                                 </motion.div>
 
                                 {/* Thumbnails */}
@@ -481,8 +544,8 @@ export default function PropertyDetailPage() {
                     >
                         {/* Close Button */}
                         <button
-                            onClick={() => setIsLightboxOpen(false)}
-                            className="absolute top-6 right-6 z-[110] bg-white/10 hover:bg-white/20 text-white p-4 rounded-full transition-all active:scale-95"
+                            onClick={closeLightbox}
+                            className="absolute top-6 right-6 z-[110] bg-white/10 hover:bg-white/20 text-white p-4 rounded-full transition-all active:scale-95 cursor-pointer"
                         >
                             <X className="h-8 w-8" />
                         </button>
