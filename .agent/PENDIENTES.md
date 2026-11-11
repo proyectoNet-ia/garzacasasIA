@@ -1,4 +1,4 @@
-# 📋 Estado y Pendientes del Proyecto — Garza Casas IA
+# 📋 Estado y Pendientes del Proyecto — Garza Casas
 **Última actualización:** 6 de Noviembre de 2026  
 **Dominio Producción:** `https://www.garzacasas.com`  
 **Stack:** Next.js 16 · React 19 · Supabase · PayPal API v2 · Gemini IA · INEGI DENUE/SHF · Vercel  

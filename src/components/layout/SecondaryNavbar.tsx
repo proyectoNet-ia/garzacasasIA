@@ -107,7 +107,7 @@ export function SecondaryNavbar({ contactConfig }: SecondaryNavbarProps) {
                                 <>
                                 <div className="bg-zinc-100 border border-zinc-200 px-3 py-1 rounded-xl transition-colors hover:bg-zinc-50 w-fit">
                                     <span className="text-xl font-black tracking-tighter text-zinc-700">
-                                        Garza Casas <span className="text-blue-500">IA</span>
+                                        Garza <span className="text-blue-500">Casas</span>
                                     </span>
                                 </div>
                                 </>

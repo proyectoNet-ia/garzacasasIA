@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
     title: 'Nuestros Agentes Inmobiliarios',
-    description: 'Conoce al equipo de agentes inmobiliarios verificados de Garza Casas IA. Profesionales con experiencia en bienes raíces en México, disponibles para asesorarte.',
+    description: 'Conoce al equipo de agentes inmobiliarios verificados de Garza Casas. Profesionales con experiencia en bienes raíces en México, disponibles para asesorarte.',
     openGraph: {
-        title: 'Agentes Inmobiliarios Verificados | Garza Casas IA',
+        title: 'Agentes Inmobiliarios Verificados | Garza Casas',
         description: 'Expertos en bienes raíces listos para ayudarte a encontrar tu propiedad ideal.',
     },
 }

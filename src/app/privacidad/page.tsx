@@ -5,7 +5,7 @@ import { getSiteSettings } from "@/lib/settings"
 
 export const metadata: Metadata = {
     title: "Aviso de Privacidad",
-    description: "Aviso de Privacidad Integral de Garza Casas IA conforme a la LFPDPPP en México.",
+    description: "Aviso de Privacidad Integral de Garza Casas conforme a la LFPDPPP en México.",
 }
 
 export const dynamic = "force-dynamic"
@@ -33,14 +33,14 @@ export default async function PrivacidadPage() {
                         <section className="space-y-3">
                             <h2 className="text-xl font-black text-zinc-900">1. Identidad del Responsable</h2>
                             <p>
-                                <strong>Garza Casas IA</strong> (con operaciones en el Área Metropolitana de Monterrey, Nuevo León, México) es responsable del uso, tratamiento y protección de los datos personales recabados a través del portal <code>www.garzacasas.com</code>.
+                                <strong>Garza Casas</strong> (con cobertura y operaciones en toda la República Mexicana) es responsable del uso, tratamiento y protección de los datos personales recabados a través del portal <code>www.garzacasas.com</code>.
                             </p>
                         </section>
 
                         <section className="space-y-3">
                             <h2 className="text-xl font-black text-zinc-900">2. Datos Personales Recabados</h2>
                             <p>
-                                Recabamos únicamente los datos necesarios para brindar intermediación tecnológica inmobiliaria: nombre completo, correo electrónico, teléfono o WhatsApp, datos profesionales de agentes registrados e información de inmuebles publicados. Los datos financieros de cobro de suscripciones son procesados directamente por <strong>PayPal</strong> bajo cifrado SSL; Garza Casas IA no almacena números completos de tarjetas bancarias ni códigos CVV.
+                                Recabamos únicamente los datos necesarios para brindar intermediación tecnológica inmobiliaria: nombre completo, correo electrónico, teléfono o WhatsApp, datos profesionales de agentes registrados e información de inmuebles publicados. Los datos financieros de cobro de suscripciones son procesados directamente por <strong>PayPal</strong> bajo cifrado SSL; Garza Casas no almacena números completos de tarjetas bancarias ni códigos CVV.
                             </p>
                         </section>
 

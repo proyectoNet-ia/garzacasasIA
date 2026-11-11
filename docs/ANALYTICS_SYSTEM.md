@@ -1,8 +1,8 @@
-# 📊 Sistema de Analíticas y Estadísticas - Garza Casas IA
+# 📊 Sistema de Analíticas y Estadísticas - Garza Casas
 
 ## Resumen del Sistema Implementado
 
-Este documento describe el sistema completo de analíticas y tracking implementado en la plataforma Garza Casas IA.
+Este documento describe el sistema completo de analíticas y tracking implementado en la plataforma Garza Casas.
 
 ---
 

@@ -1,6 +1,6 @@
-# 🏠 Garza Casas IA - Plataforma Inmobiliaria con IA
+# 🏠 Garza Casas - Plataforma Inmobiliaria con IA
 
-Plataforma inmobiliaria premium con inteligencia artificial y datos INEGI para Monterrey y área metropolitana.
+Plataforma inmobiliaria premium con inteligencia artificial y datos INEGI para toda la República Mexicana.
 
 ## 📊 Estado del Proyecto: **100% Completo** 🎉
 

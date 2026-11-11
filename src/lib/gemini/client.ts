@@ -1,5 +1,5 @@
 // ============================================================
-// GEMINI — Cliente de IA para Garza Casas IA
+// GEMINI — Cliente de IA para Garza Casas
 // Genera descripciones de propiedades y análisis de zona
 // Modelo: Gemini 2.5 Flash (Pay-as-you-go · billing activo)
 // Registro: https://aistudio.google.com

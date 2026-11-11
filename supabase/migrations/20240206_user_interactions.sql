@@ -1,4 +1,4 @@
--- Garza Casas IA - User Interactions (Favorites)
+-- Garza Casas - User Interactions (Favorites)
 -- This migration enables users to save properties as favorites.
 
 -- 1. Create Favorites table

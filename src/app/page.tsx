@@ -18,11 +18,11 @@ export const dynamic = 'force-dynamic'
 export default async function Home() {
   const heroConfig = await getSiteSettings('hero_config')
   const contactConfig = await getSiteSettings('contact_config') || {
-    phone: "+52 (81) 1234-5678",
+    phone: "+52 (55) 1234-5678",
     email: "contacto@garzacasas.com",
     instagram: "https://instagram.com",
     facebook: "https://facebook.com",
-    whatsapp: "https://wa.me/528112345678"
+    whatsapp: "https://wa.me/525512345678"
   }
 
   return (
@@ -68,7 +68,7 @@ export default async function Home() {
                 "La IA no reemplaza al agente, lo hace extraordinario."
               </h2>
               <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full" />
-              <p className="text-zinc-500 font-medium">Liderando el cambio en el mercado inmobiliario de Nuevo León.</p>
+              <p className="text-zinc-500 font-medium">Liderando el cambio en el mercado inmobiliario de toda la República Mexicana.</p>
             </ScrollReveal>
           </div>
         </section>

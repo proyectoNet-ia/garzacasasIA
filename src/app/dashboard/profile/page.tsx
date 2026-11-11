@@ -411,7 +411,7 @@ export default function ProfilePage() {
                                 ¿Eliminar tu cuenta definitivamente?
                             </DialogTitle>
                             <DialogDescription className="text-xs text-red-700/90 text-center leading-relaxed">
-                                Esta acción no se puede deshacer. Se borrarán tus inmuebles publicados, fotografías en la nube y acceso a Garza Casas IA.
+                                Esta acción no se puede deshacer. Se borrarán tus inmuebles publicados, fotografías en la nube y acceso a Garza Casas.
                             </DialogDescription>
                         </DialogHeader>
                     </div>

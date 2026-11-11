@@ -247,7 +247,7 @@ function LoginForm() {
                 </div>
 
                 <p className="text-center text-zinc-500 text-xs mt-6">
-                    © 2026 Garza Casas IA · <Link href="/" className="text-zinc-400 hover:text-white transition-colors">Volver al inicio</Link>
+                    © 2026 Garza Casas · <Link href="/" className="text-zinc-400 hover:text-white transition-colors">Volver al inicio</Link>
                 </p>
             </div>
         </div>

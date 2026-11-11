@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Planes para Agentes Inmobiliarios',
     description: 'Elige el plan ideal para potenciar tu carrera como agente inmobiliario. Gratis, Pro y Platino con herramientas IA, datos INEGI y más propiedades publicadas.',
     openGraph: {
-        title: 'Planes y Precios para Agentes | Garza Casas IA',
+        title: 'Planes y Precios para Agentes | Garza Casas',
         description: 'Potencia tu carrera inmobiliaria con IA y datos INEGI desde cualquier plan.',
     },
 }

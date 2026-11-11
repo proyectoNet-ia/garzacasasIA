@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
         const images = property.main_image_url
             ? [{ url: property.main_image_url, width: 1200, height: 630, alt: title }]
-            : [{ url: `/og-default.png`, width: 1200, height: 630, alt: 'Garza Casas IA' }]
+            : [{ url: `/og-default.png`, width: 1200, height: 630, alt: 'Garza Casas' }]
 
         return {
             title,
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                 url: `${siteUrl}/propiedades/${id}`,
                 title,
                 description,
-                siteName: 'Garza Casas IA',
+                siteName: 'Garza Casas',
                 images,
             },
             twitter: {
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             },
         }
     } catch {
-        return { title: 'Propiedad | Garza Casas IA' }
+        return { title: 'Propiedad | Garza Casas' }
     }
 }
 

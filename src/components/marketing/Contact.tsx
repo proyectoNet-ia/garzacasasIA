@@ -17,7 +17,7 @@ export interface ContactConfigProps {
 export function Contact({ contactConfig }: { contactConfig?: ContactConfigProps | null }) {
     const displayPhone = contactConfig?.phone || "+52 (81) 1234 5678"
     const displayEmail = contactConfig?.email || "contacto@garzacasas.com"
-    const displayAddress = contactConfig?.address || "San Pedro Garza García, NL"
+    const displayAddress = contactConfig?.address || "Ciudad de México / Cobertura Nacional"
     const rawWhatsapp = contactConfig?.whatsapp || contactConfig?.phone || ""
     const whatsappHref = rawWhatsapp.startsWith("http")
         ? rawWhatsapp
@@ -44,7 +44,7 @@ export function Contact({ contactConfig }: { contactConfig?: ContactConfigProps 
                                     ¿Listo para tu próxima <span className="text-blue-500 italic block">Inversión?</span>
                                 </h2>
                                 <p className="text-zinc-300 text-lg font-medium leading-relaxed">
-                                    Estamos aquí para resolver tus dudas y guiarte en cada paso del proceso inmobiliario en Monterrey.
+                                    Estamos aquí para resolver tus dudas y guiarte en cada paso del proceso inmobiliario en toda la República Mexicana.
                                 </p>
                             </div>
 

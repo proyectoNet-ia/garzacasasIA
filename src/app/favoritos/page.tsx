@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
     title: 'Mis Favoritos',
-    description: 'Gestiona tus propiedades favoritas guardadas en Garza Casas IA.',
+    description: 'Gestiona tus propiedades favoritas guardadas en Garza Casas.',
 }
 
 export default async function FavoritosPage() {

@@ -5,7 +5,7 @@ import { getSiteSettings } from "@/lib/settings"
 
 export const metadata: Metadata = {
     title: "Términos de Servicio",
-    description: "Términos y Condiciones de Uso de la plataforma inmobiliaria Garza Casas IA.",
+    description: "Términos y Condiciones de Uso de la plataforma inmobiliaria Garza Casas.",
 }
 
 export const dynamic = "force-dynamic"
@@ -24,7 +24,7 @@ export default async function TerminosPage() {
                         Términos de Servicio
                     </h1>
                     <p className="text-zinc-500 max-w-2xl mx-auto text-sm font-medium">
-                        Condiciones generales de acceso, publicación inmobiliaria y planes de suscripción en Garza Casas IA.
+                        Condiciones generales de acceso, publicación inmobiliaria y planes de suscripción en Garza Casas.
                     </p>
                 </div>
 
@@ -33,7 +33,7 @@ export default async function TerminosPage() {
                         <section className="space-y-3">
                             <h2 className="text-xl font-black text-zinc-900">1. Objeto de la Plataforma</h2>
                             <p>
-                                <strong>Garza Casas IA</strong> opera como plataforma tecnológica de difusión inmobiliaria y análisis informativo asistido por inteligencia artificial y fuentes públicas oficiales (INEGI / DENUE). Garza Casas IA no actúa como propietario ni fedatario de las operaciones celebradas entre particulares y agentes independientes.
+                                <strong>Garza Casas</strong> opera como plataforma tecnológica de difusión inmobiliaria y análisis informativo asistido por inteligencia artificial y fuentes públicas oficiales (INEGI / DENUE). Garza Casas no actúa como propietario ni fedatario de las operaciones celebradas entre particulares y agentes independientes.
                             </p>
                         </section>
 

@@ -1,4 +1,4 @@
--- Garza Casas IA - Supabase Initial Schema
+-- Garza Casas - Supabase Initial Schema
 
 -- 1. Profiles (Exentds auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (

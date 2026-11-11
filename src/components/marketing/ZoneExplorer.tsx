@@ -9,40 +9,40 @@ import { useState, useEffect } from 'react'
 
 const zones = [
     {
-        id: 'san-pedro',
-        name: 'San Pedro',
-        fullName: 'San Pedro Garza García',
-        appreciation: '+18%',
-        properties: 124,
-        image: 'https://images.unsplash.com/photo-1590247813693-5541d1c609fd?q=80&w=800&auto=format&fit=crop',
-        description: 'Exclusividad y alta ingeniería'
-    },
-    {
-        id: 'cumbres',
-        name: 'Cumbres',
-        fullName: 'Cumbres / Zona Poniente',
-        appreciation: '+12%',
-        properties: 85,
-        image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop',
-        description: 'Entorno familiar de alta demanda'
-    },
-    {
-        id: 'carretera-nacional',
-        name: 'Carretera Nacional',
-        fullName: 'Carretera Nacional / Sur',
-        appreciation: '+15%',
-        properties: 62,
-        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop',
-        description: 'Vistas naturales y plusvalía extrema'
-    },
-    {
-        id: 'valle-poniente',
-        name: 'Valle Poniente',
-        fullName: 'Valle Poniente y Santa Catarina',
+        id: 'cdmx',
+        name: 'Ciudad de México',
+        fullName: 'CDMX y Zona Metropolitana',
         appreciation: '+14%',
-        properties: 47,
-        image: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=800&auto=format&fit=crop',
-        description: 'El nuevo hub residencial de lujo'
+        properties: 320,
+        image: 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?q=80&w=800&auto=format&fit=crop',
+        description: 'Epicentro financiero, corporativo y de alta plusvalía'
+    },
+    {
+        id: 'guadalajara',
+        name: 'Guadalajara',
+        fullName: 'Guadalajara y Zapopan',
+        appreciation: '+12%',
+        properties: 210,
+        image: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800&auto=format&fit=crop',
+        description: 'Hub tecnológico con alta demanda residencial'
+    },
+    {
+        id: 'queretaro',
+        name: 'Querétaro',
+        fullName: 'Querétaro y Corregidora',
+        appreciation: '+16%',
+        properties: 145,
+        image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=800&auto=format&fit=crop',
+        description: 'Crecimiento industrial y calidad de vida superior'
+    },
+    {
+        id: 'riviera-maya',
+        name: 'Riviera Maya',
+        fullName: 'Cancún, Playa del Carmen y Tulum',
+        appreciation: '+19%',
+        properties: 180,
+        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop',
+        description: 'Destino turístico internacional de alta rentabilidad'
     }
 ]
 
@@ -66,39 +66,39 @@ export function ZoneExplorer() {
                 // Initial Fallback / AI Mockup if DB is empty
                 setZones([
                     {
-                        id: 'san-pedro',
-                        name: 'San Pedro',
-                        appreciation: '+18%',
-                        properties_count: 124,
-                        image_url: 'https://images.unsplash.com/photo-1590247813693-5541d1c609fd?q=80&w=800',
-                        description: 'Zona de alto perfil detectada automáticamente.',
-                        is_ai_suggested: true
-                    },
-                    {
-                        id: 'cumbres',
-                        name: 'Cumbres',
-                        appreciation: '+12%',
-                        properties_count: 85,
-                        image_url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800',
-                        description: 'Crecimiento demográfico sostenido en los últimos 6 meses.',
-                        is_ai_suggested: true
-                    },
-                    {
-                        id: 'carretera-nacional',
-                        name: 'Carretera Nacional',
-                        appreciation: '+15%',
-                        properties_count: 62,
-                        image_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800',
-                        description: 'Reserva natural con alto interés de inversión.',
-                        is_ai_suggested: true
-                    },
-                    {
-                        id: 'valle-poniente',
-                        name: 'Valle Poniente',
+                        id: 'cdmx',
+                        name: 'Ciudad de México',
                         appreciation: '+14%',
-                        properties_count: 47,
-                        image_url: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=800',
-                        description: 'Hub tecnológico con plusvalía acelerada.',
+                        properties_count: 320,
+                        image_url: 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?q=80&w=800',
+                        description: 'Epicentro financiero, corporativo y de alta plusvalía.',
+                        is_ai_suggested: true
+                    },
+                    {
+                        id: 'guadalajara',
+                        name: 'Guadalajara',
+                        appreciation: '+12%',
+                        properties_count: 210,
+                        image_url: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800',
+                        description: 'Hub tecnológico con alta demanda residencial.',
+                        is_ai_suggested: true
+                    },
+                    {
+                        id: 'queretaro',
+                        name: 'Querétaro',
+                        appreciation: '+16%',
+                        properties_count: 145,
+                        image_url: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=800',
+                        description: 'Crecimiento industrial y calidad de vida superior.',
+                        is_ai_suggested: true
+                    },
+                    {
+                        id: 'riviera-maya',
+                        name: 'Riviera Maya',
+                        appreciation: '+19%',
+                        properties_count: 180,
+                        image_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800',
+                        description: 'Destino turístico internacional de alta rentabilidad.',
                         is_ai_suggested: true
                     }
                 ])
@@ -124,13 +124,13 @@ export function ZoneExplorer() {
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-4">
                     <ScrollReveal className="space-y-4 max-w-2xl text-left">
                         <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-blue-600 border border-blue-600/10">
-                            Plusvalía Local
+                            Plusvalía Nacional
                         </div>
                         <h2 className="text-4xl font-black tracking-tighter text-zinc-900 sm:text-6xl font-heading leading-tight uppercase">
                             Explora las <span className="text-blue-600 italic">Zonas Top</span>
                         </h2>
                         <p className="text-zinc-500 text-lg font-medium leading-relaxed">
-                            Analizamos el mercado inmobiliario para mostrarte las áreas con mayor crecimiento y exclusividad en la región.
+                            Analizamos el mercado inmobiliario para mostrarte las áreas con mayor crecimiento y plusvalía en toda la República Mexicana.
                         </p>
                     </ScrollReveal>
                 </div>

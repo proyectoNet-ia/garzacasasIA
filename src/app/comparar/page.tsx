@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
     title: 'Comparar Propiedades',
-    description: 'Compara tus propiedades favoritas lado a lado para tomar la mejor decisión con Garza Casas IA.',
+    description: 'Compara tus propiedades favoritas lado a lado para tomar la mejor decisión con Garza Casas.',
 }
 
 export default async function CompararPage() {

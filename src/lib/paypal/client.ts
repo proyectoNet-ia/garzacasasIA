@@ -97,7 +97,7 @@ export async function createPayPalOrder(input: CreateOrderInput): Promise<PayPal
             {
                 reference_id: input.externalReference,
                 custom_id: input.userId,
-                description: `Garza Casas IA - Plan ${input.planName} (${input.billingPeriod === 'yearly' ? 'Anual' : 'Mensual'})`,
+                description: `Garza Casas - Plan ${input.planName} (${input.billingPeriod === 'yearly' ? 'Anual' : 'Mensual'})`,
                 amount: {
                     currency_code: 'MXN',
                     value: formattedAmount,
@@ -126,7 +126,7 @@ export async function createPayPalOrder(input: CreateOrderInput): Promise<PayPal
             paypal: {
                 experience_context: {
                     payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-                    brand_name: 'Garza Casas IA',
+                    brand_name: 'Garza Casas',
                     locale: 'es-MX',
                     landing_page: 'LOGIN',
                     shipping_preference: 'NO_SHIPPING',

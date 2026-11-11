@@ -15,7 +15,7 @@ ADD COLUMN IF NOT EXISTS municipio_clave TEXT;
 
 COMMENT ON COLUMN properties.latitude IS 'Latitud en formato decimal (e.g. 25.682823)';
 COMMENT ON COLUMN properties.longitude IS 'Longitud en formato decimal (e.g. -100.312948)';
-COMMENT ON COLUMN properties.municipio_clave IS 'Clave oficial del INEGI (Estado+Municipio, e.g. 19039 para Monterrey)';
+COMMENT ON COLUMN properties.municipio_clave IS 'Clave oficial del INEGI (Estado+Municipio, e.g. 09015 para Cuauhtémoc, CDMX)';
 
 -- 2. Crear tabla de caché para mejorar performance de APIs INEGI
 CREATE TABLE IF NOT EXISTS inegi_cache (

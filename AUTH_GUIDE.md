@@ -1,4 +1,4 @@
-# 🔐 Sistema de Autenticación - Garza Casas IA
+# 🔐 Sistema de Autenticación - Garza Casas
 
 ## 📋 Resumen del Sistema
 

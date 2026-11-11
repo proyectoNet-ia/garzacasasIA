@@ -405,7 +405,7 @@ export default function PropertyDetailPage() {
                                         <ShieldCheck className="h-6 w-6 text-blue-600 shrink-0" />
                                         <div className="text-xs text-blue-900/70">
                                             <p className="font-bold text-blue-900 mb-0.5">Agente Verificado</p>
-                                            <p>Este profesional cumple con los estándares de calidad de Garza Casas IA.</p>
+                                            <p>Este profesional cumple con los estándares de calidad de Garza Casas.</p>
                                         </div>
                                     </div>
                                 </CardContent>

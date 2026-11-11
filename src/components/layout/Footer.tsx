@@ -27,7 +27,7 @@ export function Footer({ contactConfig }: FooterProps) {
                             fallback={
                                 <>
                                 <div className="text-xl font-black text-zinc-900 px-4 py-1.5 border border-zinc-200 rounded-xl bg-zinc-50 inline-block">
-                                    Garza Casas <span className="text-blue-600">IA</span>
+                                    Garza <span className="text-blue-600">Casas</span>
                                 </div>
                                 </>
                             }
@@ -97,7 +97,7 @@ export function Footer({ contactConfig }: FooterProps) {
                 </div>
 
                 <div className="border-t border-zinc-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-zinc-400">
-                    <p>© {new Date().getFullYear()} Garza Casas IA. Todos los derechos reservados.</p>
+                    <p>© {new Date().getFullYear()} Garza Casas. Todos los derechos reservados.</p>
                 </div>
             </div>
         </footer>

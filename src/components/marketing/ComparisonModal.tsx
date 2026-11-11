@@ -108,7 +108,7 @@ export function ComparisonModal({ open, onOpenChange }: ComparisonModalProps) {
                         <Button variant="ghost" onClick={clearCompare} className="text-zinc-500 hover:text-red-500 hover:bg-red-500/10 font-bold uppercase tracking-widest text-[10px]">
                             Limpiar Selección
                         </Button>
-                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">Garza Casas IA © 2026</p>
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">Garza Casas © 2026</p>
                     </div>
                 </div>
             </DialogContent>

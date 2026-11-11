@@ -121,7 +121,7 @@ export function Agents() {
                         Agentes que Transforman la <span className="text-blue-500 italic">Experiencia</span>
                     </h2>
                     <p className="text-zinc-500 text-lg font-medium leading-relaxed">
-                        Expertos capacitados con herramientas de IA para ofrecerte el análisis de mercado más preciso de Monterrey.
+                        Expertos capacitados con herramientas de IA para ofrecerte el análisis de mercado más preciso en toda la República Mexicana.
                     </p>
                 </ScrollReveal>
 

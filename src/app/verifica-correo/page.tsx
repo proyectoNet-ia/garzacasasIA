@@ -64,7 +64,7 @@ export default function VerificaCorreoPage({
                     <div className="text-left space-y-3 bg-white/5 rounded-2xl p-5">
                         {[
                             'Abre tu bandeja de entrada',
-                            'Busca el correo de Garza Casas IA',
+                            'Busca el correo de Garza Casas',
                             'Haz clic en "Confirmar cuenta"',
                         ].map((step, i) => (
                             <div key={i} className="flex items-center gap-3">

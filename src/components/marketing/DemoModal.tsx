@@ -29,8 +29,8 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                     )}
                 >
                     {/* Required for accessibility */}
-                    <DialogPrimitive.Title className="sr-only">Demo Interactiva — Garza Casas IA</DialogPrimitive.Title>
-                    <DialogPrimitive.Description className="sr-only">Vista previa del dashboard inteligente de Garza Casas IA.</DialogPrimitive.Description>
+                    <DialogPrimitive.Title className="sr-only">Demo Interactiva — Garza Casas</DialogPrimitive.Title>
+                    <DialogPrimitive.Description className="sr-only">Vista previa del dashboard inteligente de Garza Casas.</DialogPrimitive.Description>
 
                     {/* Close button */}
                     <DialogPrimitive.Close className="absolute top-5 right-5 z-50 h-9 w-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/20 transition-all">
@@ -78,7 +78,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                                     El futuro de los <span className="text-blue-500 italic block">Bienes Raíces</span>
                                 </h2>
                                 <p className="text-zinc-400 text-sm leading-relaxed">
-                                    Descubre por qué los mejores agentes están migrando a Garza Casas IA.
+                                    Descubre por qué los mejores agentes están migrando a Garza Casas.
                                 </p>
                             </div>
 

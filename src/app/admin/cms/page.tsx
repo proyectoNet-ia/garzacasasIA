@@ -720,7 +720,7 @@ export default function AdminCMS() {
                                 <Input
                                     value={seoTitle}
                                     onChange={(e) => setSeoTitle(e.target.value)}
-                                    placeholder="Garza Casas IA | Bienes Raíces y Casas en Monterrey con IA"
+                                    placeholder="Garza Casas | Bienes Raíces y Casas en México con IA"
                                     className="bg-zinc-50 border-zinc-200 text-zinc-900"
                                 />
                             </div>
@@ -735,7 +735,7 @@ export default function AdminCMS() {
                                 <Input
                                     value={seoKeywords}
                                     onChange={(e) => setSeoKeywords(e.target.value)}
-                                    placeholder="casas en monterrey, bienes raices san pedro, avaluo IA..."
+                                    placeholder="casas en venta mexico, bienes raices republica mexicana, departamentos, avaluo IA..."
                                     className="bg-zinc-50 border-zinc-200 text-zinc-900"
                                 />
                             </div>
@@ -755,7 +755,7 @@ export default function AdminCMS() {
                                 rows={3}
                                 value={seoDescription}
                                 onChange={(e) => setSeoDescription(e.target.value)}
-                                placeholder="Encuentra casas y departamentos en Monterrey con valuación e inteligencia artificial..."
+                                placeholder="Encuentra casas y departamentos en toda la República Mexicana con valuación e inteligencia artificial..."
                                 className="bg-zinc-50 border-zinc-200 text-zinc-900 leading-relaxed"
                             />
                         </div>

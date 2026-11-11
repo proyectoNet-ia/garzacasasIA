@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
     
     -- Site Branding
     site_icon_url TEXT,
-    site_name TEXT DEFAULT 'Garza Casas IA',
+    site_name TEXT DEFAULT 'Garza Casas',
     
     -- Social Media
     social_facebook TEXT,
@@ -43,13 +43,13 @@ INSERT INTO public.site_settings (
     seo_keywords
 ) VALUES (
     1,
-    'Encuentra tu hogar ideal en Monterrey',
+    'Encuentra tu hogar ideal en México',
     'Descubre las mejores propiedades con ayuda de inteligencia artificial',
     'https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=1600&auto=format&fit=crop',
-    'Garza Casas IA',
-    'Garza Casas IA - Encuentra tu hogar ideal en Monterrey',
-    'Plataforma inmobiliaria con inteligencia artificial para encontrar las mejores propiedades en Monterrey y área metropolitana',
-    'casas monterrey, bienes raíces, propiedades, IA, inteligencia artificial, real estate'
+    'Garza Casas',
+    'Garza Casas - Encuentra tu hogar ideal en México',
+    'Plataforma inmobiliaria con inteligencia artificial para encontrar las mejores propiedades en toda la República Mexicana',
+    'casas mexico, bienes raíces, propiedades, IA, inteligencia artificial, real estate'
 ) ON CONFLICT (id) DO NOTHING;
 
 

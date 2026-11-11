@@ -35,7 +35,7 @@ export function MobileMenu({ className, triggerColor }: MobileMenuProps) {
                                     <>
                                     <div className="border border-white/10 px-3 py-1 rounded-xl bg-white/5">
                                         <span className="text-xl font-black tracking-tighter">
-                                            Garza Casas <span className="text-blue-500">IA</span>
+                                            Garza <span className="text-blue-500">Casas</span>
                                         </span>
                                     </div>
                                     </>

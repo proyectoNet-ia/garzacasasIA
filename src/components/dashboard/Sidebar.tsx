@@ -180,7 +180,7 @@ export function DashboardSidebar() {
                                     <Building2 className="h-5 w-5 text-white" />
                                 </div>
                                 <span className="text-xl font-black tracking-tighter text-zinc-900 truncate">
-                                    Garza Casas <span className="text-blue-500">IA</span>
+                                    Garza <span className="text-blue-500">Casas</span>
                                 </span>
                                 </>
                             }

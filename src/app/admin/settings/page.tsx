@@ -177,7 +177,7 @@ export default function AdminSettings() {
         <div className="container mx-auto py-10 px-4 max-w-7xl">
             <div className="mb-8">
                 <h1 className="text-3xl font-black font-heading text-zinc-900">Configuración Global</h1>
-                <p className="text-zinc-600 font-medium">Gestiona la configuración visual y comercial de Garza Casas IA.</p>
+                <p className="text-zinc-600 font-medium">Gestiona la configuración visual y comercial de Garza Casas.</p>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2">

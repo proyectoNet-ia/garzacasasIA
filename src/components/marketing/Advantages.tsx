@@ -101,7 +101,7 @@ export function Advantages() {
                                         <div className="h-full w-[85%] bg-blue-600 rounded-full" />
                                     </div>
                                 </div>
-                                <p className="text-sm text-zinc-500 italic">"Garza Casas IA duplicó mi volumen de ventas en solo 3 meses."</p>
+                                <p className="text-sm text-zinc-500 italic">"Garza Casas duplicó mi volumen de ventas en solo 3 meses."</p>
                             </div>
                         </div>
                     </ScrollReveal>

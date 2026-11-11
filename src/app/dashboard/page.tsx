@@ -87,7 +87,7 @@ function DashboardContent() {
         if (searchParams.get('verified') === 'true') {
             setTimeout(() => {
                 toast.success(
-                    '🎉 ¡Cuenta verificada! Bienvenido a Garza Casas IA.',
+                    '🎉 ¡Cuenta verificada! Bienvenido a Garza Casas.',
                     {
                         description: 'Tu cuenta está lista. Comienza subiendo tu primera propiedad.',
                         duration: 6000,
@@ -233,7 +233,7 @@ function DashboardContent() {
                             Bienvenido, {agentName} 👋
                         </h1>
                         <p className="text-zinc-500 font-medium">
-                            Aquí tienes un resumen de tu actividad en Garza Casas IA.
+                            Aquí tienes un resumen de tu actividad en Garza Casas.
                         </p>
                     </>
                 )}

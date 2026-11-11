@@ -178,7 +178,7 @@ export function Hero({ config }: HeroProps) {
                     <ScrollReveal delay={0.4} className="mt-8 hidden flex-col items-center gap-4 md:flex md:flex-row md:justify-center md:gap-3 md:flex-wrap">
                         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] md:mr-2">Top Zonas:</span>
                         <div className="flex flex-wrap justify-center gap-2">
-                            {["San Pedro", "Cumbres", "Carretera Nacional", "Valle Poniente"].map((city) => (
+                            {["CDMX", "Guadalajara", "Querétaro", "Puebla", "Mérida", "Riviera Maya"].map((city) => (
                                 <button
                                     key={city}
                                     className="group relative overflow-hidden rounded-full px-5 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all hover:text-white border border-white/5 hover:border-blue-500/50 bg-white/5 backdrop-blur-sm"

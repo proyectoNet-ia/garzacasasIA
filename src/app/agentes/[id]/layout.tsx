@@ -31,11 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         const company = profile.company_name ? ` — ${profile.company_name}` : ''
         const title = `${name}${company}`
         const description = profile.bio?.substring(0, 155) ||
-            `Perfil del agente inmobiliario ${name} en Garza Casas IA. Consulta sus propiedades disponibles y contáctalo directamente.`
+            `Perfil del agente inmobiliario ${name} en Garza Casas. Consulta sus propiedades disponibles y contáctalo directamente.`
 
         const images = profile.avatar_url
             ? [{ url: profile.avatar_url, width: 400, height: 400, alt: name }]
-            : [{ url: `/og-default.png`, width: 1200, height: 630, alt: 'Garza Casas IA' }]
+            : [{ url: `/og-default.png`, width: 1200, height: 630, alt: 'Garza Casas' }]
 
         return {
             title,
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                 url: `${siteUrl}/agentes/${params.id}`,
                 title,
                 description,
-                siteName: 'Garza Casas IA',
+                siteName: 'Garza Casas',
                 images,
             },
             twitter: {
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             },
         }
     } catch {
-        return { title: 'Agente | Garza Casas IA' }
+        return { title: 'Agente | Garza Casas' }
     }
 }
 

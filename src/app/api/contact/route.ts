@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
 const contactEmail = process.env.CONTACT_EMAIL_TO || 'hola@garzacasas.com';
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'Garza Casas IA <hola@garzacasas.com>';
+const fromEmail = process.env.RESEND_FROM_EMAIL || 'Garza Casas <hola@garzacasas.com>';
 
 export async function POST(req: Request) {
     // Inicializar Resend de forma lazy para que el build no falle si la key no está

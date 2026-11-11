@@ -148,7 +148,7 @@ export default function ForgotPasswordPage() {
                 )}
 
                 <p className="text-center text-zinc-700 text-xs mt-6">
-                    © 2026 Garza Casas IA · <Link href="/" className="hover:text-zinc-500 transition-colors">Volver al inicio</Link>
+                    © 2026 Garza Casas · <Link href="/" className="hover:text-zinc-500 transition-colors">Volver al inicio</Link>
                 </p>
             </div>
         </div>

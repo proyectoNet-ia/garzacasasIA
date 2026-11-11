@@ -1,4 +1,4 @@
-# 🗺️ Flujo de Trabajo — Garza Casas IA
+# 🗺️ Flujo de Trabajo — Garza Casas
 
 Este documento define la estructura y el orden de implementación para las fases restantes del proyecto, priorizando la estabilidad del modelo de negocio (suscripciones) y las funciones premium diferenciadoras (INEGI/IA).
 

@@ -21,7 +21,7 @@ const GOOGLE_AI_API_KEY = env['GOOGLE_AI_API_KEY'];
 const INEGI_API_TOKEN = env['INEGI_API_TOKEN'];
 
 console.log('\n═══════════════════════════════════════════════════════');
-console.log('  🔑  VALIDACIÓN DE API KEYS — Garza Casas IA');
+console.log('  🔑  VALIDACIÓN DE API KEYS — Garza Casas');
 console.log('═══════════════════════════════════════════════════════\n');
 
 // ── 1. GEMINI ────────────────────────────────────────────────────
@@ -86,8 +86,8 @@ async function testINEGI() {
     }
 
     // Formato correcto: /Buscar/[condicion]/[lat],[lon]/[metros]/[token]
-    // Centro de Monterrey: 25.6866,-100.3161
-    const url = `https://www.inegi.org.mx/app/api/denue/v1/consulta/Buscar/inmobiliaria/25.6866,-100.3161/2000/${INEGI_API_TOKEN}`;
+    // Centro de Ciudad de México: 19.4326,-99.1332
+    const url = `https://www.inegi.org.mx/app/api/denue/v1/consulta/Buscar/inmobiliaria/19.4326,-99.1332/2000/${INEGI_API_TOKEN}`;
 
     try {
         const res = await fetch(url);

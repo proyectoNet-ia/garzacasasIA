@@ -3,9 +3,9 @@ import { createClient as createBrowserClient } from '@/lib/supabase-client'
 
 
 export const DEFAULT_CONTACT_CONFIG = {
-    phone: "+52 (81) 1234-5678",
+    phone: "+52 (55) 1234-5678",
     email: "contacto@garzacasas.com",
-    whatsapp: "https://wa.me/528112345678",
+    whatsapp: "https://wa.me/525512345678",
     instagram: "https://instagram.com",
     facebook: "https://facebook.com",
     linkedin: "",

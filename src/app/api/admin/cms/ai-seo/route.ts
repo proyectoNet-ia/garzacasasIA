@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
         const heroTitle = settings?.hero_title || 'Encuentra tu hogar ideal'
         const heroSubtitle = settings?.hero_subtitle || 'Plataforma inmobiliaria con inteligencia artificial'
-        const siteName = settings?.site_name || 'Garza Casas IA'
+        const siteName = settings?.site_name || 'Garza Casas'
 
         const detectedServices: string[] = []
         if (packages && packages.length > 0) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
             detectedServices.push('Planes para Agentes: Gratis, Pro ($599) y Enterprise')
         }
         detectedServices.push('Valuación y Análisis de Mercado con Inteligencia Artificial (INEGI)')
-        detectedServices.push('Bolsa Inmobiliaria en Monterrey y Zona Metropolitana (San Pedro, etc.)')
+        detectedServices.push('Bolsa Inmobiliaria Nacional en toda la República Mexicana')
 
         // 3. Intentar generar con Gemini si la API key está disponible
         const apiKey = process.env.GOOGLE_AI_API_KEY
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
                 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
                 const prompt = `Eres un Consultor Senior Especialista en SEO Inmobiliario para México (Google Search & Core Web Vitals Specialist).
-Tu objetivo es crear la configuración SEO de la página principal para ${siteName}, una plataforma inmobiliaria moderna con Inteligencia Artificial enfocada en Monterrey y área metropolitana (San Pedro Garza García, etc.), Nuevo León.
+Tu objetivo es crear la configuración SEO de la página principal para ${siteName}, una plataforma inmobiliaria moderna con Inteligencia Artificial con cobertura en toda la República Mexicana.
 
 SERVICIOS Y CONTENIDO ACTUAL DE LA PLATAFORMA:
 - Título Portada: "${heroTitle}"
@@ -87,9 +87,9 @@ SERVICIOS Y CONTENIDO ACTUAL DE LA PLATAFORMA:
 ${detectedServices.map((s) => `  * ${s}`).join('\n')}
 
 REQUISITOS ESTRICTOS DE SEO:
-1. meta_title: Entre 50 y 60 caracteres. Altamente atractivo para CTR. Debe incluir "${siteName}" y palabras clave transaccionales de alto valor ("Casas en Monterrey", "Bienes Raíces", "IA").
-2. meta_description: Entre 140 y 155 caracteres. Persuasivo, con llamado a la acción (CTA) claro, orientado a compradores, arrendatarios y agentes.
-3. keywords: Entre 12 y 16 términos separados estrictamente por comas. Mezcla de short-tail y long-tail enfocadas en Monterrey, San Pedro, renta, venta, avalúo y plataforma inmobiliaria con IA.
+1. meta_title: Entre 50 y 60 caracteres. Altamente atractivo para CTR. Debe incluir "${siteName}" y palabras clave transaccionales de alto valor ("Casas en México", "Bienes Raíces", "IA").
+2. meta_description: Entre 140 y 155 caracteres. Persuasivo, con llamado a la acción (CTA) claro, orientado a compradores, arrendatarios y agentes en toda la República Mexicana.
+3. keywords: Entre 12 y 16 términos separados estrictamente por comas. Mezcla de short-tail y long-tail enfocadas en México, renta, venta nacional, avalúo y plataforma inmobiliaria con IA.
 
 Responde ÚNICAMENTE en formato JSON con la siguiente estructura (sin formato markdown ni texto adicional):
 {
@@ -121,23 +121,22 @@ Responde ÚNICAMENTE en formato JSON con la siguiente estructura (sin formato ma
         // 4. Motor Semántico Experto (Fallback inteligente 100% garantizado)
         // Genera metadatos SEO de alta conversión basados exactamente en los servicios actuales
         const hasAiServices = detectedServices.some((s) => s.toLowerCase().includes('ia') || s.toLowerCase().includes('inteligencia'))
-        const hasMonterrey = true
 
-        const fallbackTitle = `${siteName} | Bienes Raíces y Casas en Monterrey con IA`
-        const fallbackDescription = `Encuentra casas y departamentos en Monterrey y San Pedro con valuación e IA. Publica propiedades, explora plusvalía y escala con agentes expertos.`
+        const fallbackTitle = `${siteName} | Bienes Raíces y Casas en México con IA`
+        const fallbackDescription = `Encuentra casas y departamentos en toda la República Mexicana con valuación e IA. Publica propiedades, explora plusvalía y escala con agentes expertos.`
         const fallbackKeywords = [
-            'casas en monterrey',
-            'bienes raices monterrey',
-            'departamentos en renta monterrey',
-            'casas en venta san pedro garza garcia',
+            'casas en venta mexico',
+            'bienes raices mexico',
+            'departamentos en renta mexico',
+            'inmobiliaria republica mexicana',
             'plataforma inmobiliaria con IA',
-            'inmobiliarias monterrey',
+            'inmobiliarias mexico',
             'analisis de mercado inmobiliario',
-            'avaluo inmobiliario monterrey',
-            'agentes inmobiliarios monterrey',
-            'propiedades en venta nuevo leon',
-            'renta departamentos monterrey',
-            'garza casas ia'
+            'avaluo inmobiliario mexico',
+            'agentes inmobiliarios certificados',
+            'propiedades en venta mexico',
+            'renta y venta de inmuebles mexico',
+            'garza casas'
         ].join(', ')
 
         const expertResponse: SeoResult = {

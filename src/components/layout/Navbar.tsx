@@ -103,7 +103,7 @@ export function Navbar({ contactConfig }: NavbarProps) {
                                     <Building2 className={`h-5 w-5 ${isScrolled ? "text-white" : "text-white"}`} />
                                 </div>
                                 <span className={`text-xl font-black tracking-tighter transition-colors ${isScrolled ? "text-zinc-900" : "text-white"}`}>
-                                    Garza Casas <span className="text-blue-500">IA</span>
+                                    Garza <span className="text-blue-500">Casas</span>
                                 </span>
                                 </>
                             }

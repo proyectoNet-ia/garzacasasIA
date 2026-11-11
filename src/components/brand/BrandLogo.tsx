@@ -29,7 +29,7 @@ export function BrandLogo({
     initialSurface = 'light',
     imgClassName,
     className,
-    alt = 'Garza Casas IA',
+    alt = 'Garza Casas',
 }: BrandLogoProps) {
     const logos = useBrandLogos()
     const wrapperRef = useRef<HTMLSpanElement>(null)

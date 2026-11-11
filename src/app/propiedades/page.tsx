@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Propiedades en Venta y Renta en México',
     description: 'Explora nuestro catálogo de casas, departamentos y terrenos en venta y renta en México. Filtra por tipo, precio y ubicación con tecnología IA.',
     openGraph: {
-        title: 'Propiedades en Venta y Renta | Garza Casas IA',
+        title: 'Propiedades en Venta y Renta | Garza Casas',
         description: 'Encuentra tu propiedad ideal entre cientos de inmuebles verificados.',
     },
 }

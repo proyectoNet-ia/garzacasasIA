@@ -7,7 +7,7 @@ ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS contact_phone TEXT;
 ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS contact_whatsapp TEXT;
 
--- 2. Asignar valores por defecto para Garza Casas IA en id = 1
+-- 2. Asignar valores por defecto para Garza Casas en id = 1
 UPDATE public.site_settings
 SET 
     contact_phone = COALESCE(contact_phone, '+52 (81) 1234-5678'),
