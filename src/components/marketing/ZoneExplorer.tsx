@@ -36,7 +36,7 @@ export function ZoneExplorer() {
                     name: 'Ciudad de México',
                     searchKey: 'Ciudad de México',
                     appreciation: '+8.9%', // Oficial SHF / INEGI
-                    image_url: 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?q=80&w=800',
+                    image_url: '/images/zones/cdmx.jpg',
                     description: 'Epicentro financiero, cultural y de alta demanda residencial en el país.',
                     tag: 'ALTA DEMANDA'
                 },
@@ -45,7 +45,7 @@ export function ZoneExplorer() {
                     name: 'Guadalajara',
                     searchKey: 'Guadalajara',
                     appreciation: '+10.5%', // Oficial SHF / INEGI
-                    image_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=800',
+                    image_url: '/images/zones/guadalajara.jpg',
                     description: 'Hub tecnológico e innovación con gran dinamismo en el occidente.',
                     tag: 'ZONA DESTACADA'
                 },
@@ -54,7 +54,7 @@ export function ZoneExplorer() {
                     name: 'Querétaro',
                     searchKey: 'Querétaro',
                     appreciation: '+10.1%', // Oficial SHF / INEGI
-                    image_url: 'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?q=80&w=800',
+                    image_url: '/images/zones/queretaro.jpg',
                     description: 'Crecimiento industrial estratégico y calidad de vida superior en el Bajío.',
                     tag: 'ALTA DEMANDA'
                 },
@@ -63,7 +63,7 @@ export function ZoneExplorer() {
                     name: 'Riviera Maya',
                     searchKey: 'Riviera Maya',
                     appreciation: '+12.8%', // Oficial SHF / INEGI
-                    image_url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=800',
+                    image_url: '/images/zones/riviera-maya.jpg',
                     description: 'Destino turístico internacional de alta plusvalía y rentabilidad vacacional.',
                     tag: 'ZONA TURÍSTICA'
                 }
