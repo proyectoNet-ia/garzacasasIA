@@ -28,7 +28,7 @@ export default async function AgentsPage() {
                 </div>
                 <Agents />
             </main>
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

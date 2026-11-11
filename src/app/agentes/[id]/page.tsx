@@ -354,7 +354,7 @@ export default function AgentProfilePage() {
                 </div>
             </main>
 
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

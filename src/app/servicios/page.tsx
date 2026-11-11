@@ -18,7 +18,7 @@ export default async function ServicesPage() {
                 </div>
                 <Services />
             </main>
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

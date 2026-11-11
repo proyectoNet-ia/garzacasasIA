@@ -605,7 +605,7 @@ export default function PropertyDetailPage() {
                 )}
             </AnimatePresence>
 
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

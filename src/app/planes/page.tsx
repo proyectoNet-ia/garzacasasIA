@@ -28,7 +28,7 @@ export default async function PlansPage() {
                 </div>
                 <Pricing />
             </main>
-            <Footer />
+            <Footer contactConfig={contactConfig} />
         </div>
     )
 }

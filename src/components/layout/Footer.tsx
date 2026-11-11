@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Phone, Mail } from "lucide-react"
 import { IconInstagram, IconFacebook, IconWhatsApp, IconLinkedIn } from "@/components/ui/SocialIcons"
 import { BrandLogo } from "@/components/brand/BrandLogo"
+import { DEFAULT_CONTACT_CONFIG } from "@/lib/settings"
 
 interface FooterProps {
     contactConfig?: {
@@ -15,6 +16,15 @@ interface FooterProps {
 }
 
 export function Footer({ contactConfig }: FooterProps) {
+    const config = {
+        phone: contactConfig?.phone || DEFAULT_CONTACT_CONFIG.phone,
+        email: contactConfig?.email || DEFAULT_CONTACT_CONFIG.email,
+        whatsapp: contactConfig?.whatsapp || DEFAULT_CONTACT_CONFIG.whatsapp,
+        instagram: contactConfig?.instagram || DEFAULT_CONTACT_CONFIG.instagram,
+        facebook: contactConfig?.facebook || DEFAULT_CONTACT_CONFIG.facebook,
+        linkedin: contactConfig?.linkedin || DEFAULT_CONTACT_CONFIG.linkedin,
+    }
+
     return (
         <footer className="border-t border-zinc-200 bg-white text-zinc-600">
             <div className="container px-4 md:px-6 mx-auto py-12 md:py-16">
@@ -33,7 +43,7 @@ export function Footer({ contactConfig }: FooterProps) {
                             }
                         />
                         <p className="text-sm text-zinc-500 leading-relaxed">
-                            Revolucionando el mercado inmobiliario con inteligencia artificial y un servicio de primera clase.
+                            Revolucionando el mercado inmobiliario con tecnología de punta y un servicio de primera clase en todo México.
                         </p>
                     </div>
 
@@ -41,42 +51,42 @@ export function Footer({ contactConfig }: FooterProps) {
                     <div className="col-span-1 md:col-span-2 space-y-4">
                         <h4 className="font-bold text-zinc-900">Contacto</h4>
                         <div className="space-y-3 text-sm">
-                            {contactConfig?.phone && (
-                                <a href={`tel:${contactConfig.phone}`} className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            {config.phone && (
+                                <a href={`tel:${config.phone.replace(/\s+/g, '')}`} className="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <Phone className="h-4 w-4 text-zinc-400" />
-                                    {contactConfig.phone}
+                                    {config.phone}
                                 </a>
                             )}
-                            {contactConfig?.email && (
-                                <a href={`mailto:${contactConfig.email}`} className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            {config.email && (
+                                <a href={`mailto:${config.email}`} className="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <Mail className="h-4 w-4 text-zinc-400" />
-                                    {contactConfig.email}
+                                    {config.email}
                                 </a>
                             )}
                             <div className="flex gap-3 pt-2">
-                                {contactConfig?.instagram && (
-                                    <a href={contactConfig.instagram} target="_blank" rel="noreferrer"
+                                {config.instagram && (
+                                    <a href={config.instagram} target="_blank" rel="noreferrer"
                                         className="bg-zinc-100 p-2.5 rounded-xl hover:bg-pink-50 hover:text-pink-600 transition-all text-zinc-500"
                                         aria-label="Instagram">
                                         <IconInstagram className="h-5 w-5" />
                                     </a>
                                 )}
-                                {contactConfig?.facebook && (
-                                    <a href={contactConfig.facebook} target="_blank" rel="noreferrer"
+                                {config.facebook && (
+                                    <a href={config.facebook} target="_blank" rel="noreferrer"
                                         className="bg-zinc-100 p-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all text-zinc-500"
                                         aria-label="Facebook">
                                         <IconFacebook className="h-5 w-5" />
                                     </a>
                                 )}
-                                {contactConfig?.linkedin && (
-                                    <a href={contactConfig.linkedin} target="_blank" rel="noreferrer"
+                                {config.linkedin && (
+                                    <a href={config.linkedin} target="_blank" rel="noreferrer"
                                         className="bg-zinc-100 p-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all text-zinc-500"
                                         aria-label="LinkedIn">
                                         <IconLinkedIn className="h-5 w-5" />
                                     </a>
                                 )}
-                                {contactConfig?.whatsapp && (
-                                    <a href={contactConfig.whatsapp} target="_blank" rel="noreferrer"
+                                {config.whatsapp && (
+                                    <a href={config.whatsapp.startsWith('http') ? config.whatsapp : `https://wa.me/${config.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"
                                         className="bg-zinc-100 p-2.5 rounded-xl hover:bg-green-50 hover:text-green-600 transition-all text-zinc-500"
                                         aria-label="WhatsApp">
                                         <IconWhatsApp className="h-5 w-5" />
